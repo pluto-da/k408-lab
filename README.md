@@ -73,7 +73,7 @@ React 端的桥接器（`src/bridge/labBridge.ts`）接收事件：已登录则�
 
 ```bash
 # 1. 安装依赖
-corepack enable
+corepack enable          # 或 npm install -g pnpm@12.9.1
 pnpm install
 
 # 2. 启动本地数据库（有 Docker 时）
