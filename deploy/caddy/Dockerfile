@@ -3,8 +3,8 @@
 FROM node:20-bookworm-slim AS web
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 ARG NPM_REGISTRY=https://registry.npmjs.org/
-ENV COREPACK_NPM_REGISTRY=$NPM_REGISTRY npm_config_registry=$NPM_REGISTRY
-RUN corepack enable && corepack prepare pnpm@12.9.1 --activate
+ENV npm_config_registry=$NPM_REGISTRY
+RUN npm install -g pnpm@12.9.1 && pnpm --version
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
 COPY apps/web/package.json apps/web/
