@@ -1,0 +1,25 @@
+packages:
+  - apps/*
+  - packages/*
+
+# 允许执行安装脚本的依赖（原生模块 / 引擎下载）
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  argon2: true
+  esbuild: true
+  embedded-postgres: true
+  "@embedded-postgres/linux-x64": true
+  "@embedded-postgres/linux-arm64": true
+
+# 兼容旧版 pnpm（9/10）
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - prisma
+  - argon2
+  - esbuild
+  - embedded-postgres
+  - "@embedded-postgres/linux-x64"
+  - "@embedded-postgres/linux-arm64"

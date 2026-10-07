@@ -1,0 +1,25 @@
+# 本地开发只起数据库：docker compose -f docker-compose.dev.yml up -d
+name: k408-dev
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: k408
+      POSTGRES_PASSWORD: k408
+      POSTGRES_DB: k408
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: k408
+      POSTGRES_PASSWORD: k408
+      POSTGRES_DB: k408_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+volumes:
+  pgdata-dev:

@@ -1,0 +1,6 @@
+/* Geist / Geist Mono（SIL OFL 1.1，见 OFL-Geist.txt），本地托管，不依赖任何外部字体服务。
+   中文使用系统字体：PingFang SC / Microsoft YaHei / Noto Sans SC。 */
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 400; font-display: swap; src: url("./geist-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 500; font-display: swap; src: url("./geist-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 600; font-display: swap; src: url("./geist-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("./geist-mono-latin-400-normal.woff2") format("woff2"); }

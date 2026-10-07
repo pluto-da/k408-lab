@@ -1,0 +1,87 @@
+name: k408
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-k408}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-k408}
+      TZ: Asia/Shanghai
+    # 2 vCPU / 2–4 GB 小机器的保守参数
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c effective_cache_size=512MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=50
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 768m
+    logging: &logging
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+    image: k408-api:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-k408}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-k408}?schema=public&connection_limit=10
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 中设置 JWT_SECRET（至少 32 个字符）}
+      DOMAIN: ${DOMAIN:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-}
+      TRUST_PROXY: "true"
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-10}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_OPTIONS: --max-old-space-size=384
+      TZ: Asia/Shanghai
+    expose:
+      - "3000"
+    mem_limit: 512m
+    logging: *logging
+
+  caddy:
+    build:
+      context: .
+      dockerfile: deploy/caddy/Dockerfile
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+        BUILD_ID: ${BUILD_ID:-v1}
+    image: k408-web:latest
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # 设置 DOMAIN 时自动 HTTPS；不设置则监听 :80（用 IP 访问）
+      SITE_ADDRESS: ${DOMAIN:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 256m
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

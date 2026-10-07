@@ -1,0 +1,154 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Subject {
+  ds
+  co
+  os
+  cn
+}
+
+enum ItemKind {
+  chapter
+  lab
+  flow
+  part
+  quiz
+}
+
+enum MistakeSource {
+  quiz
+  flow
+}
+
+model User {
+  id           String   @id @default(cuid())
+  /// 小写存储，唯一；与 email 至少有一个
+  username     String?  @unique
+  email        String?  @unique
+  /// 预留：手机号短信登录（v1 未实现）
+  phone        String?  @unique
+  passwordHash String
+  nickname     String
+  /// 每次修改密码/强制下线时 +1，使旧 JWT 失效
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  progress    ProgressRecord[]
+  flowRuns    FlowRun[]
+  mistakes    Mistake[]
+  quizAnswers QuizAnswer[]
+}
+
+/// 进度分母：章节考点、实验、流程、部件、自测题
+model ContentItem {
+  id       String           @id
+  kind     ItemKind
+  subject  Subject
+  title    String
+  sort     Int              @default(0)
+  progress ProgressRecord[]
+
+  @@index([subject])
+}
+
+model ProgressRecord {
+  id      String      @id @default(cuid())
+  userId  String
+  itemId  String
+  count   Int         @default(1)
+  firstAt DateTime    @default(now()) @db.Timestamptz(3)
+  lastAt  DateTime    @default(now()) @db.Timestamptz(3)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item    ContentItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@index([userId, lastAt])
+}
+
+model Flow {
+  id      String    @id
+  subject Subject
+  title   String
+  runs    FlowRun[]
+}
+
+model FlowRun {
+  id            String   @id @default(cuid())
+  userId        String
+  flowId        String
+  stars         Int
+  mistakes      Int
+  timeMs        Int
+  score         Int?
+  options       Json?
+  /// 客户端事件 id，避免网络重试导致重复记录
+  clientEventId String?  @unique
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flow          Flow     @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+  @@index([flowId, createdAt])
+  @@index([flowId, userId])
+}
+
+model Question {
+  id          String       @id
+  subject     Subject
+  stem        String
+  options     Json
+  answer      Int
+  explanation String
+  sort        Int          @default(0)
+  answers     QuizAnswer[]
+  mistakes    Mistake[]
+}
+
+model QuizAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  chosen     Int
+  correct    Boolean
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, questionId])
+}
+
+model Mistake {
+  id            String        @id @default(cuid())
+  userId        String
+  source        MistakeSource
+  subject       Subject
+  /// 去重键：quiz:<题号> 或 flow:<流程>:<题干>
+  dedupeKey     String
+  questionId    String?
+  flowId        String?
+  stepIndex     Int?
+  stepType      String        @default("single")
+  prompt        String
+  options       Json?
+  chosen        String
+  correctAnswer String
+  explanation   String
+  wrongCount    Int           @default(1)
+  mastered      Boolean       @default(false)
+  masteredAt    DateTime?     @db.Timestamptz(3)
+  lastWrongAt   DateTime      @default(now()) @db.Timestamptz(3)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      Question?     @relation(fields: [questionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, subject, mastered])
+}

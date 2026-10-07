@@ -1,0 +1,51 @@
+# SITE_ADDRESS 由 docker-compose 传入：
+#   设置了 DOMAIN（如 k408.example.com）→ Caddy 自动申请并续期 HTTPS 证书（需 80/443 端口可达、DNS 已指向本机）
+#   未设置 DOMAIN → 退化为 ":80"，用服务器 IP 走 http 访问
+{
+	admin off
+}
+
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	# 带哈希的构建产物：长期缓存；不存在时返回 404（不回落到 index.html）
+	handle /assets/* {
+		root * /srv
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	# 旧版实验室模块与字体（通过 ?v=构建号 刷新）
+	@static path /legacy/* /fonts/* /favicon.svg
+	handle @static {
+		root * /srv
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+
+	# 单页应用：其余路径都回落到 index.html
+	handle {
+		root * /srv
+		header Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
