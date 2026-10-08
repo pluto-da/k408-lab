@@ -35,6 +35,8 @@ services:
       dockerfile: apps/api/Dockerfile
       args:
         NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+        APT_MIRROR: ${APT_MIRROR:-}
+        PRISMA_ENGINES_MIRROR: ${PRISMA_ENGINES_MIRROR:-}
     image: k408-api:latest
     restart: unless-stopped
     depends_on:

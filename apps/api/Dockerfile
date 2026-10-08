@@ -1,5 +1,7 @@
 # 构建上下文为仓库根目录：docker build -f apps/api/Dockerfile .
 FROM node:20-bookworm-slim AS base
+ARG APT_MIRROR=
+RUN if [ -n "$APT_MIRROR" ]; then sed -i "s#http://deb.debian.org#$APT_MIRROR#g" /etc/apt/sources.list.d/debian.sources; fi
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
@@ -7,6 +9,8 @@ ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 # 可通过 --build-arg NPM_REGISTRY=https://registry.npmmirror.com 使用镜像源
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 ENV npm_config_registry=$NPM_REGISTRY
+ARG PRISMA_ENGINES_MIRROR=
+ENV PRISMA_ENGINES_MIRROR=$PRISMA_ENGINES_MIRROR
 RUN npm install -g pnpm@12.9.1 && pnpm --version
 WORKDIR /app
 
@@ -22,6 +26,8 @@ RUN pnpm --filter @k408/api build \
   && cd /out && ./node_modules/.bin/prisma generate
 
 FROM node:20-bookworm-slim AS runtime
+ARG APT_MIRROR=
+RUN if [ -n "$APT_MIRROR" ]; then sed -i "s#http://deb.debian.org#$APT_MIRROR#g" /etc/apt/sources.list.d/debian.sources; fi
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates tini \
   && rm -rf /var/lib/apt/lists/*
