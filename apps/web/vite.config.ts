@@ -1,10 +1,37 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import type { Plugin } from "vite";
 
 const BUILD_ID = process.env.BUILD_ID ?? new Date().toISOString().replace(/\D/g, "").slice(0, 12);
 
+/** 站点根地址（如 https://k408.example.com）。设置后生成 sitemap.xml 并写进 robots.txt；未设置时只输出 robots.txt */
+const SITE_URL = (process.env.SITE_URL ?? "").trim().replace(/\/+$/, "");
+/** 可被搜索引擎收录的页面 */
+const PUBLIC_ROUTES = ["/", "/lab", "/pc"];
+
+function seoFiles(): Plugin {
+  return {
+    name: "k408-seo-files",
+    apply: "build",
+    generateBundle() {
+      const robots = ["User-agent: *", "Allow: /", "Disallow: /api/", "Disallow: /login", "Disallow: /register", "Disallow: /profile"];
+      if (SITE_URL) {
+        robots.push("", `Sitemap: ${SITE_URL}/sitemap.xml`);
+        const today = new Date().toISOString().slice(0, 10);
+        const urls = PUBLIC_ROUTES.map((r) => `  <url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod></url>`).join("\n");
+        this.emitFile({
+          type: "asset",
+          fileName: "sitemap.xml",
+          source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+        });
+      }
+      this.emitFile({ type: "asset", fileName: "robots.txt", source: robots.join("\n") + "\n" });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), seoFiles()],
   // 整机拆解模块的压缩模型文件，作为带哈希的静态资源输出
   assetsInclude: ["**/*.sog"],
   define: {

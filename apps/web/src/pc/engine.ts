@@ -352,6 +352,7 @@ export class PcEngine {
     const el = this.renderer.domElement;
     el.addEventListener("pointerdown", this.onDown);
     el.addEventListener("pointerup", this.onUp);
+    el.addEventListener("pointercancel", this.onCancel);
     el.addEventListener("pointermove", this.onMove);
     el.addEventListener("pointerleave", this.onLeave);
     this.controls.addEventListener("start", this.onControlStart);
@@ -615,6 +616,7 @@ export class PcEngine {
     const el = this.renderer.domElement;
     el.removeEventListener("pointerdown", this.onDown);
     el.removeEventListener("pointerup", this.onUp);
+    el.removeEventListener("pointercancel", this.onCancel);
     el.removeEventListener("pointermove", this.onMove);
     el.removeEventListener("pointerleave", this.onLeave);
     this.controls.removeEventListener("start", this.onControlStart);
@@ -899,6 +901,17 @@ export class PcEngine {
   // ---------------------------------------------------------------- flow
   private setState(s: EngineState, part: PartId | null) {
     this.state = s;
+    // opened part with layers: one finger / left mouse drives the teardown, two fingers / right mouse orbit
+    const layered = s === "open" && !!part && !!this.parts.get(part)?.interior?.layers.length;
+    const c = this.controls;
+    if (layered) {
+      c.touches = { ONE: -1 as unknown as THREE.TOUCH, TWO: THREE.TOUCH.DOLLY_ROTATE };
+      c.mouseButtons = { LEFT: -1 as unknown as THREE.MOUSE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+    } else {
+      c.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+      c.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+      this.drag = null;
+    }
     this.cb.onState?.(s, part);
   }
 
@@ -990,10 +1003,12 @@ export class PcEngine {
       if (this.selected !== id) return;
       this.setState("open", id);
       this.showCallouts(id, true);
-      // first look: play the teardown once; the slider / step buttons take over at any time
+      // affordance: the top layer lifts a little and settles back, showing that it can be pulled apart
       if (it.layers.length) setTimeout(() => {
-        if (this.selected === id && this.state === "open" && this.disK === 0 && !this.tweens.some((t) => t.key === "dis")) this.playDisassembly();
-      }, 350);
+        if (this.selected !== id || this.state !== "open" || this.disK !== 0 || this.drag) return;
+        const peak = 0.35 / it.layers.length;
+        this.tween(1.3, (e) => this.applyDisassembly(peak * Math.sin(Math.PI * e)), undefined, (t) => t, "dis");
+      }, 300);
     });
   }
 
@@ -1463,7 +1478,7 @@ export class PcEngine {
     if (this.composer && this.rgbMix > 0.001) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
     this.layoutCallouts();
-    if (this.state !== "loading" && running.length + (moved ? 1 : 0) > 0) this.adaptQuality(dt);
+    if (this.state !== "loading" && (running.length > 0 || moved || this.drag)) this.adaptQuality(dt);
     this.stats.frames++;
     this.stats.dt = dt;
     this.stats.dpr = this.dpr;
@@ -1514,11 +1529,31 @@ export class PcEngine {
     return hits.length ? (hits[0]!.object.userData.part as PartId) : null;
   }
 
+  private pointers = new Set<number>();
+  private drag: { id: number; y0: number; k0: number; h: number } | null = null;
+
   private onDown = (e: PointerEvent) => {
     this.down = { x: e.clientX, y: e.clientY, t: performance.now() };
+    this.pointers.add(e.pointerId);
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    if (this.state === "open" && it?.layers.length && this.pointers.size === 1 && (e.pointerType !== "mouse" || e.button === 0)) {
+      this.tweens = this.tweens.filter((t) => t.key !== "dis");
+      // a full swipe over ~55 % of the screen height takes the part completely apart
+      this.drag = { id: e.pointerId, y0: e.clientY, k0: this.disK, h: Math.max(240, this.renderer.domElement.clientHeight * 0.55) };
+      this.renderer.domElement.setPointerCapture?.(e.pointerId);
+    } else {
+      this.drag = null; // second finger: hand over to orbit / zoom
+    }
+  };
+
+  private onCancel = (e: PointerEvent) => {
+    this.pointers.delete(e.pointerId);
+    if (this.drag?.id === e.pointerId) this.drag = null;
   };
 
   private onUp = (e: PointerEvent) => {
+    this.pointers.delete(e.pointerId);
+    if (this.drag?.id === e.pointerId) this.drag = null;
     const d = this.down;
     this.down = null;
     if (!d) return;
@@ -1536,6 +1571,11 @@ export class PcEngine {
 
 
   private onMove = (e: PointerEvent) => {
+    if (this.drag && e.pointerId === this.drag.id) {
+      const k = clamp01(this.drag.k0 + (this.drag.y0 - e.clientY) / this.drag.h);
+      if (k !== this.disK) this.applyDisassembly(k);
+      return;
+    }
     if (e.pointerType !== "mouse" || this.state !== "overview" || e.buttons) return;
     const id = this.pick(e.clientX, e.clientY);
     if (id !== this.hovered) {

@@ -52,17 +52,33 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+async function fetchOk(url: string): Promise<Response> {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`加载失败（${r.status}）：${url}`);
+  return r;
+}
+
 export async function bootLegacy(container: HTMLElement, onProgress?: (p: number) => void): Promise<void> {
   if (bootedInto) return;
   bootedInto = container;
   window.__LEGACY_LOADER__ = true;
-  const manifest = (await fetch(v("manifest.json")).then((r) => r.json())) as Manifest;
-  const glbP = manifest.glb
-    ? fetch(v(manifest.glb))
-        .then((r) => (r.ok ? r.arrayBuffer() : null))
-        .catch(() => null)
-    : Promise.resolve(null);
-  const [html] = await Promise.all([fetch(v("body.html")).then((r) => r.text()), ...manifest.css.map(loadCss)]);
+  let manifest: Manifest;
+  let html: string;
+  let glbP: Promise<ArrayBuffer | null>;
+  try {
+    manifest = (await fetchOk(v("manifest.json")).then((r) => r.json())) as Manifest;
+    // 主板模型（约 2.6 MB）与页面骨架并行下载；模型失败时旧脚本会自行降级
+    glbP = manifest.glb
+      ? fetch(v(manifest.glb))
+          .then((r) => (r.ok ? r.arrayBuffer() : null))
+          .catch(() => null)
+      : Promise.resolve(null);
+    [html] = await Promise.all([fetchOk(v("body.html")).then((r) => r.text()), ...manifest.css.map(loadCss)]);
+  } catch (e) {
+    // 还没执行任何旧脚本：允许重试
+    bootedInto = null;
+    throw e;
+  }
   container.innerHTML = html;
   onProgress?.(0.2);
   window.MB_GLB_BUF = await glbP;

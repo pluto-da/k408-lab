@@ -60,6 +60,12 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     }
   });
 
+  // 接口响应都与登录态相关，禁止浏览器与中间代理缓存
+  app.addHook("onSend", async (req, reply, payload) => {
+    if (req.url.startsWith("/api/") && !reply.hasHeader("cache-control")) reply.header("cache-control", "no-store");
+    return payload;
+  });
+
   app.setErrorHandler((err, req, reply) => {
     if (err instanceof HttpError) {
       return reply.code(err.statusCode).send({ error: { code: err.code, message: err.message } });

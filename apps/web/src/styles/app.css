@@ -259,3 +259,33 @@ details summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
 .lab-boot li { animation: app-in 0.3s ease-out both; }
 .lab-boot b { color: var(--ok); font-weight: 600; }
 
+
+/* ---------- a11y & shell polish (audit 2026-10) ---------- */
+.skip-link {
+  position: absolute; left: 8px; top: -60px; z-index: 100;
+  padding: 10px 14px; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 2px;
+  font: 600 14px/1 var(--font); text-decoration: none;
+}
+.skip-link:focus { top: 8px; }
+main:focus { outline: none; }
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--cn); outline-offset: 2px; }
+.app-bar :where(a, button):focus-visible, .hx-hero :where(a, button):focus-visible { outline-color: #8cc8ff; }
+.app-bar .app-btn, .app-user__name { min-height: 36px; }
+.app-foot__nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0; }
+.app-foot__nav a, .app-foot a { color: var(--ink-2); text-underline-offset: 3px; }
+.app-foot__nav a { display: inline-flex; align-items: center; min-height: 32px; }
+.app-foot p { margin: 4px 0; }
+.app-foot__note { opacity: 0.85; }
+.form-err::before { content: "⚠ "; }
+.pw-field { position: relative; display: grid; }
+.pw-field input { padding-right: 64px; }
+.pw-toggle {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  min-height: 36px; padding: 0 10px; border: 0; background: transparent; color: var(--ink-2);
+  font: 500 13px/1 var(--font); cursor: pointer; border-radius: 2px;
+}
+.pw-toggle:hover { color: var(--ink); background: rgba(22, 24, 29, 0.06); }
+.lab-error { max-width: 520px; margin: 48px auto; padding: 0 16px; display: grid; gap: 12px; justify-items: center; text-align: center; }
+.lab-error h1 { margin: 0; font-size: 22px; }
+.lab-error p { margin: 0; color: var(--ink-2); }
+.hx-note { margin: 14px 0 0; font-size: 13px; color: rgba(238, 240, 243, 0.72); }

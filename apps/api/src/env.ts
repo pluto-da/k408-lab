@@ -41,6 +41,9 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(`环境变量配置错误：${msg}`);
   }
   const e = parsed.data;
+  if (e.NODE_ENV === "production" && /change-me/i.test(e.JWT_SECRET)) {
+    throw new Error("环境变量配置错误：JWT_SECRET 仍是 .env.example 里的示例值，请用 openssl rand -hex 32 生成");
+  }
   const domain = e.DOMAIN.trim();
   return {
     NODE_ENV: e.NODE_ENV,

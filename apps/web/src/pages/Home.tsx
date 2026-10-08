@@ -14,10 +14,10 @@ const SPOTS = [
 /** 一条指令 / 一次数据的旅程：首页时间线 */
 const STOPS = [
   { t: "网卡收帧", d: "MAC · CRC 校验", s: "cn" },
-  { t: "DMA 写内存", d: "不占用 CPU", s: "co" },
+  { t: "DMA 写内存", d: "不经 CPU 搬运数据", s: "co" },
   { t: "中断响应", d: "保存断点与现场", s: "os" },
   { t: "Cache 缺失", d: "按块调入 · 局部性", s: "co" },
-  { t: "执行写回", d: "写回法 · 脏位", s: "co" },
+  { t: "写 Cache", d: "写回法 · 脏位", s: "co" },
   { t: "显卡输出", d: "PCIe 带宽", s: "co" },
   { t: "落盘 SSD", d: "文件系统 · 缓冲", s: "os" },
 ] as const;
@@ -65,6 +65,7 @@ export default function HomePage() {
                 进入实验室
               </Link>
             </div>
+            <p className="hx-note">免费使用 · 无需注册 · 手机、平板、电脑都能打开</p>
             <BootLine />
           </div>
           <Link to="/pc" className="hx-stage" aria-label="打开整机拆解">

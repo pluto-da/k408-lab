@@ -36,13 +36,16 @@ export default function PcPage() {
   const [hovered, setHovered] = useState<PartId | null>(null);
   const [opening, setOpening] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(true);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(() => typeof window === "undefined" || window.innerWidth >= 1280);
   const [light, setLight] = useState<LightMode>("studio");
   const [rgbMode, setRgbMode] = useState(0);
   const [rgbColor, setRgbColor] = useState(RGB_SWATCHES[0]!);
   const [explode, setExplode] = useState(0);
   const [jStep, setJStep] = useState<number | null>(null);
+  // teardown progress: the bar is written straight to the DOM (no React render per frame); React only
+  // re-renders when the number of removed layers changes
   const [dis, setDis] = useState<{ k: number; layers: string[] }>({ k: 0, layers: [] });
+  const fillRef = useRef<HTMLElement>(null);
   const wide = useWide();
   const touringNow = state === "journey";
 
@@ -77,7 +80,13 @@ export default function PcPage() {
           onInteriorProgress: (p) => alive && setOpening(p),
           onError: (m) => alive && setError(m),
           onJourney: (i) => alive && setJStep(i),
-          onDisassembly: (k, layers) => alive && setDis((d) => (d.k === k && d.layers.length === layers.length ? d : { k, layers })),
+          onDisassembly: (k, layers) => {
+            if (!alive) return;
+            if (fillRef.current) fillRef.current.style.transform = `scaleY(${k})`;
+            const n = layers.length;
+            const r = Math.floor(k * n + 1e-3);
+            setDis((d) => (Math.floor(d.k * n + 1e-3) === r && d.layers.length === n && d.layers[0] === layers[0] ? d : { k, layers }));
+          },
         });
       } catch {
         setSupported(false);
@@ -138,7 +147,7 @@ export default function PcPage() {
   }, []);
 
   const pick = useCallback((id: PartId | null) => {
-    setPanelOpen(true);
+    if (window.innerWidth >= 1280) setPanelOpen(true);
     engineRef.current?.select(id);
   }, []);
 
@@ -149,8 +158,6 @@ export default function PcPage() {
   const disN = dis.layers.length;
   const disShow = !!selected && disN > 0 && (state === "open" || state === "extracting");
   const removed = Math.floor(dis.k * disN + 1e-3);
-  const cur = disN ? Math.min(disN - 1, Math.max(0, Math.ceil(dis.k * disN - 1e-3) - 1)) : 0;
-  const curInfo = selected && disN ? LAYERS[selected]?.[dis.layers[cur]!] : undefined;
 
   if (!supported) return <Fallback />;
 
@@ -227,11 +234,9 @@ export default function PcPage() {
         <button type="button" className="pc-btn" disabled={!ready} onClick={() => engineRef.current?.resetView()}>
           重置视角
         </button>
-        {!wide && (
-          <button type="button" className="pc-btn" onClick={() => setPanelOpen((v) => !v)}>
-            {panelOpen ? "收起说明" : "考点"}
-          </button>
-        )}
+        <button type="button" className={panelOpen ? "pc-btn is-on" : "pc-btn"} onClick={() => setPanelOpen((v) => !v)}>
+          {panelOpen ? "收起考点" : "408 考点"}
+        </button>
       </div>
 
       {light === "rgb" && (
@@ -271,48 +276,23 @@ export default function PcPage() {
       )}
 
       {disShow && (
-        <section className="pc-dis" aria-label="拆解进度">
-          <div className="pc-dis__head">
-            <span className="pc-dis__title">手动拆解</span>
-            <span className="pc-dis__count">
-              {removed}/{disN}
-            </span>
-          </div>
-          <div className="pc-dis__steps">
+        <div className="pc-dhud" aria-label="拆解进度">
+          <div className="pc-dhud__rail">
+            <i ref={fillRef} />
             {dis.layers.map((n, i) => (
-              <button
-                key={n}
-                type="button"
-                className={i < removed ? "is-done" : i === cur && dis.k > 0 ? "is-on" : undefined}
-                onClick={() => engineRef.current?.setDisassembly(i < removed ? i / disN : (i + 1) / disN, 1.1)}
-              >
-                {LAYERS[selected!]?.[n]?.label ?? n}
-              </button>
+              <span key={n} style={{ bottom: `${((i + 1) / disN) * 100}%` }} />
             ))}
           </div>
-          <input
-            className="pc-dis__range"
-            type="range"
-            min={0}
-            max={1}
-            step={0.001}
-            value={dis.k}
-            aria-label="拆解进度"
-            onChange={(e) => engineRef.current?.setDisassembly(Number(e.target.value))}
-          />
-          <p className="pc-dis__note">{dis.k < 0.002 ? "组装状态。拖动滑杆、点上面的步骤，或用按钮一层层拆开。" : curInfo?.note}</p>
-          <div className="pc-dis__nav">
-            <button type="button" className="pc-btn" disabled={dis.k <= 0.001} onClick={() => engineRef.current?.stepDisassembly(-1)}>
-              装回一层
-            </button>
-            <button type="button" className="pc-btn" onClick={() => engineRef.current?.playDisassembly()}>
-              {dis.k > 0.999 ? "全部装回" : "自动演示"}
-            </button>
-            <button type="button" className="pc-btn pc-btn--back" disabled={dis.k >= 0.999} onClick={() => engineRef.current?.stepDisassembly(1)}>
-              拆下一层
-            </button>
+          <div className="pc-dhud__text">
+            <b>
+              {removed > 0 ? LAYERS[selected!]?.[dis.layers[removed - 1]!]?.label ?? "" : "组装状态"}
+              <em>
+                {removed}/{disN}
+              </em>
+            </b>
+            <span>{removed > 0 ? LAYERS[selected!]?.[dis.layers[removed - 1]!]?.note : "单指按住向上滑，一层层拆开；向下滑装回。双指旋转、缩放。"}</span>
           </div>
-        </section>
+        </div>
       )}
 
       {touring && step && (

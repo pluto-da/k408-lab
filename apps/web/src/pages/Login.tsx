@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLogin } from "../api/hooks";
 import { errorMessage } from "../api/client";
 import { safeNext } from "../lib/format";
+import PasswordInput from "../components/PasswordInput";
 
 export default function LoginPage() {
   const [params] = useSearchParams();
@@ -23,13 +24,24 @@ export default function LoginPage() {
         <h1>登录</h1>
         <label>
           用户名或邮箱
-          <input value={account} onChange={(e) => setAccount(e.target.value)} autoComplete="username" required autoFocus />
+          <input
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="next"
+            maxLength={120}
+            required
+            autoFocus
+          />
         </label>
         <label>
           密码
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" enterKeyHint="go" maxLength={72} required />
         </label>
-        {login.error && <p className="form-err">{errorMessage(login.error)}</p>}
+        {login.error && <p className="form-err" role="alert">{errorMessage(login.error)}</p>}
         <button className="app-btn app-btn--big" disabled={login.isPending || !account || !password}>
           {login.isPending ? "登录中…" : "登录"}
         </button>

@@ -178,27 +178,30 @@ html.is-pc body { background: #0a0c10; }
 @media (prefers-reduced-motion: reduce) { .pc-rgb, .pc-journey { animation: none; } }
 .pc-parts[hidden] { display: none; }
 
-/* ---- 手动拆解 ---- */
-.pc-dis {
-  position: absolute; left: clamp(14px, 3vw, 28px); top: 72px; width: min(380px, calc(100% - 28px));
-  padding: 12px 14px; border-radius: 8px; background: rgba(12, 15, 20, 0.86); border: 1px solid rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); animation: pc-in 0.35s ease-out;
+/* ---- 手动拆解：手指滑动，左侧细进度条 ---- */
+.pc-dhud {
+  position: absolute; left: clamp(12px, 2.4vw, 26px); top: 50%; transform: translateY(-50%);
+  display: flex; gap: 12px; align-items: stretch; max-width: min(250px, 42vw); pointer-events: none; animation: pc-in 0.35s ease-out;
 }
-.pc-dis__head { display: flex; justify-content: space-between; align-items: baseline; }
-.pc-dis__title { font-size: 14px; font-weight: 600; color: #fff; }
-.pc-dis__count { font-size: 12px; color: rgba(140, 200, 255, 0.9); font-variant-numeric: tabular-nums; }
-.pc-dis__steps { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0 4px; }
-.pc-dis__steps button {
-  font: inherit; font-size: 12px; line-height: 1; padding: 6px 9px; border-radius: 13px; cursor: pointer;
-  color: rgba(236, 238, 242, 0.8); background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
-}
-.pc-dis__steps button.is-done { color: #0a0c10; background: rgba(90, 176, 255, 0.85); border-color: transparent; }
-.pc-dis__steps button.is-on { border-color: #5ab0ff; color: #fff; }
-.pc-dis__range { width: 100%; margin: 8px 0 2px; accent-color: #5ab0ff; height: 28px; }
-.pc-dis__note { margin: 2px 0 0; min-height: 40px; font-size: 13px; line-height: 1.55; color: rgba(236, 238, 242, 0.86); }
-.pc-dis__nav { display: flex; gap: 6px; margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
-.pc-dis__nav .pc-btn { min-height: 34px; padding: 8px 12px; }
+.pc-dhud__rail { position: relative; flex: none; width: 3px; min-height: 150px; border-radius: 2px; background: rgba(255, 255, 255, 0.14); }
+.pc-dhud__rail i { position: absolute; inset: 0; border-radius: 2px; background: #5ab0ff; box-shadow: 0 0 10px rgba(90, 176, 255, 0.6); transform: scaleY(0); transform-origin: bottom; will-change: transform; }
+.pc-dhud__rail span { position: absolute; left: -3px; width: 9px; height: 1px; background: rgba(255, 255, 255, 0.5); }
+.pc-dhud__text { display: flex; flex-direction: column; justify-content: center; gap: 4px; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
+.pc-dhud__text b { font-size: 14px; font-weight: 600; color: #fff; }
+.pc-dhud__text em { font-style: normal; font-weight: 500; font-size: 11px; margin-left: 8px; color: rgba(140, 200, 255, 0.9); font-variant-numeric: tabular-nums; }
+.pc-dhud__text span { font-size: 12px; line-height: 1.55; color: rgba(236, 238, 242, 0.82); }
+.pc-btn.is-on { background: rgba(90, 176, 255, 0.18); border-color: rgba(90, 176, 255, 0.5); }
+
+/* 更紧凑的控件，把画面留给模型 */
+.pc-parts button, .pc-btn { font-size: 12.5px; padding: 7px 11px; min-height: 32px; border-radius: 16px; }
+.pc-seg button { font-size: 12.5px; padding: 6px 11px; }
+.pc-head h1 { font-size: 19px; }
+.pc-head p { font-size: 12px; }
+.pc-panel { width: 312px; padding: 14px 15px 16px; }
+.pc-panel h2 { font-size: 18px; }
+.pc-panel__brief { font-size: 13px; }
+.pc-points li { font-size: 12.8px; padding: 6px 0 6px 24px; }
 @media (max-width: 899px) {
-  .pc-dis { top: 60px; padding: 10px 12px; }
-  .pc-dis__note { font-size: 12px; min-height: 0; }
+  .pc-dhud { top: auto; bottom: 64px; transform: none; max-width: calc(100% - 28px); }
+  .pc-dhud__rail { min-height: 64px; }
 }

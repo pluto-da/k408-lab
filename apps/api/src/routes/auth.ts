@@ -4,6 +4,7 @@ import { z } from "zod";
 import { burnPasswordCheck, hashPassword, verifyPassword } from "../lib/password";
 import { conflict, HttpError } from "../lib/errors";
 import { toPublicUser } from "../plugins/auth";
+import { LoginGuard } from "../lib/login-guard";
 
 const usernameSchema = z
   .string()
@@ -34,8 +35,9 @@ const loginSchema = z.object({
   password: z.string().min(1, "请输入密码").max(72),
 });
 
-const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string }> = async (app, opts) => {
+const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string; loginGuard?: LoginGuard }> = async (app, opts) => {
   const limited = { config: { rateLimit: { max: opts.rateMax, timeWindow: opts.rateWindow } } };
+  const guard = opts.loginGuard ?? new LoginGuard();
 
   app.post("/register", limited, async (req, reply) => {
     const body = registerSchema.parse(req.body);
@@ -63,12 +65,21 @@ const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string }> = 
   app.post("/login", limited, async (req, reply) => {
     const { account, password } = loginSchema.parse(req.body);
     const key = account.toLowerCase();
+    const wait = guard.lockedFor(key);
+    if (wait > 0) {
+      throw new HttpError(429, "ACCOUNT_LOCKED", `该账号密码错误次数过多，请 ${Math.ceil(wait / 60_000)} 分钟后再试`);
+    }
     const user = await app.prisma.user.findUnique({ where: key.includes("@") ? { email: key } : { username: key } });
     if (!user) {
       await burnPasswordCheck(password);
+      guard.fail(key);
       throw new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
     }
-    if (!(await verifyPassword(user.passwordHash, password))) throw new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
+    if (!(await verifyPassword(user.passwordHash, password))) {
+      guard.fail(key);
+      throw new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
+    }
+    guard.succeed(key);
     await app.issueSession(reply, user);
     return { user: toPublicUser(user) };
   });

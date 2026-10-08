@@ -14,6 +14,11 @@ COPY packages/shared packages/shared
 COPY apps/web apps/web
 ARG BUILD_ID
 ENV BUILD_ID=$BUILD_ID
+# 站点根地址（https://域名），用于生成 sitemap.xml；ICP 备案号显示在页脚
+ARG SITE_URL=
+ENV SITE_URL=$SITE_URL
+ARG VITE_ICP_BEIAN=
+ENV VITE_ICP_BEIAN=$VITE_ICP_BEIAN
 RUN pnpm --filter @k408/web build
 
 FROM caddy:2-alpine

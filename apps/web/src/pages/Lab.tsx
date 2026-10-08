@@ -7,6 +7,7 @@ export default function LabPage() {
   const ref = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -26,7 +27,10 @@ export default function LabPage() {
         const hash = window.location.hash.slice(1);
         if (hash) document.getElementById(decodeURIComponent(hash))?.scrollIntoView();
       })
-      .catch((e: unknown) => console.error(e));
+      .catch((e: unknown) => {
+        console.error(e);
+        if (alive) setFailed(true);
+      });
     return () => {
       alive = false;
       // StrictMode 的二次执行路径名不变；真正离开 /lab 时，整页加载目标页，释放 3D 场景
@@ -41,7 +45,16 @@ export default function LabPage() {
 
   return (
     <div className="lab-page">
-      {!ready && (
+      {failed && (
+        <div className="lab-error" role="alert">
+          <h1>实验室没能加载出来</h1>
+          <p>可能是网络不稳定。实验室需要下载约 3 MB 的 3D 模型和脚本，建议在 Wi-Fi 下打开。</p>
+          <button type="button" className="app-btn app-btn--big" onClick={() => window.location.reload()}>
+            重新加载
+          </button>
+        </div>
+      )}
+      {!ready && !failed && (
         <div className="lab-loading" role="status" aria-live="polite">
           <div className="lab-loading__bar">
             <i style={{ width: `${Math.round(progress * 100)}%` }} />

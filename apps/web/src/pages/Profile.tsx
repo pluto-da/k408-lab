@@ -41,8 +41,12 @@ function ProfileInner() {
             昵称
             <input value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={20} />
           </label>
-          {update.error && <p className="form-err">{errorMessage(update.error)}</p>}
-          {update.isSuccess && !update.isPending && <p className="form-ok">已保存</p>}
+          {update.error && <p className="form-err" role="alert">{errorMessage(update.error)}</p>}
+          {update.isSuccess && !update.isPending && (
+            <p className="form-ok" role="status">
+              已保存
+            </p>
+          )}
           <button className="app-btn" disabled={update.isPending || !nickname.trim() || nickname.trim() === user.nickname}>
             保存昵称
           </button>

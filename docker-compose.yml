@@ -65,6 +65,9 @@ services:
       args:
         NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
         BUILD_ID: ${BUILD_ID:-v1}
+        # 站点完整地址（如 https://k408.example.com），设置后生成 sitemap.xml
+        SITE_URL: ${SITE_URL:-}
+        VITE_ICP_BEIAN: ${ICP_BEIAN:-}
     image: k408-web:latest
     restart: unless-stopped
     depends_on:
