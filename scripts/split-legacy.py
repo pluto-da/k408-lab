@@ -2,7 +2,9 @@
 """把旧版单页 index.html 拆成 apps/web/public/legacy/ 下的独立文件（一次性迁移工具）。
 
 注意：拆分后在 js/ 中手工加入了学习事件钩子（LAB_EMIT，见 js/00-bridge.js 及各文件中
-“LAB_EMIT” 处）和按 GLB 文件加载主板模型的改动。重新运行本脚本会覆盖这些改动，需要重新打补丁。
+“LAB_EMIT” 处）和按 GLB 文件加载主板模型的改动；另外手工删除了流程答题模式
+（生成的 js/11-play.js、manifest 中对应条目、body.html 里的 data-play 按钮及 legacy-03.css 中的相关样式）。
+重新运行本脚本会覆盖这些改动，需要重新打补丁。
 
 用法: python3 scripts/split-legacy.py <旧站目录> <GLB 文件>
 输出:

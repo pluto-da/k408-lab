@@ -22,8 +22,7 @@
     "js/07-hero-extras.js",
     "js/08-lab.js",
     "js/09-quiz.js",
-    "js/10-graph.js",
-    "js/11-play.js"
+    "js/10-graph.js"
   ],
   "glb": "assets/motherboard.glb"
 }

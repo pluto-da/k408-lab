@@ -12,7 +12,7 @@ const KIND_HINT: Record<ItemKind, string> = {
   chapter: "在章节列表里点开考点卡",
   lab: "在可视化实验室切换到该实验",
   part: "在 3D 主板上点选部件聚焦",
-  flow: "完成一次「我来操作」闯关",
+  flow: "在 3D 主板上看一遍该流程的自动演示",
   quiz: "在自测中答对",
 };
 
@@ -52,7 +52,7 @@ function DashboardInner() {
           <Ring percent={p.overall.percent} />
           <div>
             <b>总进度</b>
-            <p className="muted">章节考点、实验、部件、流程闯关与自测题合计</p>
+            <p className="muted">章节考点、实验、部件、流程演示与自测题合计</p>
             <div className="row">
               <Link className="app-btn" to="/lab">
                 继续学习

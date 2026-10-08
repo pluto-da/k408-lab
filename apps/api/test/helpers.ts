@@ -29,7 +29,7 @@ export async function makeApp(overrides: Record<string, string> = {}): Promise<C
 
 export async function resetDb(prisma: PrismaClient) {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE "Mistake", "QuizAnswer", "FlowRun", "ProgressRecord", "User" RESTART IDENTITY CASCADE',
+    'TRUNCATE "Mistake", "QuizAnswer", "ProgressRecord", "User" RESTART IDENTITY CASCADE',
   );
 }
 

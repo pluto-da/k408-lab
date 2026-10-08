@@ -25,7 +25,7 @@ describe("学习事件与进度", () => {
       { type: "part_focused", partId: "cpu" },
       { type: "quiz_answered", questionId: "q1", chosen: 1, correct: true },
       { type: "quiz_answered", questionId: "q2", chosen: 0, correct: true }, // 客户端说对，服务端判错
-      { type: "flow_finished", flowId: "pagefault", stars: 3, mistakes: 0, timeMs: 42000 },
+      { type: "flow_viewed", flowId: "pagefault" },
     ]);
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ accepted: 9, rejected: [] });
@@ -53,24 +53,32 @@ describe("学习事件与进度", () => {
     const res = await postEvents(ctx.app, u.cookie, [
       { type: "lab_opened", labId: "nope" },
       { type: "chapter_viewed", subject: "ds", chapterNo: 19 },
-      { type: "flow_finished", flowId: "life", stars: 3, mistakes: 4, timeMs: 30000 },
-      { type: "flow_finished", flowId: "life", stars: 3, mistakes: 0, timeMs: 500 },
+      { type: "flow_viewed", flowId: "nope" },
+      { type: "flow_finished", flowId: "life", stars: 3, mistakes: 0, timeMs: 30000 }, // 已移除的事件类型
       { type: "what", foo: 1 },
       { type: "lab_opened", labId: "banker" },
     ]);
     const body = res.json();
     expect(body.accepted).toBe(1);
     expect(body.rejected.map((r: { index: number }) => r.index)).toEqual([0, 1, 2, 3, 4]);
-    expect(body.rejected[2].reason).toBe("星级与失误数不符");
+    expect(body.rejected[2].reason).toContain("未知的流程");
   });
 
-  it("同一事件 id 重复上报只记一次闯关成绩", async () => {
+  it("流程演示重复观看只计一次进度", async () => {
     const u = await registerUser(ctx.app);
-    const ev = { eid: "same-event-0001", type: "flow_finished", flowId: "web", stars: 2, mistakes: 1, timeMs: 61000 };
-    for (let i = 0; i < 2; i++) {
-      await ctx.app.inject({ method: "POST", url: "/api/events", headers: { cookie: u.cookie }, payload: { events: [ev] } });
-    }
-    expect(await ctx.prisma.flowRun.count({ where: { userId: u.id } })).toBe(1);
+    await postEvents(ctx.app, u.cookie, [
+      { type: "flow_viewed", flowId: "web" },
+      { type: "flow_viewed", flowId: "web" },
+    ]);
+    const p = (await ctx.app.inject({ method: "GET", url: "/api/progress", headers: { cookie: u.cookie } })).json();
+    const cn = p.subjects.find((s: { subject: string }) => s.subject === "cn");
+    expect(cn.byKind.flow).toEqual({ done: 1, total: 1 });
+    expect(p.completedIds.filter((id: string) => id === "flow:web")).toHaveLength(1);
+  });
+
+  it("排行榜与闯关接口已移除", async () => {
+    expect((await ctx.app.inject({ method: "GET", url: "/api/leaderboard/life" })).statusCode).toBe(404);
+    expect((await ctx.app.inject({ method: "GET", url: "/api/flows" })).statusCode).toBe(404);
   });
 
   it("批量上限 100 条", async () => {

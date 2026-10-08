@@ -44,32 +44,21 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await page.click('.x-quiz__opt[data-k="0"]'); // q1 答错
   await page.click(".x-quiz__nav button");
   await page.click('.x-quiz__opt[data-k="2"]'); // q2 答对
-  // 3. 闯关：逐个试答案直到通关（会产生失误）
-  await page.evaluate(() => window.PLAY.setup("life"));
-  await page.click('.x-play-card button.x-panel__btn--main');
-  for (let guard = 0; guard < 80; guard++) {
-    const end = await page.evaluate(() => [...document.querySelectorAll(".x-play-card")].some((c) => !c.hidden && /再玩一次/.test(c.textContent)));
-    if (end) break;
-    const q = () => page.evaluate(() => (document.querySelector(".x-playbar .x-flowbar__meta") || {}).textContent || "");
-    const before = await q();
-    const btns = await page.$$(".x-play-ans button:not(:disabled)");
-    if (btns.length) await btns[0].click({ force: true });
-    else {
-      for (const p of await page.$$("#xparts button[data-k]")) {
-        await p.click({ force: true });
-        await sleep(350);
-        if ((await q()) !== before || !(await page.$(".x-playbar:not([hidden])"))) break;
-      }
-    }
-    await sleep(400);
-  }
+  // 3. 流程自动演示：点开「缺页中断」看演示，确认没有答题模式
+  await page.click('#xflows button[data-flow="pagefault"]');
+  await sleep(500);
+  const flowState = await page.evaluate(() => ({
+    bar: !document.getElementById("xflowbar").hidden,
+    playButtons: document.querySelectorAll("button[data-play]").length,
+  }));
+  log("流程演示", JSON.stringify(flowState));
+  await page.click("#xf-exit");
   const evs = await page.evaluate(() => window.__evs.map((e) => e.type));
   log("捕获事件", JSON.stringify(evs.reduce((a, t) => ((a[t] = (a[t] || 0) + 1), a), {})));
-  const fin = await page.evaluate(() => window.__evs.find((e) => e.type === "flow_finished"));
-  log("闯关结算", JSON.stringify(fin));
+  const viewed = await page.evaluate(() => window.__evs.find((e) => e.type === "flow_viewed"));
   const queued = await page.evaluate(() => JSON.parse(sessionStorage.getItem("k408.pendingEvents") || "[]").length);
   log("未登录暂存队列", queued);
-  if (SHOTS) await page.screenshot({ path: SHOTS + "/lab-play.png" });
+  if (SHOTS) await page.screenshot({ path: SHOTS + "/lab-flow.png" });
 
   // 4. 注册（离开 /lab 会整页加载），登录后补传
   await page.click('a.app-btn:has-text("注册")');
@@ -90,9 +79,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   if (SHOTS) await page.screenshot({ path: SHOTS + "/dashboard.png", fullPage: true });
 
   const mistakes = await page.evaluate(() => fetch("/api/mistakes").then((r) => r.json()));
-  log("错题", mistakes.items.length, JSON.stringify(mistakes.items.map((m) => m.source + ":" + m.prompt.replace(/<[^>]+>/g, "").slice(0, 16))));
-  const lb = await page.evaluate(() => fetch("/api/leaderboard/life?period=week").then((r) => r.json()));
-  log("排行榜我的名次", JSON.stringify(lb.me));
+  log("错题", mistakes.items.length, JSON.stringify(mistakes.items.map((m) => m.prompt.replace(/<[^>]+>/g, "").slice(0, 16))));
+  const progress = await page.evaluate(() => fetch("/api/progress").then((r) => r.json()));
+  const flowDone = progress.completedIds.includes("flow:pagefault");
+  log("流程演示计入进度", flowDone);
+  const gone = await page.evaluate(() => fetch("/api/leaderboard/life").then((r) => r.status));
+  errors.length = 0; // 上面这次 404 是预期的
+  log("旧排行榜接口状态", gone);
 
   // 5. 站内导航：进入 /lab 再离开到错题本
   await page.click('nav a:has-text("实验室")');
@@ -103,15 +96,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   log("错题本卡片", cards);
   // 重做第一张（自测题）
   if (SHOTS) await page.screenshot({ path: SHOTS + "/mistakes.png", fullPage: true });
-  await page.goto(BASE + "/leaderboard?flow=life");
-  await page.waitForSelector(".lb, .empty");
-  if (SHOTS) await page.screenshot({ path: SHOTS + "/leaderboard.png", fullPage: true });
   await page.goto(BASE + "/");
+  const navText = await page.$eval("nav", (n) => n.textContent);
   if (SHOTS) await page.screenshot({ path: SHOTS + "/home.png", fullPage: true });
 
   log("页面错误", errors.length ? JSON.stringify(errors.slice(0, 8)) : "无");
   await browser.close();
-  const ok = fin && mistakes.items.length > 0 && lb.me && cards > 0;
+  const ok =
+    viewed && flowState.bar && flowState.playButtons === 0 && !heroState.play &&
+    flowDone && gone === 404 && mistakes.items.length > 0 && cards > 0 && !/排行榜/.test(navText);
   console.log(ok ? "E2E 通过" : "E2E 失败");
   process.exit(ok ? 0 : 1);
 })().catch((e) => {

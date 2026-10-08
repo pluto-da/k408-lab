@@ -1,9 +1,5 @@
-import { createHash } from "node:crypto";
-import { Prisma, type PrismaClient, type Subject } from "@prisma/client";
-import { envelopeSchema, flowById, itemId, labEventSchema, starsFor, type LabEvent } from "@k408/shared";
-
-/** 闯关最短耗时（毫秒），低于此值视为异常数据 */
-export const MIN_FLOW_TIME_MS = 2000;
+import type { Prisma, PrismaClient, Subject } from "@prisma/client";
+import { envelopeSchema, itemId, labEventSchema, type LabEvent } from "@k408/shared";
 
 export interface IngestResult {
   accepted: number;
@@ -32,7 +28,6 @@ async function recordQuizMistake(
     where: { userId_dedupeKey: { userId, dedupeKey: `quiz:${q.id}` } },
     create: {
       userId,
-      source: "quiz",
       subject: q.subject,
       dedupeKey: `quiz:${q.id}`,
       questionId: q.id,
@@ -57,7 +52,7 @@ export async function quizAnswer(prisma: PrismaClient, userId: string, questionI
   return { correct, question: q };
 }
 
-async function applyEvent(prisma: PrismaClient, userId: string, ev: LabEvent, eid: string, at: Date): Promise<string | null> {
+async function applyEvent(prisma: PrismaClient, userId: string, ev: LabEvent, at: Date): Promise<string | null> {
   switch (ev.type) {
     case "chapter_viewed": {
       const id = itemId.chapter(ev.subject, ev.chapterNo);
@@ -76,64 +71,9 @@ async function applyEvent(prisma: PrismaClient, userId: string, ev: LabEvent, ei
       const r = await quizAnswer(prisma, userId, ev.questionId, ev.chosen, at);
       return r ? null : "未知的题目";
     }
-    case "flow_finished": {
-      if (ev.stars !== starsFor(ev.mistakes)) return "星级与失误数不符";
-      if (ev.timeMs < MIN_FLOW_TIME_MS) return "用时异常";
-      try {
-        await prisma.flowRun.create({
-          data: {
-            userId,
-            flowId: ev.flowId,
-            stars: ev.stars,
-            mistakes: ev.mistakes,
-            timeMs: ev.timeMs,
-            score: ev.score ?? null,
-            options: ev.options ?? Prisma.JsonNull,
-            clientEventId: eid,
-            createdAt: at,
-          },
-        });
-      } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return null; // 重复上报
-        throw e;
-      }
+    case "flow_viewed":
       await touch(prisma, userId, itemId.flow(ev.flowId), at);
       return null;
-    }
-    case "flow_mistake": {
-      const flow = flowById(ev.flowId)!;
-      const key = `flow:${ev.flowId}:${createHash("sha1").update(ev.question).digest("hex").slice(0, 16)}`;
-      await prisma.mistake.upsert({
-        where: { userId_dedupeKey: { userId, dedupeKey: key } },
-        create: {
-          userId,
-          source: "flow",
-          subject: flow.subject as Subject,
-          dedupeKey: key,
-          flowId: ev.flowId,
-          stepIndex: ev.stepIndex,
-          stepType: ev.stepType,
-          prompt: ev.question,
-          options: ev.options ?? [],
-          chosen: ev.chosen,
-          correctAnswer: ev.correct,
-          explanation: ev.explanation,
-          lastWrongAt: at,
-        },
-        update: {
-          chosen: ev.chosen,
-          correctAnswer: ev.correct,
-          explanation: ev.explanation,
-          options: ev.options ?? [],
-          stepIndex: ev.stepIndex,
-          wrongCount: { increment: 1 },
-          mastered: false,
-          masteredAt: null,
-          lastWrongAt: at,
-        },
-      });
-      return null;
-    }
   }
 }
 
@@ -151,7 +91,7 @@ export async function ingestEvents(prisma: PrismaClient, userId: string, raw: un
     // 客户端时间只在合理范围内采用（离线队列最多 7 天），否则以服务器时间为准
     const ts = env.data.ts;
     const at = new Date(ts && ts <= now + 60_000 && ts >= now - 7 * 86400_000 ? ts : now);
-    const reason = await applyEvent(prisma, userId, ev.data, env.data.eid, at);
+    const reason = await applyEvent(prisma, userId, ev.data, at);
     if (reason) result.rejected.push({ index, reason });
     else result.accepted++;
   }

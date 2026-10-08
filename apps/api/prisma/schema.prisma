@@ -23,11 +23,6 @@ enum ItemKind {
   quiz
 }
 
-enum MistakeSource {
-  quiz
-  flow
-}
-
 model User {
   id           String   @id @default(cuid())
   /// 小写存储，唯一；与 email 至少有一个
@@ -43,12 +38,11 @@ model User {
   updatedAt    DateTime @updatedAt @db.Timestamptz(3)
 
   progress    ProgressRecord[]
-  flowRuns    FlowRun[]
   mistakes    Mistake[]
   quizAnswers QuizAnswer[]
 }
 
-/// 进度分母：章节考点、实验、流程、部件、自测题
+/// 进度分母：章节考点、实验、流程演示、部件、自测题
 model ContentItem {
   id       String           @id
   kind     ItemKind
@@ -72,32 +66,6 @@ model ProgressRecord {
 
   @@unique([userId, itemId])
   @@index([userId, lastAt])
-}
-
-model Flow {
-  id      String    @id
-  subject Subject
-  title   String
-  runs    FlowRun[]
-}
-
-model FlowRun {
-  id            String   @id @default(cuid())
-  userId        String
-  flowId        String
-  stars         Int
-  mistakes      Int
-  timeMs        Int
-  score         Int?
-  options       Json?
-  /// 客户端事件 id，避免网络重试导致重复记录
-  clientEventId String?  @unique
-  createdAt     DateTime @default(now()) @db.Timestamptz(3)
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  flow          Flow     @relation(fields: [flowId], references: [id], onDelete: Cascade)
-
-  @@index([flowId, createdAt])
-  @@index([flowId, userId])
 }
 
 model Question {
@@ -128,14 +96,10 @@ model QuizAnswer {
 model Mistake {
   id            String        @id @default(cuid())
   userId        String
-  source        MistakeSource
   subject       Subject
-  /// 去重键：quiz:<题号> 或 flow:<流程>:<题干>
+  /// 去重键：quiz:<题号>
   dedupeKey     String
   questionId    String?
-  flowId        String?
-  stepIndex     Int?
-  stepType      String        @default("single")
   prompt        String
   options       Json?
   chosen        String

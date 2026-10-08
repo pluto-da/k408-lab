@@ -9,7 +9,6 @@ const LoginPage = lazy(() => import("./pages/Login"));
 const RegisterPage = lazy(() => import("./pages/Register"));
 const DashboardPage = lazy(() => import("./pages/Dashboard"));
 const MistakesPage = lazy(() => import("./pages/Mistakes"));
-const LeaderboardPage = lazy(() => import("./pages/Leaderboard"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
 
@@ -25,7 +24,6 @@ export default function App() {
           <Route path="register" element={<RegisterPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="mistakes" element={<MistakesPage />} />
-          <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

@@ -11,7 +11,7 @@ export default function HomePage() {
         <h1>把计算机拆开给你看</h1>
         <p className="lead">
           3D 拆开一块主板，看 CPU、内存、总线、网卡各管哪几章；{LABS.length} 个动画实验单步演示算法；
-          {FLOWS.length} 条流程闯关亲手把数据送到终点。错题自动收进错题本，成绩上排行榜。
+          {FLOWS.length} 条流程演示跟着数据走完全程。自测答错的题自动收进错题本。
         </p>
         <div className="row">
           <Link to="/lab" className="app-btn app-btn--big">
@@ -43,18 +43,13 @@ export default function HomePage() {
       <section className="home-feats">
         <div>
           <h2>学习进度</h2>
-          <p>看过的章节考点、打开过的实验、拆解过的部件、通关的流程都会记录，按四门课显示完成百分比。</p>
+          <p>看过的章节考点、打开过的实验、拆解过的部件、看过的流程演示都会记录，按四门课显示完成百分比。</p>
           <Link to="/dashboard">查看进度 →</Link>
         </div>
         <div>
           <h2>错题本</h2>
-          <p>自测答错、闯关里每一步走错都会连同你的选择和解析一起收录，按科目筛选，重做答对即标记已掌握。</p>
+          <p>自测答错的题会连同你的选择和解析一起收录，按科目筛选，重做答对即标记已掌握。</p>
           <Link to="/mistakes">打开错题本 →</Link>
-        </div>
-        <div>
-          <h2>排行榜</h2>
-          <p>每条流程闯关按星级、失误、用时排名，分本周榜和总榜，看看自己排第几。</p>
-          <Link to="/leaderboard">查看排行榜 →</Link>
         </div>
       </section>
     </div>

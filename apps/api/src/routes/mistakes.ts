@@ -2,37 +2,28 @@ import type { FastifyPluginAsync } from "fastify";
 import type { Mistake, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { SUBJECTS, type MistakeDto } from "@k408/shared";
-import { badRequest, notFound } from "../lib/errors";
+import { notFound } from "../lib/errors";
 import { quizAnswer } from "../lib/ingest";
 
 const listQuery = z.object({
   subject: z.enum(SUBJECTS).optional(),
   status: z.enum(["active", "mastered", "all"]).default("active"),
-  source: z.enum(["quiz", "flow"]).optional(),
 });
 const idParams = z.object({ id: z.string().min(1).max(40) });
 const patchBody = z.object({ mastered: z.boolean() });
-const redoBody = z.object({ answer: z.union([z.number().int().min(0).max(20), z.string().max(300), z.array(z.string().max(100)).max(12)]) });
+const redoBody = z.object({ answer: z.number({ invalid_type_error: "请选择一个选项", required_error: "请选择一个选项" }).int().min(0).max(20) });
 
 function toDto(m: Mistake): MistakeDto {
   const options = Array.isArray(m.options) ? (m.options as unknown[]).map(String) : [];
-  const quiz = m.source === "quiz";
   return {
     id: m.id,
-    source: m.source,
     subject: m.subject,
     questionId: m.questionId,
-    flowId: m.flowId,
-    stepIndex: m.stepIndex,
-    stepType: m.stepType === "order" ? "order" : "single",
     prompt: m.prompt,
-    promptIsHtml: quiz,
     options,
-    optionsAreHtml: quiz,
     chosen: m.chosen,
     correctAnswer: m.correctAnswer,
     explanation: m.explanation,
-    explanationIsHtml: quiz,
     wrongCount: m.wrongCount,
     mastered: m.mastered,
     masteredAt: m.masteredAt?.toISOString() ?? null,
@@ -41,15 +32,12 @@ function toDto(m: Mistake): MistakeDto {
   };
 }
 
-const norm = (s: string) => s.replace(/\s+/g, "").replace(/→/g, ">");
-
 const mistakes: FastifyPluginAsync = async (app) => {
   app.get("/mistakes", async (req) => {
     const user = await app.requireUser(req);
     const q = listQuery.parse(req.query);
     const where: Prisma.MistakeWhereInput = { userId: user.id };
     if (q.subject) where.subject = q.subject;
-    if (q.source) where.source = q.source;
     if (q.status !== "all") where.mastered = q.status === "mastered";
     const [items, grouped] = await Promise.all([
       app.prisma.mistake.findMany({ where, orderBy: [{ lastWrongAt: "desc" }], take: 300 }),
@@ -89,18 +77,11 @@ const mistakes: FastifyPluginAsync = async (app) => {
     const { id } = idParams.parse(req.params);
     const { answer } = redoBody.parse(req.body);
     const m = await own(user.id, id);
-    let correct: boolean;
-    if (m.source === "quiz") {
-      if (typeof answer !== "number" || !m.questionId) throw badRequest("请选择一个选项");
-      const r = await quizAnswer(app.prisma, user.id, m.questionId, answer);
-      if (!r) throw notFound("题目已下线");
-      correct = r.correct;
-      // quizAnswer 答错时已累计 wrongCount
-    } else {
-      const given = Array.isArray(answer) ? answer.join(" → ") : String(answer);
-      correct = norm(given) === norm(m.correctAnswer);
-      if (!correct) await app.prisma.mistake.update({ where: { id }, data: { wrongCount: { increment: 1 }, lastWrongAt: new Date() } });
-    }
+    if (!m.questionId) throw notFound("题目已下线");
+    const r = await quizAnswer(app.prisma, user.id, m.questionId, answer);
+    if (!r) throw notFound("题目已下线");
+    // quizAnswer 答错时已累计 wrongCount
+    const correct = r.correct;
     const updated = correct
       ? await app.prisma.mistake.update({ where: { id }, data: { mastered: true, masteredAt: new Date() } })
       : await app.prisma.mistake.findUniqueOrThrow({ where: { id } });

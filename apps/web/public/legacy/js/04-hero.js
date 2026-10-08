@@ -165,7 +165,6 @@
           cv.addEventListener("pointerdown", function (ev) { down = { x: ev.clientX, y: ev.clientY }; });
           cv.addEventListener("pointerup", function (ev) {
             if (!down) return;
-            if (window.PLAY && PLAY.on()) { down = null; return; } /* game mode answers part clicks itself */
             var moved = Math.abs(ev.clientX - down.x) + Math.abs(ev.clientY - down.y) > 8; down = null;
             if (moved) return;
             var g = pick(ev);

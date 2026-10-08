@@ -7,7 +7,6 @@ const NAV = [
   { to: "/lab", label: "实验室" },
   { to: "/dashboard", label: "学习进度" },
   { to: "/mistakes", label: "错题本" },
-  { to: "/leaderboard", label: "排行榜" },
 ];
 
 function Notice() {

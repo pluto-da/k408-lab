@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { LeaderboardResponse, MistakeDto, ProgressResponse, PublicUser, Subject } from "@k408/shared";
+import type { MistakeDto, ProgressResponse, PublicUser, Subject } from "@k408/shared";
 import { api } from "./client";
 import { useAuth } from "../store/auth";
 
@@ -69,7 +69,6 @@ export function useUpdateProfile() {
     onSuccess: (r) => {
       setUser(r.user);
       qc.setQueryData(["me"], r.user);
-      void qc.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
 }
@@ -82,7 +81,6 @@ export type MistakeStatus = "active" | "mastered" | "all";
 export interface MistakeFilter {
   subject?: Subject;
   status: MistakeStatus;
-  source?: "quiz" | "flow";
 }
 export interface MistakeList {
   items: MistakeDto[];
@@ -92,7 +90,6 @@ export interface MistakeList {
 export function useMistakes(f: MistakeFilter, enabled: boolean) {
   const qs = new URLSearchParams({ status: f.status });
   if (f.subject) qs.set("subject", f.subject);
-  if (f.source) qs.set("source", f.source);
   return useQuery({ queryKey: ["mistakes", f], queryFn: () => api<MistakeList>(`/mistakes?${qs}`), enabled });
 }
 
@@ -113,18 +110,9 @@ export function useMistakeActions() {
       onSuccess: done,
     }),
     redo: useMutation({
-      mutationFn: (v: { id: string; answer: number | string | string[] }) =>
+      mutationFn: (v: { id: string; answer: number }) =>
         api<{ correct: boolean; item: MistakeDto }>(`/mistakes/${v.id}/redo`, { body: { answer: v.answer } }),
     }),
     refresh: done,
   };
-}
-
-export function useLeaderboard(flowId: string, period: "week" | "all") {
-  const status = useAuth((s) => s.status);
-  return useQuery({
-    queryKey: ["leaderboard", flowId, period, status],
-    queryFn: () => api<LeaderboardResponse>(`/leaderboard/${flowId}?period=${period}`),
-    refetchInterval: 60_000,
-  });
 }

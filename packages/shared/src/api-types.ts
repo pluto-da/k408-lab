@@ -24,47 +24,20 @@ export interface ProgressResponse {
   completedIds: string[];
 }
 
-export type MistakeSource = "quiz" | "flow";
-
+/** 错题（仅来自自测题） */
 export interface MistakeDto {
   id: string;
-  source: MistakeSource;
   subject: Subject;
   questionId: string | null;
-  flowId: string | null;
-  stepIndex: number | null;
-  stepType: "single" | "order";
-  /** 题干：自测题为受信任的题库 HTML（仅含 code 标签），流程题为纯文本 */
+  /** 题干、选项、答案与解析均为受信任的题库 HTML（仅含 code 标签） */
   prompt: string;
-  promptIsHtml: boolean;
   options: string[];
-  optionsAreHtml: boolean;
   chosen: string;
   correctAnswer: string;
   explanation: string;
-  explanationIsHtml: boolean;
   wrongCount: number;
   mastered: boolean;
   masteredAt: string | null;
   lastWrongAt: string;
   createdAt: string;
-}
-
-export interface LeaderboardRow {
-  rank: number;
-  userId: string;
-  nickname: string;
-  stars: number;
-  mistakes: number;
-  timeMs: number;
-  achievedAt: string;
-}
-
-export interface LeaderboardResponse {
-  flowId: string;
-  period: "week" | "all";
-  since: string | null;
-  rows: LeaderboardRow[];
-  me: LeaderboardRow | null;
-  totalPlayers: number;
 }

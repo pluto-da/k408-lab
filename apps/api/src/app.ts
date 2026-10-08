@@ -13,7 +13,6 @@ import meRoutes from "./routes/me";
 import eventRoutes from "./routes/events";
 import progressRoutes from "./routes/progress";
 import mistakeRoutes from "./routes/mistakes";
-import leaderboardRoutes from "./routes/leaderboard";
 import questionRoutes from "./routes/questions";
 
 export interface BuildOptions {
@@ -94,7 +93,6 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
       await api.register(eventRoutes);
       await api.register(progressRoutes);
       await api.register(mistakeRoutes);
-      await api.register(leaderboardRoutes);
       await api.register(questionRoutes);
     },
     { prefix: "/api" },

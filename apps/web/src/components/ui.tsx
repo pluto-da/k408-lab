@@ -16,15 +16,6 @@ export function Bar({ percent, color }: { percent: number; color: string }) {
   );
 }
 
-export function Stars({ n }: { n: number }) {
-  return (
-    <span className="stars" aria-label={`${n} 星`}>
-      {"★★★".slice(0, n)}
-      <i>{"★★★".slice(n)}</i>
-    </span>
-  );
-}
-
 /** 题库里的 HTML（仅含 code 等简单标签）由服务端种子提供，可信 */
 export function Html({ html, as: Tag = "span", className }: { html: string; as?: "span" | "div" | "p"; className?: string }) {
   return <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />;

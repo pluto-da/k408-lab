@@ -6,7 +6,10 @@ describe("事件队列", () => {
     expect(normalize({ type: "lab_opened", labId: "sort" })).toMatchObject({ type: "lab_opened", labId: "sort" });
     expect(normalize({ type: "lab_opened", labId: "sort" })?.eid).toMatch(/^[A-Za-z0-9]{8,}$/);
     expect(normalize({ type: "lab_opened", labId: "nope" })).toBeNull();
-    expect(normalize({ type: "flow_finished", flowId: "life", stars: 3, mistakes: 0, timeMs: 5000 })).not.toBeNull();
+    expect(normalize({ type: "flow_viewed", flowId: "life" })).not.toBeNull();
+    expect(normalize({ type: "flow_viewed", flowId: "nope" })).toBeNull();
+    expect(normalize({ type: "flow_finished", flowId: "life", stars: 3, mistakes: 0, timeMs: 5000 })).toBeNull();
+    expect(normalize({ type: "flow_mistake", flowId: "life", stepIndex: 0, question: "?", chosen: "a", correct: "b" })).toBeNull();
     expect(normalize(null)).toBeNull();
   });
 

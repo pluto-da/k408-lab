@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-/** 学习事件同步状态：用于页头的小徽标和闯关结束提示 */
+/** 学习事件同步状态：用于页头的小徽标和底部提示 */
 interface SyncState {
   pending: number;
   lastSyncedAt: number | null;

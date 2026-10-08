@@ -1,5 +1,5 @@
 import { type PrismaClient, type Subject } from "@prisma/client";
-import { CATALOG, FLOWS } from "@k408/shared";
+import { CATALOG } from "@k408/shared";
 import questions from "../../prisma/seed-questions.json";
 
 interface SeedQuestion {
@@ -11,8 +11,8 @@ interface SeedQuestion {
   explanation: string;
 }
 
-/** 幂等写入题库、流程与进度条目；服务启动和 seed 都会调用 */
-export async function syncCatalog(prisma: PrismaClient): Promise<{ items: number; flows: number; questions: number }> {
+/** 幂等写入题库与进度条目；服务启动和 seed 都会调用 */
+export async function syncCatalog(prisma: PrismaClient): Promise<{ items: number; questions: number }> {
   const qs = questions as SeedQuestion[];
   await prisma.$transaction([
     ...CATALOG.map((it, i) =>
@@ -20,13 +20,6 @@ export async function syncCatalog(prisma: PrismaClient): Promise<{ items: number
         where: { id: it.id },
         create: { id: it.id, kind: it.kind, subject: it.subject as Subject, title: it.title, sort: i },
         update: { kind: it.kind, subject: it.subject as Subject, title: it.title, sort: i },
-      }),
-    ),
-    ...FLOWS.map((f) =>
-      prisma.flow.upsert({
-        where: { id: f.id },
-        create: { id: f.id, subject: f.subject as Subject, title: f.title },
-        update: { subject: f.subject as Subject, title: f.title },
       }),
     ),
     ...qs.map((q, i) =>
@@ -37,5 +30,5 @@ export async function syncCatalog(prisma: PrismaClient): Promise<{ items: number
       }),
     ),
   ]);
-  return { items: CATALOG.length, flows: FLOWS.length, questions: qs.length };
+  return { items: CATALOG.length, questions: qs.length };
 }

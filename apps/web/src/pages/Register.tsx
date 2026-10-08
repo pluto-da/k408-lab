@@ -39,7 +39,7 @@ export default function RegisterPage() {
           <input type="email" value={f.email} onChange={set("email")} autoComplete="email" placeholder="name@example.com" />
         </label>
         <label>
-          昵称（选填，显示在排行榜）
+          昵称（选填）
           <input value={f.nickname} onChange={set("nickname")} maxLength={20} />
         </label>
         <label>

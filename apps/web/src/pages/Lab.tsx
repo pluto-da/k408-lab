@@ -54,7 +54,7 @@ export default function LabPage() {
       )}
       {status === "anon" && (
         <div className="lab-hint">
-          学习记录暂存在本页{pending ? `（${pending} 条）` : ""}，<Link to="/login?next=/lab">登录</Link>后自动保存进度、错题和闯关成绩。
+          学习记录暂存在本页{pending ? `（${pending} 条）` : ""}，<Link to="/login?next=/lab">登录</Link>后自动保存进度和错题。
         </div>
       )}
       <div ref={ref} className="legacy-root" />

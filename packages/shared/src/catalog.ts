@@ -72,7 +72,7 @@ export const LABS: readonly LabDef[] = [
   { id: "tcpconn", subject: "cn", title: "TCP 三次握手 / 四次挥手" },
 ];
 
-/** 可玩的流程闯关（window.PLAY.games 的 id） */
+/** 流程自动演示（window.FLOW.flows 的 id） */
 export const FLOWS: readonly FlowDef[] = [
   { id: "life", subject: "co", title: "一条指令的一生" },
   { id: "pagefault", subject: "os", title: "缺页中断" },
@@ -116,7 +116,7 @@ export const itemId = {
 export const KIND_NAMES: Record<ItemKind, string> = {
   chapter: "章节考点",
   lab: "可视化实验",
-  flow: "流程闯关",
+  flow: "流程演示",
   part: "部件拆解",
   quiz: "自测题（答对）",
 };
