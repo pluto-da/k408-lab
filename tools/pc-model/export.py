@@ -30,11 +30,14 @@ from lib import MATS, srgb2lin
 UV_TILE = 0.05  # metres per UV unit for tiling finish maps
 
 
-def descendants(root):
+def descendants(root, stop_layers=False):
+    """Renderable meshes under root. stop_layers: don't descend into removable-layer frames."""
     out = []
     stack = list(root.children)
     while stack:
         o = stack.pop()
+        if stop_layers and o.get("layer"):
+            continue
         stack.extend(o.children)
         if o.type in ("MESH", "CURVE") and not o.hide_render and not o.get("nosplat"):
             out.append(o)
@@ -188,12 +191,24 @@ def split_long_edges(ob, lmax):
     bm.free()
 
 
-def realise_part(root, name, lmax):
-    """Returns one joined object for the part, origin at the root, in root-local Blender axes."""
+def layer_roots(root):
+    out = []
+    stack = list(root.children)
+    while stack:
+        o = stack.pop()
+        stack.extend(o.children)
+        if o.get("layer"):
+            out.append(o)
+    return out
+
+
+def realise_part(root, name, lmax, src=None, stop_layers=False):
+    """Returns one joined object for the part, origin at the root, in root-local Blender axes.
+    src: take the meshes under this frame instead of under root (used for removable layers)."""
     dg = bpy.context.evaluated_depsgraph_get()
     root_inv = root.matrix_world.inverted()
     pieces = []
-    for o in descendants(root):
+    for o in descendants(src or root, stop_layers):
         ob = _realise(o, dg, root_inv)
         if ob is not None:
             pieces.append(ob)
@@ -253,12 +268,14 @@ def ao_stats(ob):
 
 
 def export_glb(ob, path):
-    """Writes ob (moved to the identity transform, i.e. root-local coordinates) as GLB."""
-    mw = ob.matrix_world.copy()
-    ob.matrix_world = Matrix.Identity(4)
+    """Writes ob (or a list of objects; moved to the identity transform, i.e. root-local coordinates) as GLB."""
+    obs = ob if isinstance(ob, list) else [ob]
+    mws = [o.matrix_world.copy() for o in obs]
     bpy.ops.object.select_all(action="DESELECT")
-    ob.select_set(True)
-    bpy.context.view_layer.objects.active = ob
+    for o in obs:
+        o.matrix_world = Matrix.Identity(4)
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = obs[0]
     bpy.ops.export_scene.gltf(
         filepath=path,
         export_format="GLB",
@@ -280,9 +297,10 @@ def export_glb(ob, path):
         export_lights=False,
         export_extras=False,
     )
-    ob.matrix_world = mw
-    tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
-    print(f"[glb] {os.path.basename(path)} tris {tris} verts {len(ob.data.vertices)} {os.path.getsize(path)//1024} KB", flush=True)
+    for o, mw in zip(obs, mws):
+        o.matrix_world = mw
+    tris = sum(len(p.vertices) - 2 for o in obs for p in o.data.polygons)
+    print(f"[glb] {os.path.basename(path)} objs {len(obs)} tris {tris} {os.path.getsize(path)//1024} KB", flush=True)
     return tris
 
 
@@ -305,10 +323,14 @@ def part_meta(root, ob=None):
                 nm = nm[:-4]
             anchors[nm] = to_three(c.matrix_world.translation, o)
     if ob is not None:
-        n = len(ob.data.vertices)
-        co = np.empty(n * 3, np.float32)
-        ob.data.vertices.foreach_get("co", co)
-        co = co.reshape(-1, 3)
+        obs = ob if isinstance(ob, list) else [ob]
+        cos = []
+        for o2 in obs:
+            n = len(o2.data.vertices)
+            c2 = np.empty(n * 3, np.float32)
+            o2.data.vertices.foreach_get("co", c2)
+            cos.append(c2.reshape(-1, 3))
+        co = np.concatenate(cos)
         lo, hi = co.min(0), co.max(0)  # root-local blender axes
         mins = [lo[0], lo[2], -hi[1]]
         maxs = [hi[0], hi[2], -lo[1]]
@@ -333,3 +355,42 @@ def materials_json(path):
         old.update(out)
         out = old
     write_json(path, dict(sorted(out.items())))
+
+
+C3 = Matrix(((1, 0, 0, 0), (0, 0, 1, 0), (0, -1, 0, 0), (0, 0, 0, 1)))  # blender -> three axes
+
+
+def layer_meta(root, layers):
+    """Per removable layer: assembled pose relative to the exploded pose (three axes, metres).
+    Viewer: x_assembled = R*S*(x - pivot) + pivot + t, interpolated towards identity as the layer comes off."""
+    root_inv = root.matrix_world.inverted()
+    out = []
+    for L in layers:
+        E = root_inv @ L.matrix_world
+        A = root_inv @ L.parent.matrix_world @ Matrix([L["asm"][i * 4:(i + 1) * 4] for i in range(4)])
+        D = C3 @ (A @ E.inverted()) @ C3.inverted()
+        p0 = (C3 @ E).to_translation()
+        loc, rot, sc = D.decompose()
+        lin = D.to_3x3()
+        t = lin @ p0 + loc - p0
+        out.append(dict(name=L["layer"], order=int(L["order"]), lift=round(float(L["lift"]), 5),
+                        pivot=[round(float(v), 5) for v in p0], t=[round(float(v), 5) for v in t],
+                        q=[round(float(v), 6) for v in (rot.x, rot.y, rot.z, rot.w)], s=round(float(sc.x), 5)))
+    out.sort(key=lambda d: d["order"])
+    return out
+
+
+def anchor_layers(root):
+    """anchor name -> layer name for anchors that live inside a removable layer frame."""
+    res = {}
+    stack = [(c, None) for c in root.children]
+    while stack:
+        c, lay = stack.pop()
+        lay = c.get("layer") or lay
+        if c.get("anchor") and lay:
+            nm = c.name[2:]
+            if len(nm) > 4 and nm[-4] == "." and nm[-3:].isdigit():
+                nm = nm[:-4]
+            res[nm] = lay
+        stack.extend((k, lay) for k in c.children)
+    return res

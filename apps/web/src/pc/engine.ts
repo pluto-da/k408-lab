@@ -13,7 +13,18 @@ import { JOURNEY } from "./journey";
 import { LOOK, TextureBank, buildGlass, buildStudioEnv, makeMaterial, type MatDef } from "./look";
 
 type Vec3 = [number, number, number];
+interface LayerMeta {
+  name: string;
+  order: number;
+  lift: number;
+  pivot: Vec3;
+  t: Vec3;
+  q: [number, number, number, number];
+  s: number;
+}
 interface PartMeta {
+  layers?: LayerMeta[];
+  anchorLayer?: Record<string, string>;
   tris: number;
   bytes: number;
   origin: Vec3;
@@ -66,6 +77,8 @@ export interface EngineCallbacks {
   onInteriorProgress?: (p: number | null) => void;
   onError?: (msg: string) => void;
   onJourney?: (step: number | null) => void;
+  /** 拆解进度 0..1 与当前部件的拆解层（按拆下顺序）；layers 为空表示该部件没有分层 */
+  onDisassembly?: (k: number, layers: string[]) => void;
 }
 
 const CENTER = new THREE.Vector3(0, 0.25, 0);
@@ -90,6 +103,16 @@ interface Model {
   root: THREE.Object3D;
   mats: THREE.MeshPhysicalMaterial[];
   hover: { value: number };
+  fade: { value: number };
+  meshes: THREE.Mesh[];
+}
+
+interface LayerRT {
+  meta: LayerMeta;
+  node: THREE.Object3D;
+  q: THREE.Quaternion;
+  pivot: THREE.Vector3;
+  t: THREE.Vector3;
 }
 
 interface PartRT {
@@ -102,7 +125,7 @@ interface PartRT {
   opacity: number;
   center: THREE.Vector3; // local bbox centre
   radius: number;
-  interior?: { group: THREE.Group; model: Model; meta: PartMeta; opacity: number };
+  interior?: { group: THREE.Group; model: Model; meta: PartMeta; opacity: number; layers: LayerRT[] };
   interiorPromise?: Promise<void>;
 }
 
@@ -208,6 +231,9 @@ const PACKET_FS = /* glsl */ `
     gl_FragColor = vec4((uColor*glow + vec3(1.0)*core) * vA * uOpacity, 1.0); }`;
 
 const TRAIL = 18;
+const QI = new THREE.Quaternion();
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+const PRELOAD: PartId[] = ["cpu", "gpu", "ram", "ssd", "hdd", "nic", "psu", "board"];
 
 export class PcEngine {
   private renderer: THREE.WebGLRenderer;
@@ -250,7 +276,7 @@ export class PcEngine {
   private down: { x: number; y: number; t: number } | null = null;
   private calloutLayer: HTMLDivElement;
   private svg: SVGSVGElement;
-  private callouts: { el: HTMLDivElement; line: SVGPolylineElement; dot: SVGCircleElement; anchor: THREE.Vector3; obj: THREE.Object3D }[] = [];
+  private callouts: { el: HTMLDivElement; line: SVGPolylineElement; dot: SVGCircleElement; anchor: THREE.Vector3; obj: THREE.Object3D; w: number }[] = [];
   private calloutVis = 0;
   private ro: ResizeObserver;
   // journey
@@ -264,8 +290,13 @@ export class PcEngine {
   private journeyStep = -1;
   private journeyTimer: ReturnType<typeof setTimeout> | null = null;
   private journeyBadge: HTMLDivElement;
+  private disK = 0;
+  private calloutGate = 0;
+  private dirty = 3;
+  private linksOn = false;
+  private preloading = false;
   /** lightweight counters for diagnostics (window.__pcStats) */
-  readonly stats = { frames: 0, dt: 0, dpr: 1 };
+  readonly stats = { frames: 0, idle: 0, dt: 0, dpr: 1 };
 
   constructor(
     private container: HTMLElement,
@@ -285,6 +316,8 @@ export class PcEngine {
     this.renderer.toneMappingExposure = 1.05;
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.className = "pc-canvas";
+    // decode meshopt buffers off the main thread, so opening a part does not freeze the page
+    (MeshoptDecoder as unknown as { useWorkers?: (n: number) => void }).useWorkers?.(Math.min(4, Math.max(1, (navigator.hardwareConcurrency || 2) - 1)));
     this.loader.setMeshoptDecoder(MeshoptDecoder);
     this.bank = new TextureBank((n) => urlOf(`${n}.webp`), Math.min(8, this.renderer.capabilities.getMaxAnisotropy()));
     this.env = buildStudioEnv(this.renderer);
@@ -322,6 +355,7 @@ export class PcEngine {
     el.addEventListener("pointermove", this.onMove);
     el.addEventListener("pointerleave", this.onLeave);
     this.controls.addEventListener("start", this.onControlStart);
+    this.controls.addEventListener("change", this.invalidate);
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(container);
     this.resize();
@@ -415,10 +449,45 @@ export class PcEngine {
 
   setShowAll(v: boolean) {
     this.showAll = v;
+    this.invalidate();
+  }
+
+  /** 部件内部拆解进度：0 = 组装状态，1 = 全部拆开。dur > 0 时动画过去 */
+  setDisassembly(k: number, dur = 0) {
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    if (!it || !it.layers.length || (this.state !== "open" && this.state !== "extracting")) return;
+    const to = clamp01(k);
+    if (dur <= 0) {
+      this.tweens = this.tweens.filter((t) => t.key !== "dis");
+      this.applyDisassembly(to);
+      return;
+    }
+    const from = this.disK;
+    this.tween(dur, (e) => this.applyDisassembly(from + (to - from) * e), undefined, easeInOutSine, "dis");
+  }
+
+  /** 拆下 / 装回一层：dir = +1 拆下一层，-1 装回一层 */
+  stepDisassembly(dir: 1 | -1) {
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    if (!it || !it.layers.length) return;
+    const n = it.layers.length;
+    const cur = this.disK * n;
+    const next = dir > 0 ? Math.floor(cur + 1e-3) + 1 : Math.ceil(cur - 1e-3) - 1;
+    this.setDisassembly(Math.max(0, Math.min(n, next)) / n, 1.1);
+  }
+
+  /** 自动演示：从当前位置拆到底；已经拆完则装回 */
+  playDisassembly() {
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    if (!it || !it.layers.length) return;
+    const n = it.layers.length;
+    const to = this.disK > 0.999 ? 0 : 1;
+    this.setDisassembly(to, Math.max(1.2, Math.abs(to - this.disK) * n * 1.25));
   }
 
   setHighlightLink(id: string | null) {
     this.highlightLink = id;
+    this.invalidate();
   }
 
   /** 右侧面板占用的宽度（像素），用于让模型避开面板居中 */
@@ -584,6 +653,7 @@ export class PcEngine {
     const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
     const gltf = await this.loader.parseAsync(buf, "");
     const hover = { value: 0 };
+    const fade = { value: 1 };
     const own = new Map<string, THREE.MeshPhysicalMaterial>();
     const meshes: THREE.Mesh[] = [];
     gltf.scene.traverse((o) => {
@@ -604,6 +674,7 @@ export class PcEngine {
         mat.onBeforeCompile = (sh, r) => {
           ob.call(mat, sh, r);
           sh.uniforms.uHover = hover;
+          sh.uniforms.uFade = fade;
         };
         own.set(name, mat);
       }
@@ -617,19 +688,12 @@ export class PcEngine {
       m.frustumCulled = true;
     }
     gltf.scene.name = label;
-    return { root: gltf.scene, mats: [...own.values()], hover };
+    return { root: gltf.scene, mats: [...own.values()], hover, fade, meshes };
   }
 
+  /** dithered fade (see look.ts): the materials never switch to transparent, so no shader recompiles */
   private setModelOpacity(model: Model, o: number) {
-    for (const m of model.mats) {
-      const t = o < 0.999;
-      if (m.transparent !== t) {
-        m.transparent = t;
-        m.needsUpdate = true;
-      }
-      m.opacity = o;
-      m.depthWrite = o > 0.55;
-    }
+    model.fade.value = o;
     model.root.visible = o > 0.01;
   }
 
@@ -854,6 +918,7 @@ export class PcEngine {
     this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 3.4, () => {
       this.controls.enabled = true;
       this.setState("overview", null);
+      void this.preload();
     }, ease);
     setTimeout(() => {
       if (this.disposed) return;
@@ -908,20 +973,27 @@ export class PcEngine {
     it.group.visible = true;
     it.opacity = 0;
     this.setModelOpacity(it.model, 0);
-    it.group.scale.setScalar(0.92);
+    it.group.scale.setScalar(it.layers.length ? 1 : 0.92);
+    this.tweens = this.tweens.filter((t) => t.key !== "dis");
+    this.applyDisassembly(it.layers.length ? 0 : 1);
     this.fadePart(p, 0, 0.5);
     for (const c of carry) this.fadePart(this.parts.get(c)!, 0, 0.5);
     for (const q of this.parts.values()) if (q.id !== id && !carry.includes(q.id)) this.fadePart(q, 0, 0.6);
+    const grow = it.layers.length ? 0 : 0.08;
     this.tween(0.75, (k) => {
       it.opacity = k;
       this.setModelOpacity(it.model, k);
-      it.group.scale.setScalar(0.92 + 0.08 * k);
+      it.group.scale.setScalar(1 - grow + grow * k);
     }, undefined, easeOut, "interior");
     const ir = ihi.clone().sub(ilo).length() / 2;
     this.flyTo(center, new THREE.Vector3(...def.view).normalize(), this.fitDistance(ir * 0.98), 1.1, () => {
       if (this.selected !== id) return;
       this.setState("open", id);
       this.showCallouts(id, true);
+      // first look: play the teardown once; the slider / step buttons take over at any time
+      if (it.layers.length) setTimeout(() => {
+        if (this.selected === id && this.state === "open" && this.disK === 0 && !this.tweens.some((t) => t.key === "dis")) this.playDisassembly();
+      }, 350);
     });
   }
 
@@ -942,7 +1014,7 @@ export class PcEngine {
     }
   }
 
-  private async ensureInterior(id: PartId) {
+  private async ensureInterior(id: PartId, quiet = false) {
     const p = this.parts.get(id)!;
     if (p.interior) return;
     if (!p.interiorPromise) {
@@ -950,10 +1022,11 @@ export class PcEngine {
       if (!meta) throw new Error(`missing interior ${id}`);
       p.interiorPromise = (async () => {
         let got = 0;
-        this.cb.onInteriorProgress?.(0);
+        const loud = () => !quiet || this.selected === id;
+        if (loud()) this.cb.onInteriorProgress?.(0);
         const bytes = await fetchBytes(urlOf(`${id}_open.glb`), (n) => {
           got += n;
-          this.cb.onInteriorProgress?.(Math.min(0.99, got / meta.bytes));
+          if (loud()) this.cb.onInteriorProgress?.(Math.min(0.99, got / meta.bytes));
         }, this.abort.signal);
         const model = await withTimeout(this.buildModel(bytes, `${id}_open`), 60_000, id);
         const group = new THREE.Group();
@@ -968,14 +1041,84 @@ export class PcEngine {
         } catch {
           /* compile on first draw */
         }
+        // push its textures to the GPU now rather than on the first visible frame
+        for (const m of model.mats) for (const t of [m.map, m.bumpMap, m.roughnessMap]) if (t) this.renderer.initTexture(t);
         group.visible = false;
-        p.interior = { group, model, meta, opacity: 0 };
-        this.cb.onInteriorProgress?.(null);
+        const layers: LayerRT[] = [];
+        for (const lm of meta.layers ?? []) {
+          const node = model.root.getObjectByName(`X_L_${lm.name}`);
+          if (!node) continue;
+          node.matrixAutoUpdate = false;
+          layers.push({ meta: lm, node, q: new THREE.Quaternion(...lm.q), pivot: v3(lm.pivot), t: v3(lm.t) });
+        }
+        p.interior = { group, model, meta, opacity: 0, layers };
+        if (loud()) this.cb.onInteriorProgress?.(null);
       })();
       p.interiorPromise.catch(() => (p.interiorPromise = undefined));
     }
     await p.interiorPromise;
   }
+
+  /** Background-loads every part's interior once the page is idle, so opening one is instant. */
+  private async preload() {
+    if (this.preloading) return;
+    this.preloading = true;
+    const idle = () => new Promise<void>((r) => {
+      const ric = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+      if (ric) ric(() => r(), { timeout: 1500 });
+      else setTimeout(r, 400);
+    });
+    for (const id of PRELOAD) {
+      if (this.disposed) return;
+      await idle();
+      // never compete with an animation that is playing
+      while (!this.disposed && (this.tweens.length > 0 || this.state === "journey")) await new Promise((r) => setTimeout(r, 300));
+      try {
+        await this.ensureInterior(id, true);
+      } catch {
+        /* retried when the part is opened */
+      }
+    }
+  }
+
+  /**
+   * Layer i comes off during [i/n, (i+1)/n] of the slider: it first lifts (or drops) to its exploded height,
+   * then swings sideways along a small arc and turns into its exploded orientation.
+   */
+  private applyDisassembly(k: number) {
+    this.disK = k;
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    const layers = it?.layers ?? [];
+    const n = layers.length;
+    const m = new THREE.Matrix4();
+    const tmp = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const off = new THREE.Vector3();
+    layers.forEach((L, i) => {
+      const lk = clamp01(k * n - i);
+      const tv = ease(clamp01(lk / 0.45));
+      const tl = ease(clamp01((lk - 0.3) / 0.7));
+      q.copy(L.q).slerp(QI, tl);
+      const sc = L.meta.s + (1 - L.meta.s) * tl;
+      off.set(L.t.x * (1 - tl), L.t.y * (1 - tv) + L.meta.lift * Math.sin(Math.PI * tl), L.t.z * (1 - tl));
+      m.makeTranslation(L.pivot.x + off.x, L.pivot.y + off.y, L.pivot.z + off.z);
+      m.multiply(tmp.makeRotationFromQuaternion(q));
+      m.multiply(tmp.makeScale(sc, sc, sc));
+      m.multiply(tmp.makeTranslation(-L.pivot.x, -L.pivot.y, -L.pivot.z));
+      L.node.matrix.copy(m);
+      L.node.matrixWorldNeedsUpdate = true;
+    });
+    // labels only make sense once everything is apart
+    const gate = n === 0 || k > 0.985 ? 1 : 0;
+    if (gate !== this.calloutGateTarget) {
+      this.calloutGateTarget = gate;
+      const from = this.calloutGate;
+      this.tween(0.35, (e) => (this.calloutGate = from + (gate - from) * e), undefined, easeOut, "gate");
+    }
+    this.cb.onDisassembly?.(k, layers.map((L) => L.meta.name));
+    this.invalidate();
+  }
+  private calloutGateTarget = 1;
 
   // ---------------------------------------------------------------- animation helpers
   private tween(dur: number, fn: (k: number) => void, done?: () => void, e = ease, key?: string) {
@@ -1060,6 +1203,12 @@ export class PcEngine {
     const meta = interior ? p.interior?.meta : p.meta;
     const obj = interior ? p.interior?.group : p.group;
     if (!meta || !obj) return;
+    const layerOf = (anchor: string): THREE.Object3D => {
+      if (!interior) return obj;
+      const lname = meta.anchorLayer?.[anchor];
+      const L = lname ? p.interior?.layers.find((x) => x.meta.name === lname) : undefined;
+      return L?.node ?? obj;
+    };
     for (const c of def.callouts) {
       const a = meta.anchors[c.anchor];
       if (!a) continue;
@@ -1077,7 +1226,7 @@ export class PcEngine {
       dot.style.setProperty("--c", c.color ?? "#e8e8ea");
       this.svg.appendChild(line);
       this.svg.appendChild(dot);
-      this.callouts.push({ el, line, dot, anchor: v3(a), obj });
+      this.callouts.push({ el, line, dot, anchor: v3(a), obj: layerOf(c.anchor), w: 0 });
     }
     this.calloutVis = 0;
     this.tween(0.5, (k) => (this.calloutVis = k), undefined, easeOut, "callouts");
@@ -1124,7 +1273,7 @@ export class PcEngine {
       const overflow = ys.length ? ys[ys.length - 1]! - bottom : 0;
       if (overflow > 0) for (let i = 0; i < ys.length; i++) ys[i] = ys[i]! - overflow;
       for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i]!, ys[i + 1]! - gap);
-      const widths = list.map((p) => p.c.el.offsetWidth);
+      const widths = list.map((p) => (p.c.w ||= p.c.el.offsetWidth));
       const colW = Math.max(0, ...widths);
       // column edge nearest the part
       const edge = side === "l" ? Math.max(10 + colW, minX - 36) : Math.min(W - 10 - colW, maxX + 36);
@@ -1135,7 +1284,7 @@ export class PcEngine {
         const lx = side === "l" ? edge - lw : edge;
         const ex = side === "l" ? edge : edge;
         lab.style.transform = `translate(${lx}px, ${y - 12}px)`;
-        const op = p.behind ? "0" : String(this.calloutVis);
+        const op = p.behind ? "0" : String(this.calloutVis * this.calloutGate);
         lab.style.opacity = op;
         const kx = side === "l" ? ex + 12 : ex - 12;
         line.setAttribute("points", `${p.x},${p.y} ${kx},${y} ${ex},${y}`);
@@ -1156,6 +1305,7 @@ export class PcEngine {
     const W = el.clientWidth;
     const H = el.clientHeight;
     const v = new THREE.Vector3();
+    let anyOn = false;
     for (const L of this.links) {
       let target = 0;
       let labelOn = false;
@@ -1179,6 +1329,7 @@ export class PcEngine {
       L.haloMat.uniforms.uTime!.value = time;
       L.dotMat.uniforms.uPx!.value = el.height / (2 * Math.tan((this.camera.fov * Math.PI) / 360));
       const visible = L.vis > 0.01 && !!L.curve;
+      if (visible || Math.abs(target - L.vis) > 0.005) anyOn = true;
       L.core.visible = L.halo.visible = L.dots.visible = visible;
       if (visible && L.curve) {
         const pos = L.dots.geometry.getAttribute("position") as THREE.BufferAttribute;
@@ -1206,6 +1357,7 @@ export class PcEngine {
         L.label.style.opacity = "0";
       }
     }
+    this.linksOn = anyOn;
   }
 
 
@@ -1275,6 +1427,11 @@ export class PcEngine {
   }
 
 
+  /** something changed: draw the next few frames even if nothing is animating */
+  private invalidate = () => {
+    this.dirty = 3;
+  };
+
   private frame = () => {
     const dt = Math.min(0.1, this.clock.getDelta());
     const time = this.clock.elapsedTime;
@@ -1289,15 +1446,24 @@ export class PcEngine {
       else t.done?.();
     }
     this.tweens = keep.concat(this.tweens);
-    if (this.controls.enabled) this.controls.update();
+    const moved = this.controls.enabled ? this.controls.update() : false;
     this.clampTarget();
     this.updateLinks(time, dt);
+    // render on demand: a still scene (part opened, nothing moving) costs no GPU time at all
+    const animating =
+      running.length > 0 || moved || this.dirty > 0 || this.linksOn || this.rgbMix > 0.001 ||
+      this.state === "intro" || this.state === "journey" || this.state === "loading" || this.packetMat.uniforms.uOpacity!.value > 0.001;
+    if (!animating) {
+      this.stats.idle++;
+      return;
+    }
+    if (this.dirty > 0) this.dirty--;
     this.updatePacket(dt);
     this.updateLook(time);
     if (this.composer && this.rgbMix > 0.001) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
     this.layoutCallouts();
-    if (this.state !== "loading") this.adaptQuality(dt);
+    if (this.state !== "loading" && running.length + (moved ? 1 : 0) > 0) this.adaptQuality(dt);
     this.stats.frames++;
     this.stats.dt = dt;
     this.stats.dpr = this.dpr;
@@ -1329,6 +1495,7 @@ export class PcEngine {
     this.camera.updateProjectionMatrix();
     this.svg.setAttribute("width", String(w));
     this.svg.setAttribute("height", String(h));
+    this.dirty = 3;
   }
 
   // ---------------------------------------------------------------- input
@@ -1383,6 +1550,8 @@ export class PcEngine {
       }
       this.renderer.domElement.style.cursor = id ? "pointer" : "";
       this.cb.onHover?.(id);
+      if (id && id !== "case") void this.ensureInterior(id, true).catch(() => undefined);
+      this.invalidate();
     }
   };
 
@@ -1392,6 +1561,7 @@ export class PcEngine {
       if (p?.model) p.model.hover.value = 0;
       this.hovered = null;
       this.cb.onHover?.(null);
+      this.invalidate();
     }
   };
 

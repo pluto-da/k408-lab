@@ -315,3 +315,49 @@ export const LINKS: LinkDef[] = [
   { id: "pwr_gpu", label: "显卡 12V 供电", color: "#FFC24A", parts: ["psu", "gpu"], points: [["psu", "out"], ["case", "pw_g"], ["gpu", "power"]], lift: 0.0, bidir: false },
   { id: "pwr_hdd", label: "SATA 供电", color: "#FFC24A", parts: ["psu", "hdd"], points: [["psu", "out"], ["case", "pw_h"], ["hdd", "sata"]], lift: 0.0, bidir: false },
 ];
+
+/** 打开部件后可以逐层拆下的结构（名称与模型里的层一一对应），note 说明拆下这一层后看到什么 */
+export interface LayerInfo {
+  label: string;
+  note: string;
+}
+
+export const LAYERS: Partial<Record<PartId, Record<string, LayerInfo>>> = {
+  cpu: {
+    cooler: { label: "散热器底座", note: "铜底与导热硅脂把核心的热量导进热管；散热跟不上时 CPU 会降频。" },
+    ilm: { label: "插座扣具", note: "扣具把 CPU 压在上千个 LGA 触点上，CPU 经这些触点连到内存通道与 PCIe 总线。" },
+    ihs: { label: "金属顶盖（开盖）", note: "顶盖下就是裸露的 Die：核心（运算器 + 控制器）、L1/L2/L3 Cache 与内存控制器。" },
+  },
+  ram: {
+    rgbbar: { label: "灯条", note: "灯条只负责灯效，和存储无关。" },
+    hs0: { label: "正面散热马甲", note: "马甲下是一排 DRAM 颗粒，8 颗并行拼出 64 位数据宽度（多体并行 / 位扩展）。" },
+    hs1: { label: "背面散热马甲", note: "金手指连到主板内存插槽；SPD 芯片记录容量、频率与时序。" },
+    bank: { label: "放大一颗 DRAM", note: "颗粒内部分成多个 Bank，按行激活到行缓冲再按列读写；电容会漏电，所以 DRAM 需要定期刷新。" },
+  },
+  ssd: {
+    heatsink: { label: "M.2 散热片", note: "主控和闪存长时间高速读写会发热降速，散热片靠导热垫贴合。" },
+    label: { label: "撕下标签", note: "标签下是主控、DRAM 缓存和 NAND 闪存颗粒；接口走 PCIe 通道，协议是 NVMe。" },
+    stack: { label: "放大闪存堆叠", note: "闪存按页读写、按块擦除；主控里的 FTL 负责逻辑地址到物理页的映射、磨损均衡和垃圾回收。" },
+  },
+  hdd: {
+    cover: { label: "顶盖", note: "密封腔体内：盘片、主轴电机和磁头臂。盘片两面都能存数据，同一半径的磁道组成柱面。" },
+    arm: { label: "磁头寻道", note: "磁头臂摆到目标磁道 = 寻道时间；等扇区转到磁头下 = 旋转延迟（平均半圈）；之后才是传输时间。" },
+  },
+  gpu: {
+    shroud: { label: "导风罩与风扇", note: "三把风扇把冷风压进下面的鳍片。" },
+    heatsink: { label: "鳍片散热器", note: "铜底贴住 GPU 核心，热管把热量带到整排鳍片。" },
+    backplate: { label: "背板", note: "露出 PCB 正面：GPU 核心、环绕的 GDDR 显存和一排供电电路；显卡经 PCIe ×16 与 CPU 交换数据。" },
+  },
+  nic: {
+    heatsink: { label: "主控散热片", note: "散热片下是网卡主控芯片。" },
+    die: { label: "放大网卡芯片", note: "MAC 属于数据链路层：成帧、CRC 校验、MAC 地址过滤；PHY 属于物理层：编码和收发电信号。" },
+  },
+  psu: {
+    lid: { label: "外壳与风扇", note: "内部：PFC、开关管、主变压器和整流输出，把 220V 交流变成 12V/5V/3.3V 直流。" },
+  },
+  board: {
+    vrm: { label: "供电散热片", note: "VRM 把 12V 降到 CPU 需要的约 1V，多相供电轮流工作分摊电流。" },
+    io: { label: "I/O 装甲", note: "后窗接口：USB、网口、视频和音频都从这里接出。" },
+    pch: { label: "芯片组散热片", note: "PCH 芯片组扩展出 SATA、USB 和更多 PCIe 通道，再经 DMI 总线连到 CPU。" },
+  },
+};

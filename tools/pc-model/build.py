@@ -159,19 +159,34 @@ def interior(o):
     part = o["part"]
     root = model.build_interior(part)
     bpy.context.view_layer.update()
+    if "--asm" in sys.argv:  # preview the assembled pose (debug)
+        from mathutils import Matrix
+        for L in export.layer_roots(root):
+            L.matrix_local = Matrix([L["asm"][i * 4:(i + 1) * 4] for i in range(4)])
+        bpy.context.view_layer.update()
     ao_d, lmax = INT_PARAMS[part]
     ob = None
     if not o["noglb"]:
-        ob = export.realise_part(root, part + "_open", lmax * o["lmax"])
+        layers = export.layer_roots(root)
+        base = export.realise_part(root, part + "_open", lmax * o["lmax"], stop_layers=True)
+        objs = [base]
+        for L in layers:
+            lo = export.realise_part(root, "L_" + L["layer"], lmax * o["lmax"], src=L, stop_layers=False)
+            objs.append(lo)
         hide_sources([root])
-        export.place_world(ob, root)
+        for x in objs:
+            export.place_world(x, root)
         bpy.context.view_layer.update()
-        export.bake_ao([ob], ao_d, o["samples"])
-        tris = export.export_glb(ob, os.path.join(BUILD, "glb", part + "_open.glb"))
-        export.place_world(ob, root)
-        meta = dict(tris=tris, **export.part_meta(root, ob))
+        export.bake_ao(objs, ao_d, o["samples"])
+        tris = export.export_glb(objs, os.path.join(BUILD, "glb", part + "_open.glb"))
+        for x in objs:
+            export.place_world(x, root)
+        meta = dict(tris=tris, **export.part_meta(root, objs))
+        meta["layers"] = export.layer_meta(root, layers)
+        meta["anchorLayer"] = export.anchor_layers(root)
         export.write_json(os.path.join(BUILD, "meta", part + "_open.json"), meta)
         export.materials_json(os.path.join(BUILD, "meta", "materials.json"))
+        ob = objs
     if o["preview"]:
         studio((1180, 820), 48)
         bb = export.part_meta(root, ob)["bbox"]
@@ -180,7 +195,7 @@ def interior(o):
         c = (c3[0], -c3[2], c3[1])
         size = float(np.linalg.norm(hi - lo))
         bpy.data.objects["Plane"].location.z = float(lo[1]) - 0.002
-        camera_shot(os.path.join(BUILD, "preview", part + "_open.png"), c, (-0.35, -1.0, 0.85), size * 1.25)
+        camera_shot(os.path.join(BUILD, "preview", part + ("_asm" if "--asm" in sys.argv else "") + "_open.png"), c, (-0.35, -1.0, 0.85), size * 1.25)
 
 
 if __name__ == "__main__":

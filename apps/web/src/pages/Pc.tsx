@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { LINKS, PART_BY_ID, PARTS, type PartId } from "../pc/parts";
+import { LAYERS, LINKS, PART_BY_ID, PARTS, type PartId } from "../pc/parts";
 import type { EngineState, LightMode, PcEngine } from "../pc/engine";
 import { JOURNEY } from "../pc/journey";
 import "../pc/pc.css";
@@ -42,6 +42,7 @@ export default function PcPage() {
   const [rgbColor, setRgbColor] = useState(RGB_SWATCHES[0]!);
   const [explode, setExplode] = useState(0);
   const [jStep, setJStep] = useState<number | null>(null);
+  const [dis, setDis] = useState<{ k: number; layers: string[] }>({ k: 0, layers: [] });
   const wide = useWide();
   const touringNow = state === "journey";
 
@@ -76,6 +77,7 @@ export default function PcPage() {
           onInteriorProgress: (p) => alive && setOpening(p),
           onError: (m) => alive && setError(m),
           onJourney: (i) => alive && setJStep(i),
+          onDisassembly: (k, layers) => alive && setDis((d) => (d.k === k && d.layers.length === layers.length ? d : { k, layers })),
         });
       } catch {
         setSupported(false);
@@ -144,6 +146,11 @@ export default function PcPage() {
   const busy = state === "extracting" || state === "closing";
   const touring = state === "journey";
   const step = jStep !== null ? JOURNEY[jStep] : null;
+  const disN = dis.layers.length;
+  const disShow = !!selected && disN > 0 && (state === "open" || state === "extracting");
+  const removed = Math.floor(dis.k * disN + 1e-3);
+  const cur = disN ? Math.min(disN - 1, Math.max(0, Math.ceil(dis.k * disN - 1e-3) - 1)) : 0;
+  const curInfo = selected && disN ? LAYERS[selected]?.[dis.layers[cur]!] : undefined;
 
   if (!supported) return <Fallback />;
 
@@ -261,6 +268,51 @@ export default function PcPage() {
             onChange={(e) => setExplode(Number(e.target.value))}
           />
         </label>
+      )}
+
+      {disShow && (
+        <section className="pc-dis" aria-label="拆解进度">
+          <div className="pc-dis__head">
+            <span className="pc-dis__title">手动拆解</span>
+            <span className="pc-dis__count">
+              {removed}/{disN}
+            </span>
+          </div>
+          <div className="pc-dis__steps">
+            {dis.layers.map((n, i) => (
+              <button
+                key={n}
+                type="button"
+                className={i < removed ? "is-done" : i === cur && dis.k > 0 ? "is-on" : undefined}
+                onClick={() => engineRef.current?.setDisassembly(i < removed ? i / disN : (i + 1) / disN, 1.1)}
+              >
+                {LAYERS[selected!]?.[n]?.label ?? n}
+              </button>
+            ))}
+          </div>
+          <input
+            className="pc-dis__range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.001}
+            value={dis.k}
+            aria-label="拆解进度"
+            onChange={(e) => engineRef.current?.setDisassembly(Number(e.target.value))}
+          />
+          <p className="pc-dis__note">{dis.k < 0.002 ? "组装状态。拖动滑杆、点上面的步骤，或用按钮一层层拆开。" : curInfo?.note}</p>
+          <div className="pc-dis__nav">
+            <button type="button" className="pc-btn" disabled={dis.k <= 0.001} onClick={() => engineRef.current?.stepDisassembly(-1)}>
+              装回一层
+            </button>
+            <button type="button" className="pc-btn" onClick={() => engineRef.current?.playDisassembly()}>
+              {dis.k > 0.999 ? "全部装回" : "自动演示"}
+            </button>
+            <button type="button" className="pc-btn pc-btn--back" disabled={dis.k >= 0.999} onClick={() => engineRef.current?.stepDisassembly(1)}>
+              拆下一层
+            </button>
+          </div>
+        </section>
       )}
 
       {touring && step && (

@@ -39,6 +39,7 @@ const AO_FS_HEAD = /* glsl */ `
   uniform float uRgbMode;
   uniform vec3 uRgbColor;
   uniform float uHover;
+  uniform float uFade;
   vec3 hue2rgb(float h) { vec3 k = clamp(abs(fract(h + vec3(0.0, 2.0/3.0, 1.0/3.0)) * 6.0 - 3.0) - 1.0, 0.0, 1.0); return k * k * (3.0 - 2.0 * k); }
 `;
 const AO_FS_APPLY = /* glsl */ `
@@ -63,14 +64,25 @@ const RGB_EMISSIVE = /* glsl */ `
   }
 `;
 
+// Screen-door fade: parts fade in/out by discarding a dithered share of pixels, so materials stay opaque
+// (no transparent <-> opaque switch, which would recompile every shader mid-animation and stall the frame).
+const FADE_FS = /* glsl */ `
+  #include <clipping_planes_fragment>
+  if (uFade < 0.999) {
+    float n = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    if (n >= uFade) discard;
+  }
+`;
+
 function patch(mat: THREE.Material, rgb: boolean, hover: { value: number }) {
   mat.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, LOOK, { uHover: hover });
+    Object.assign(sh.uniforms, LOOK, { uHover: hover, uFade: { value: 1 } });
     sh.vertexShader = sh.vertexShader
       .replace("#include <common>", "#include <common>\n" + AO_VS_HEAD)
       .replace("#include <fog_vertex>", "#include <fog_vertex>\n" + AO_VS_MAIN);
     let fs = sh.fragmentShader
       .replace("#include <common>", "#include <common>\n" + AO_FS_HEAD)
+      .replace("#include <clipping_planes_fragment>", FADE_FS)
       .replace("#include <aomap_fragment>", AO_FS_APPLY)
       .replace("#include <opaque_fragment>", "outgoingLight += diffuseColor.rgb * uHover * 0.12;\n#include <opaque_fragment>");
     if (rgb) fs = fs.replace("#include <emissivemap_fragment>", RGB_EMISSIVE);

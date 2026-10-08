@@ -25,6 +25,7 @@ def M():
         case_inner=mat("case_inner", (22, 23, 26), metal=0.0, rough=0.6, kind="powder"),
         alu=mat("alu", (200, 202, 207), metal=1.0, rough=0.28, kind="brushed"),
         alu_dark=mat("alu_dark", (62, 64, 70), metal=1.0, rough=0.34, kind="brushed"),
+        alu_hs=mat("alu_hs", (176, 180, 190), metal=0.82, rough=0.42, kind="brushed"),
         gunmetal=mat("gunmetal", (48, 50, 55), metal=0.9, rough=0.38, kind="brushed"),
         steel=mat("steel", (160, 162, 168), metal=1.0, rough=0.35),
         nickel=mat("nickel", (206, 206, 210), metal=1.0, rough=0.18),
@@ -99,6 +100,19 @@ class Frame:
     def sub(self, name, origin_mm, xaxis=(1, 0, 0), yaxis=(0, 1, 0)):
         e = empty(name, parent=self.p, matrix=frame_matrix([v * MM for v in origin_mm], xaxis, yaxis))
         return Frame(e)
+
+
+def layer(G, name, order, origin, xaxis=(1, 0, 0), yaxis=(0, 1, 0), scale=1.0, lift=0.0):
+    """Tags sub-frame G as a removable layer of an opened part. The frame is built in its exploded pose;
+    (origin, axes, scale) is its assembled pose in the parent frame (mm). lift = arc height (mm) when it moves."""
+    from mathutils import Matrix
+    e = G.p
+    e["layer"] = name
+    e["order"] = order
+    e["lift"] = lift * MM
+    M = frame_matrix([v * MM for v in origin], xaxis, yaxis) @ Matrix.Scale(scale, 4)
+    e["asm"] = [M[i][j] for i in range(4) for j in range(4)]
+    return G
 
 
 # ------------------------------------------------------------------ generic sub-assemblies
@@ -205,17 +219,21 @@ def build_board(F, m, opened=False):
         cap(F, f"vcap_l{i}", 70.5, y + 3.3, 1.6, 2.6, 7.5, m)
         if opened:
             F.B(f"mos_l{i}", 50, y + 0.8, 1.6, 56, y + 5.8, 2.6, m["plastic"], bev=0.2)
-    if not opened:
-        # VRM heatsinks with real fins
-        hs = F.B("vrm_hs_top_base", 55, 262, 1.6, 138, 281, 12, m["gunmetal"], bev=1.2)
-        fin = F.B("vrm_hs_top_fin", 55, 262, 12, 56.6, 281, 27, m["gunmetal"], bev=0.3)
-        array(fin, 26, (3.2 * MM, 0, 0))
-        F.B("vrm_hs_top_cap", 55, 262, 27, 138, 266, 29, m["alu_dark"], bev=0.8)
-        F.B("vrm_hs_left_base", 38, 175, 1.6, 58, 262, 12, m["gunmetal"], bev=1.2)
-        fin = F.B("vrm_hs_left_fin", 38, 175, 12, 58, 176.6, 30, m["gunmetal"], bev=0.3)
-        array(fin, 27, (0, 3.2 * MM, 0))
-        F.B("vrm_hs_left_cap", 38, 175, 30, 42, 262, 32, m["alu_dark"], bev=0.8)
-        del hs
+    V = F.sub("vrm_hs", (0, 0, 34)) if opened else F
+    if opened:
+        layer(V, "vrm", 0, (0, 0, 0))
+    hs = V.B("vrm_hs_top_base", 55, 262, 1.6, 138, 281, 12, m["gunmetal"], bev=1.2)
+    fin = V.B("vrm_hs_top_fin", 55, 262, 12, 56.6, 281, 27, m["gunmetal"], bev=0.3)
+    array(fin, 26, (3.2 * MM, 0, 0))
+    V.B("vrm_hs_top_cap", 55, 262, 27, 138, 266, 29, m["alu_dark"], bev=0.8)
+    V.B("vrm_hs_left_base", 38, 175, 1.6, 58, 262, 12, m["gunmetal"], bev=1.2)
+    fin = V.B("vrm_hs_left_fin", 38, 175, 12, 58, 176.6, 30, m["gunmetal"], bev=0.3)
+    array(fin, 27, (0, 3.2 * MM, 0))
+    V.B("vrm_hs_left_cap", 38, 175, 30, 42, 262, 32, m["alu_dark"], bev=0.8)
+    if opened:
+        V.B("vrm_pad_t", 58, 262.5, 1.0, 136, 270, 1.6, m["thermal_pad"], bev=0.1, seg=1)
+        V.B("vrm_pad_l", 49, 178, 1.0, 57, 260, 1.6, m["thermal_pad"], bev=0.1, seg=1)
+    del hs
     # DIMM slots
     for i in range(4):
         x0 = 147 + i * 9.5
@@ -236,9 +254,11 @@ def build_board(F, m, opened=False):
     if opened:
         F.B("pch_pkg", 155, 44, 1.6, 185, 74, 3.0, m["pcb_black"], bev=0.3)
         F.B("pch_die", 160, 49, 3.0, 180, 69, 3.8, T("chipset", "chipset.png", (32, 32, 36), dens=2.0), bev=0.15).__setitem__("dens", 2.0)
-    else:
-        F.B("pch_hs", 150, 38, 1.6, 190, 80, 9.5, m["gunmetal"], bev=1.6, seg=3)
-        F.B("pch_hs_top", 154, 42, 9.5, 186, 76, 10.5, m["alu"], bev=0.6)
+    Pc = F.sub("pch_cover", (0, 0, 24)) if opened else F
+    if opened:
+        layer(Pc, "pch", 2, (0, 0, 2.3))
+    Pc.B("pch_hs", 150, 38, 1.6, 190, 80, 9.5, m["gunmetal"], bev=1.6, seg=3)
+    Pc.B("pch_hs_top", 154, 42, 9.5, 186, 76, 10.5, m["alu"], bev=0.6)
     # SATA ports (front edge)
     for i in range(4):
         yc = 48 + 13.5 * i
@@ -258,9 +278,11 @@ def build_board(F, m, opened=False):
         io_y += w
     for i, am in enumerate([m["audio_g"], m["audio_p"], m["audio_b"]]):
         F.B(f"audio_ring{i}", -11.4, io_y - 18 + i * 5.5, 5, -10.4, io_y - 14 + i * 5.5, 9, am, bev=0.2, seg=1)
-    if not opened:
-        F.B("io_shroud", -1, 156, 1.6, 22, 300, 36, m["gunmetal"], bev=2.0, seg=3)
-        F.B("io_shroud_trim", 21.5, 160, 4, 22.6, 296, 34, m["alu"], bev=0.3)
+    Io = F.sub("io_cover", (0, 0, 28)) if opened else F
+    if opened:
+        layer(Io, "io", 1, (0, 0, 0))
+    Io.B("io_shroud", -1, 156, 1.6, 22, 300, 36, m["gunmetal"], bev=2.0, seg=3)
+    Io.B("io_shroud_trim", 21.5, 160, 4, 22.6, 296, 34, m["alu"], bev=0.3)
     # misc caps / headers / battery / screws
     for i in range(6):
         cap(F, f"acap{i}", 20 + (i % 3) * 9, 20 + (i // 3) * 10, 1.6, 3.2, 9, m, sleeve=m["yellow_tape"])
@@ -358,9 +380,33 @@ def build_cpu_open(F, m):
         F.B(f"seal{i}", a, b, 1.2, c, d, 1.5, m["rubber"], bev=0.1, seg=1)
     # lifted IHS (upside down, tilted) showing its underside + solder
     G = F.sub("ihs_lift", (0, 30, 22), xaxis=(1, 0, 0), yaxis=(0, math.cos(-2.28), math.sin(-2.28)))
+    layer(G, "ihs", 2, (0, 0, 4.4), yaxis=(0, -1, 0), lift=14)
     G.B("ihs_plate", -14.5, -14.5, 0, 14.5, 14.5, 2.2, m["nickel"], bev=0.8, seg=3)
-    G.B("ihs_skirt", -17, -15, 2.2, 17, 15, 3.2, m["nickel"], bev=0.6)
-    G.B("ihs_solder", -9, -5, -0.25, 9, 5, 0, m["tim"], bev=0.05, seg=1)
+    G.B("ihs_flange", -17, -15, 1.4, 17, 15, 2.2, m["nickel"], bev=0.5)
+    for i, (a, b, c, d) in enumerate([(-17, -15, 17, -13.2), (-17, 13.2, 17, 15), (-17, -15, -15.2, 15), (15.2, -15, 17, 15)]):
+        G.B(f"ihs_skirt{i}", a, b, 2.2, c, d, 3.2, m["nickel"], bev=0.3)
+    G.B("ihs_solder", -9, -5, 2.2, 9, 5, 2.32, m["tim"], bev=0.05, seg=1)
+    G.B("ihs_cavity", -15.2, -13.2, 2.2, 15.2, 13.2, 2.21, mat("ihs_in", (150, 120, 96), metal=1.0, rough=0.3), bev=0, seg=1)
+    # socket retention frame (ILM) + load lever
+    I = F.sub("ilm", (-64, 4, 0))
+    layer(I, "ilm", 1, (0, 0, 1.2), lift=8)
+    for i, (a, b, c, d) in enumerate([(-26, -24, 26, -16), (-26, 16, 26, 24), (-26, -16, -18, 16), (18, -16, 26, 16)]):
+        I.B(f"ilm{i}", a, b, 0, c, d, 1.0, m["steel"], bev=0.3)
+    for i, x in enumerate((-12, 12)):
+        I.B(f"ilm_tab{i}", x - 4, -24, 1.0, x + 4, -20, 1.6, m["steel"], bev=0.2)
+    I.C("ilm_lever", 29, 2.5, -23, 0.9, 46, m["steel"], axis="y", seg=12, bev=0)
+    I.B("ilm_hook", 27.5, 21, 0, 30.5, 24, 3.5, m["steel"], bev=0.3)
+    # cooler cold plate (bottom of the tower cooler) with spread thermal paste
+    K = F.sub("coldplate", (0, 66, 26))
+    layer(K, "cooler", 0, (0, 0, 4.4), lift=12)
+    K.B("paste", -13, -13, -0.12, 13, 13, 0, m["tim"], bev=0.05, seg=1)
+    K.B("base", -20, -20, 0, 20, 20, 4.5, m["copper"], bev=0.8)
+    K.B("block", -18, -24, 4.5, 18, 24, 12, m["alu"], bev=1.2)
+    K.B("mount", -34, -5, 9, 34, 5, 12, m["steel"], bev=0.8)
+    for i, x in enumerate((-31, 31)):
+        K.C(f"mscr{i}", x, 0, 12, 2.4, 2.4, m["steel"], seg=16, bev=0.3)
+    for i in range(6):
+        K.C(f"pipe{i}", -25 + i * 10, 6 if i % 2 else -6, 12, 3.0, 9, m["copper"], seg=16, bev=0.4)
     # anchors (die regions follow textures.py: die 18x10 mm, centred)
     def dpos(u, v):  # texture mm (origin bottom-left) -> local
         return (u - 9.0, v - 5.0, 2.3)
@@ -375,6 +421,7 @@ def build_cpu_open(F, m):
     F.A("io", *dpos(16.5, 5.0))
     F.A("substrate", 18, -14, 1.2)
     F.A("ihs", 0, 30, 22)
+    F.A("cooler", 0, 66, 39)
 
 
 # ------------------------------------------------------------------ RAM
@@ -387,7 +434,7 @@ def dimm(F, m, name, opened=False):
     if not opened:
         for s, sg in ((1, "a"), (-1, "b")):
             z0, z1 = (0.6, 2.2) if s > 0 else (-2.2, -0.6)
-            F.B(f"{name}_hs{sg}", -0.6, 6, z0, L + 0.6, 38, z1, m["alu_dark"], bev=0.5)
+            F.B(f"{name}_hs{sg}", -0.6, 6, z0, L + 0.6, 38, z1, m["alu_hs"], bev=0.5)
         lab = F.B(name + "_label", 12, 12, 2.2, 122, 30, 2.4, T("ram_label", "ram_label.png", (196, 198, 202)), bev=0.1, seg=1)
         lab["dens"] = 1.5
         F.B(name + "_bar", 2, 38, -4.0, L - 2, 40.6, 4.0, m["alu"], bev=0.6)
@@ -417,13 +464,22 @@ def build_ram_open(F, m):
     dimm(G, m, "d", opened=True)
     # heatspreader halves pulled away to both sides
     # both heatspreader halves set aside behind the stick, leaning back, outer face (label) to the camera
+    asm = [((66.65, -2.6, 0), (-1, 0, 0)), ((-66.7, 1.4, 0), (1, 0, 0))]
     for k, (dy, dz) in enumerate(((30, -6), (52, 6))):
         H = F.sub(f"hs_{k}", (-66.7, dy, dz), xaxis=(1, 0, 0), yaxis=(0, -math.sin(0.35), math.cos(0.35)))
-        H.B("plate", -0.6, 6, -0.8, 133.95, 38, 0.8, m["alu_dark"], bev=0.5)
+        layer(H, f"hs{k}", 1 + k, asm[k][0], xaxis=asm[k][1], yaxis=(0, 0, 1), lift=44)
+        H.B("plate", -0.6, 6, -0.8, 133.95, 38, 0.8, m["alu_hs"], bev=0.5)
         H.B("rim", -0.6, 34, -2, 133.95, 40.5, 2, m["gunmetal"], bev=0.8)
         H.B("label", 12, 12, -1.0, 122, 30, -0.8, T("ram_label_back", "ram_label.png", (196, 198, 202), side="both"), bev=0.05, seg=1)
+        H.B("pad", 6, 8, 0.8, 128, 24, 1.1, m["thermal_pad"], bev=0.1, seg=1)
+    # RGB light bar on top of the stick
+    R = F.sub("rgbbar", (-66.7, 0, 24), xaxis=(1, 0, 0), yaxis=(0, 0, 1))
+    layer(R, "rgbbar", 0, (-66.7, 0, 0), yaxis=(0, 0, 1))
+    R.B("bar", 2, 38, -4.0, 133.35 - 2, 40.6, 4.0, m["alu"], bev=0.6)
+    R.B("rgb", 4, 40.6, -2.6, 133.35 - 4, 43.6, 2.6, m["rgb_ram"], bev=0.8, seg=2)
     # floating DRAM die with banks above chip 2
     B = F.sub("bankdie", (-25, -6, 62), xaxis=(1, 0, 0), yaxis=(0, math.cos(0.5), math.sin(0.5)))
+    layer(B, "bank", 3, (-66.7 + 8 + 2 * 15.2 + 5.5, -1.7, 16), yaxis=(0, 0, 1), scale=0.2)
     B.B("die", -24, -12, 0, 24, 12, 0.8, T("banks", "banks.png", (18, 20, 26), dens=4.0), bev=0.15).__setitem__("dens", 4.0)
     B.B("die_edge", -24.6, -12.6, -0.6, 24.6, 12.6, 0, m["pcb_black"], bev=0.1)
     F.A("dram", -66.7 + 8 + 2 * 15.2 + 5.5, -1.6, 16)
@@ -467,13 +523,24 @@ def build_ssd_open(F, m):
     ssd(G, m, opened=True)
     # peeled label floating above
     L = F.sub("label_peel", (-40, 30, 1), xaxis=(1, 0, 0), yaxis=(0, math.cos(1.3), math.sin(1.3)))
+    layer(L, "label", 1, (-40, 0, 2.05), lift=6)
     L.B("label", 3, -10.8, 0, 74, 10.8, 0.15, T("ssd_label", "ssd_label.png", (24, 24, 28)), bev=0.03, seg=1).__setitem__("dens", 1.2)
     # NAND die stack floating above package 0
     S = F.sub("nandstack", (-26, -2, 14))
+    layer(S, "stack", 2, (-26, 0, 1.0), scale=0.15)
     cols = [mat("nand_die", (120, 130, 150), metal=0.6, rough=0.3)]
     for i in range(4):
         S.B(f"die{i}", -6, -5, i * 2.2, 6, 5, i * 2.2 + 0.6, cols[0], bev=0.05, seg=1)
         S.B(f"wire{i}", 6, -4.5, i * 2.2, 6.6, 4.5, i * 2.2 + 0.4, m["gold"], bev=0, seg=1)
+    # motherboard M.2 heatsink with thermal pad
+    K = F.sub("m2hs", (-40, 52, 14))
+    layer(K, "heatsink", 0, (-40, 0, 2.2), lift=10)
+    K.B("pad", 3, -10.5, 0, 74, 10.5, 0.6, m["thermal_pad"], bev=0.1, seg=1)
+    K.B("plate", 1, -11.4, 0.6, 76, 11.4, 3.4, m["gunmetal"], bev=0.6)
+    for i in range(13):
+        x = 5 + i * 5.4
+        K.B(f"fin{i}", x, -10.4, 3.4, x + 1.6, 10.4, 7.2, m["gunmetal"], bev=0.3)
+    K.B("stripe", 1, -11.6, 1.6, 76, -11.3, 2.6, m["alu"], bev=0.1, seg=1)
     F.A("ctrl", -40 + 64, 0, 2.2)
     F.A("dram", -40 + 49, 0, 1.8)
     F.A("nand", -40 + 33, 0, 2.2)
@@ -533,6 +600,8 @@ def build_hdd_open(F, m):
     L = math.hypot(dx, dy)
     th = math.atan2(dy, dx)
     A = F.sub("arm", (px, pyv, 0), xaxis=(math.cos(th), math.sin(th), 0), yaxis=(-math.sin(th), math.cos(th), 0))
+    tp = th - 0.62  # parked: head rests off the platter edge
+    layer(A, "arm", 1, (px, pyv, 0), xaxis=(math.cos(tp), math.sin(tp), 0), yaxis=(-math.sin(tp), math.cos(tp), 0))
     for i, z in enumerate((10.6, 17.0)):
         A.B(f"arm{i}", 0, -4.5, z, L * 0.62, 4.5, z + 1.0, m["alu"], bev=0.3)
         A.B(f"susp{i}", L * 0.6, -2.0, z + 0.2, L - 0.5, 2.0, z + 0.5, m["steel"], bev=0.1, seg=1)
@@ -545,7 +614,10 @@ def build_hdd_open(F, m):
     F.B("filter", -38, py + 40, 4, -28, py + 52, 12, m["plastic_white"], bev=0.6)
     # cover lifted & tilted
     Cv = F.sub("cover_lift", (0, 112, 62), xaxis=(1, 0, 0), yaxis=(0, math.cos(1.2), math.sin(1.2)))
+    layer(Cv, "cover", 0, (0, 0, 21), lift=16)
     Cv.B("cover", -50.8, -73.5, 0, 50.8, 73.5, 1.2, m["alu"], bev=0.6, seg=2)
+    for i, (x, y) in enumerate([(-44, -66), (44, -66), (-44, 66), (44, 66), (0, 0), (-12, 40)]):
+        Cv.C(f"cscr{i}", x, y, 1.2, 2.2, 0.6, m["steel"], seg=12, bev=0.2)
     Cv.B("label", -44.8, -65.5, 1.2, 44.8, 33.5, 1.35, T("hdd_label", "hdd_label.png", (214, 216, 220), rot=True), bev=0.05, seg=1)
     F.A("platter", -28, py - 20, 17)
     F.A("track", tgt_r * math.cos(a2 + 1.2), py + tgt_r * math.sin(a2 + 1.2), 17)
@@ -651,12 +723,14 @@ def build_nic_open(F, m):
     nic(G, m, opened=True)
     # heatsink lifted
     H = F.sub("hs_lift", (-60, -34, 26))
+    layer(H, "heatsink", 0, (-60, -34, 2.8), lift=6)
     H.B("hs_base", 46, 18, 0, 68, 40, 2.2, m["alu_dark"], bev=0.6)
     fin = H.B("hs_fin", 46, 18, 2.2, 47.2, 40, 9, m["alu_dark"], bev=0.2)
     array(fin, 8, (3.0 * MM, 0, 0))
     H.B("pad", 50, 22, -0.6, 64, 36, 0, m["thermal_pad"], bev=0.1)
     # floating die: MAC | PHY
     D = F.sub("nicdie", (-3, -10, 44), xaxis=(1, 0, 0), yaxis=(0, math.cos(0.55), math.sin(0.55)))
+    layer(D, "die", 1, (-3, -5, 2.85), scale=0.3)
     D.B("die", -18, -9, 0, 18, 9, 0.8, T("nic_die", "nic_die.png", (30, 30, 36), dens=4.0), bev=0.1).__setitem__("dens", 4.0)
     D.B("edge", -18.5, -9.5, -0.5, 18.5, 9.5, 0, m["pcb_black"], bev=0.1)
     F.A("mac", -3 - 9, -10, 46)
@@ -718,9 +792,10 @@ def psu(F, m, opened=False):
         F.B("ac_inlet", -50, D / 2 - 8, 30, -24, D / 2, 52, m["plastic"], bev=0.8)
         # lid with fan, lifted & tilted
         Lf = F.sub("lid", (0, 118, 80), xaxis=(1, 0, 0), yaxis=(0, math.cos(1.9), math.sin(1.9)))
+        layer(Lf, "lid", 0, (0, 0, H), yaxis=(0, -1, 0), lift=30)
         Lf.B("lid", -W / 2, -D / 2, 0, W / 2, D / 2, 1.2, m["case_black"], bev=0.6)
         Lf.B("lid_l", -W / 2, -D / 2, 1.2, -W / 2 + 1.2, D / 2, 44, m["case_black"], bev=0.5)
-        Lf.B("lid_f", -W / 2, -D / 2, 1.2, W / 2, -D / 2 + 1.2, 44, m["case_black"], bev=0.5)
+        Lf.B("lid_f", -W / 2, D / 2 - 1.2, 1.2, W / 2, D / 2, 44, m["case_black"], bev=0.5)
         Fn = Lf.sub("lidfan", (0, 0, 14))
         fan(Fn, "pfan", 120, 25, m)
         F.A("xfmr", 19, -5, z + 34)
@@ -958,6 +1033,7 @@ def build_interior(part):
         gpu(G, m, opened=True)
         # heatsink + shroud lifted
         H = F.sub("hs_lift", (-136, -56 + 70, 60))
+        layer(H, "heatsink", 1, (-136, -56, 4), lift=20)
         fin = H.B("fin", 12, 6, 2, 12.4, 108, 34, m["fin_alu"], bev=0, seg=1)
         array(fin, 140, (2.0 * MM, 0, 0))
         fin["nosplit"] = 1
@@ -966,12 +1042,20 @@ def build_interior(part):
         for i in range(4):
             H.C(f"hp{i}", 30 + i * 16, 4 + (i % 2) * 6, 12, 3.0, 280, m["copper"], axis="x", seg=14, bev=0)
         S = F.sub("shroud_lift", (-136, -56 + 140, 120))
+        layer(S, "shroud", 0, (-136, -56, 42), lift=20)
         plate = S.B("shroud_plate", 2, -4, 0, 300, 118, 5, m["gunmetal"], bev=1.6, seg=3)
         for i, x in enumerate((60, 155, 250)):
             c = S.C(f"fanhole{i}", x, 57, -2, 45, 10, m["plastic"], seg=72, bev=0)
             cut(plate, c)
             Gf = S.sub(f"gfan{i}", (x, 57, -6))
             fan(Gf, f"gf{i}", 90, 8, m, frame=False, blades=11)
+        P = F.sub("bp_lift", (-136, -56 - 132, 0))
+        layer(P, "backplate", 2, (-136, -56, -1))
+        P.B("backplate", 4, 1, -3.0, 270, 113, 0, m["gunmetal"], bev=0.8, seg=2)
+        P.B("bp_stripe", 60, 112.4, -2.6, 250, 113.4, -0.4, m["alu"], bev=0.2, seg=1)
+        P.B("bp_pad", 84, 40, 0, 116, 72, 0.6, m["thermal_pad"], bev=0.1, seg=1)
+        for i, (x, y) in enumerate([(88, 44), (112, 44), (88, 68), (112, 68), (20, 10), (20, 100), (260, 10), (260, 100)]):
+            P.C(f"bpscr{i}", x, y, 0, 2.4, 0.8, m["steel"], seg=14, bev=0.2)
         F.A("die", -136 + 100, -56 + 56, 4)
         F.A("vram", -136 + 68, -56 + 64, 3)
         F.A("vrm", -136 + 190, -56 + 84, 8)

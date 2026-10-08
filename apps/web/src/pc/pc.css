@@ -177,3 +177,28 @@ html.is-pc body { background: #0a0c10; }
 }
 @media (prefers-reduced-motion: reduce) { .pc-rgb, .pc-journey { animation: none; } }
 .pc-parts[hidden] { display: none; }
+
+/* ---- 手动拆解 ---- */
+.pc-dis {
+  position: absolute; left: clamp(14px, 3vw, 28px); top: 72px; width: min(380px, calc(100% - 28px));
+  padding: 12px 14px; border-radius: 8px; background: rgba(12, 15, 20, 0.86); border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); animation: pc-in 0.35s ease-out;
+}
+.pc-dis__head { display: flex; justify-content: space-between; align-items: baseline; }
+.pc-dis__title { font-size: 14px; font-weight: 600; color: #fff; }
+.pc-dis__count { font-size: 12px; color: rgba(140, 200, 255, 0.9); font-variant-numeric: tabular-nums; }
+.pc-dis__steps { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0 4px; }
+.pc-dis__steps button {
+  font: inherit; font-size: 12px; line-height: 1; padding: 6px 9px; border-radius: 13px; cursor: pointer;
+  color: rgba(236, 238, 242, 0.8); background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.pc-dis__steps button.is-done { color: #0a0c10; background: rgba(90, 176, 255, 0.85); border-color: transparent; }
+.pc-dis__steps button.is-on { border-color: #5ab0ff; color: #fff; }
+.pc-dis__range { width: 100%; margin: 8px 0 2px; accent-color: #5ab0ff; height: 28px; }
+.pc-dis__note { margin: 2px 0 0; min-height: 40px; font-size: 13px; line-height: 1.55; color: rgba(236, 238, 242, 0.86); }
+.pc-dis__nav { display: flex; gap: 6px; margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.pc-dis__nav .pc-btn { min-height: 34px; padding: 8px 12px; }
+@media (max-width: 899px) {
+  .pc-dis { top: 60px; padding: 10px 12px; }
+  .pc-dis__note { font-size: 12px; min-height: 0; }
+}
