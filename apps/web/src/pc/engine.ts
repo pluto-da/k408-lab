@@ -1,13 +1,20 @@
-// 整机拆解 3D 场景（three.js + Spark）。只负责场景与交互，界面文字在 React 侧。
+// 整机拆解 3D 场景。只负责场景与交互，界面文字在 React 侧。
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { SparkRenderer, SplatMesh } from "@sparkjsdev/spark";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import manifestJson from "./manifest.json";
 import { LINKS, PART_BY_ID, PARTS, type LinkDef, type PartId } from "./parts";
+import { JOURNEY } from "./journey";
+import { LOOK, TextureBank, buildGlass, buildStudioEnv, makeMaterial, type MatDef } from "./look";
 
 type Vec3 = [number, number, number];
 interface PartMeta {
-  count: number;
+  tris: number;
   bytes: number;
   origin: Vec3;
   bbox: [Vec3, Vec3];
@@ -16,26 +23,40 @@ interface PartMeta {
 interface Manifest {
   exterior: Record<string, PartMeta>;
   interior: Record<string, PartMeta>;
+  materials: Record<string, MatDef>;
+  textures: Record<string, number>;
 }
 const manifest = manifestJson as unknown as Manifest;
 
-const assetUrls = import.meta.glob("./assets/*.sog", { query: "?url", import: "default", eager: true }) as Record<string, string>;
-const urlOf = (name: string): string => {
-  const u = assetUrls[`./assets/${name}.sog`];
-  if (!u) throw new Error(`missing asset ${name}`);
+const assetUrls = import.meta.glob("./assets/*.{glb,webp}", { query: "?url", import: "default", eager: true }) as Record<string, string>;
+const urlOf = (file: string): string => {
+  const u = assetUrls[`./assets/${file}`];
+  if (!u) throw new Error(`missing asset ${file}`);
   return u;
 };
 
 /**
- * Some interior scans were captured in a different orientation than the part sits in the case.
- * The board interior lies flat (thin along y); in the case it stands upright (thin along x):
+ * The board interior is modelled lying flat (thin along y); in the case it stands upright (thin along x):
  * case = R · interior with x' = -y, y' = -z, z' = x.
  */
 const INTERIOR_ROT: Partial<Record<PartId, THREE.Matrix4>> = {
   board: new THREE.Matrix4().set(0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1),
 };
 
-export type EngineState = "loading" | "intro" | "overview" | "extracting" | "open" | "closing";
+/** 爆炸视图：每个部件沿自己的方向拉开（米，k = 1 时） */
+const EXPLODE_VIEW: Partial<Record<PartId, Vec3>> = {
+  board: [-0.05, 0, 0],
+  cpu: [-0.2, 0.07, 0.0],
+  ram: [-0.16, 0.05, -0.04],
+  ssd: [-0.13, 0.0, 0.05],
+  gpu: [-0.27, -0.02, 0.02],
+  nic: [-0.24, -0.07, 0.02],
+  hdd: [-0.2, 0.0, -0.16],
+  psu: [-0.22, 0.0, 0.1],
+};
+
+export type EngineState = "loading" | "intro" | "overview" | "extracting" | "open" | "closing" | "journey";
+export type LightMode = "studio" | "rgb";
 
 export interface EngineCallbacks {
   onProgress?: (p: number) => void;
@@ -44,14 +65,17 @@ export interface EngineCallbacks {
   onHover?: (part: PartId | null) => void;
   onInteriorProgress?: (p: number | null) => void;
   onError?: (msg: string) => void;
+  onJourney?: (step: number | null) => void;
 }
 
 const CENTER = new THREE.Vector3(0, 0.25, 0);
-const OVERVIEW_DIR = new THREE.Vector3(-1.0, 0.5, 0.95).normalize();
+const OVERVIEW_DIR = new THREE.Vector3(-1.0, 0.42, 0.95).normalize();
 const MOUNTED: PartId[] = ["cpu", "ram", "ssd", "gpu", "nic"];
+const GLASS_X = -0.1062;
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
 interface Tween {
   t0: number;
@@ -62,17 +86,23 @@ interface Tween {
   key?: string;
 }
 
+interface Model {
+  root: THREE.Object3D;
+  mats: THREE.MeshPhysicalMaterial[];
+  hover: { value: number };
+}
+
 interface PartRT {
   id: PartId;
   meta: PartMeta;
   group: THREE.Group;
-  mesh: SplatMesh | null;
+  model: Model | null;
   proxy: THREE.Mesh;
   base: THREE.Vector3;
   opacity: number;
   center: THREE.Vector3; // local bbox centre
   radius: number;
-  interior?: { group: THREE.Group; mesh: SplatMesh; meta: PartMeta };
+  interior?: { group: THREE.Group; model: Model; meta: PartMeta; opacity: number };
   interiorPromise?: Promise<void>;
 }
 
@@ -167,28 +197,42 @@ const DOT_VS = /* glsl */ `
 const DOT_FS = /* glsl */ `
   uniform vec3 uColor; uniform float uOpacity;
   void main(){ vec2 q = gl_PointCoord*2.0-1.0; float r = dot(q,q); if (r>1.0) discard; float a = exp(-r*4.0); gl_FragColor = vec4(mix(uColor, vec3(1.0), a*0.7) * a * uOpacity, 1.0); }`;
-const GLASS_FS = /* glsl */ `
-  varying vec2 vUv; uniform float uOpacity;
-  void main(){
-    float band = smoothstep(0.0, 0.18, vUv.x + vUv.y * 0.45 - 0.35) * (1.0 - smoothstep(0.18, 0.42, vUv.x + vUv.y * 0.45 - 0.35));
-    float band2 = smoothstep(0.0, 0.05, vUv.x + vUv.y * 0.45 - 0.95) * (1.0 - smoothstep(0.05, 0.12, vUv.x + vUv.y * 0.45 - 0.95));
-    float rim = smoothstep(0.985, 1.0, max(abs(vUv.x*2.0-1.0), abs(vUv.y*2.0-1.0)));
-    float a = 0.035 + 0.07 * band + 0.05 * band2 + 0.18 * rim;
-    gl_FragColor = vec4(vec3(0.75, 0.82, 0.92) * a * uOpacity, 1.0);
-  }`;
+
+const PACKET_VS = /* glsl */ `
+  uniform float uPx; attribute float aSize; attribute float aAlpha; varying float vA;
+  void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); gl_Position = projectionMatrix*mv; gl_PointSize = aSize * uPx / -mv.z; vA = aAlpha; }`;
+const PACKET_FS = /* glsl */ `
+  uniform vec3 uColor; uniform float uOpacity; varying float vA;
+  void main(){ vec2 q = gl_PointCoord*2.0-1.0; float r = dot(q,q); if (r>1.0) discard;
+    float core = exp(-r*10.0); float glow = exp(-r*3.0)*0.55;
+    gl_FragColor = vec4((uColor*glow + vec3(1.0)*core) * vA * uOpacity, 1.0); }`;
+
+const TRAIL = 18;
 
 export class PcEngine {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
   private camera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
-  private spark: SparkRenderer;
+  private loader = new GLTFLoader();
+  private bank: TextureBank;
+  private env: THREE.Texture;
+  private matCache = new Map<string, Promise<THREE.MeshPhysicalMaterial>>();
   private parts = new Map<PartId, PartRT>();
   private links: LinkRT[] = [];
   private tweens: Tween[] = [];
   private raycaster = new THREE.Raycaster();
-  private glass!: THREE.Mesh;
-  private glassMat!: THREE.ShaderMaterial;
+  private glass!: ReturnType<typeof buildGlass>;
+  private glassOpacity = 0;
+  private glassSlide = 0;
+  private key!: THREE.DirectionalLight;
+  private rim!: THREE.DirectionalLight;
+  private caseGlow!: THREE.PointLight;
+  private composer: EffectComposer | null = null;
+  private bloom: UnrealBloomPass | null = null;
+  private lightMode: LightMode = "studio";
+  private rgbMix = 0;
+  private explodeK = 0;
   private abort = new AbortController();
   private clock = new THREE.Clock();
   private state: EngineState = "loading";
@@ -209,6 +253,17 @@ export class PcEngine {
   private callouts: { el: HTMLDivElement; line: SVGPolylineElement; dot: SVGCircleElement; anchor: THREE.Vector3; obj: THREE.Object3D }[] = [];
   private calloutVis = 0;
   private ro: ResizeObserver;
+  // journey
+  private packet!: THREE.Points;
+  private packetMat!: THREE.ShaderMaterial;
+  private packetLight!: THREE.PointLight;
+  private packetCurve: THREE.CatmullRomCurve3 | null = null;
+  private packetT = 0;
+  private packetPulse = 0;
+  private packetHistory: THREE.Vector3[] = [];
+  private journeyStep = -1;
+  private journeyTimer: ReturnType<typeof setTimeout> | null = null;
+  private journeyBadge: HTMLDivElement;
   /** lightweight counters for diagnostics (window.__pcStats) */
   readonly stats = { frames: 0, dt: 0, dpr: 1 };
 
@@ -217,19 +272,25 @@ export class PcEngine {
     private overlay: HTMLElement,
     private cb: EngineCallbacks = {},
   ) {
-    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: "high-performance" });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
     this.maxDpr = Math.min(window.devicePixelRatio || 1, 2);
     // ?dpr=1 caps the pixel ratio (used by automated screenshots / very slow devices)
     const forced = Number(new URLSearchParams(window.location.search).get("dpr"));
     if (forced > 0) this.maxDpr = Math.min(this.maxDpr, forced);
     this.dpr = Math.min(this.maxDpr, 1.5);
     this.renderer.setPixelRatio(this.dpr);
-    this.renderer.setClearColor(0x0a0c10, 1);
+    this.renderer.setClearColor(0x090a0d, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.AgXToneMapping;
+    this.renderer.toneMappingExposure = 1.05;
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.className = "pc-canvas";
+    this.loader.setMeshoptDecoder(MeshoptDecoder);
+    this.bank = new TextureBank((n) => urlOf(`${n}.webp`), Math.min(8, this.renderer.capabilities.getMaxAnisotropy()));
+    this.env = buildStudioEnv(this.renderer);
+    this.scene.environment = this.env;
 
-    this.camera = new THREE.PerspectiveCamera(34, 1, 0.004, 20);
+    this.camera = new THREE.PerspectiveCamera(32, 1, 0.004, 20);
     this.camera.position.copy(CENTER).addScaledVector(OVERVIEW_DIR, 1.3);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.copy(CENTER);
@@ -243,16 +304,17 @@ export class PcEngine {
     this.controls.screenSpacePanning = true;
     this.controls.enabled = false;
 
-    this.spark = new SparkRenderer({ renderer: this.renderer });
-    this.scene.add(this.spark);
     this.buildStage();
 
     this.calloutLayer = document.createElement("div");
     this.calloutLayer.className = "pc-callouts";
     this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     this.svg.setAttribute("class", "pc-leaders");
+    this.journeyBadge = document.createElement("div");
+    this.journeyBadge.className = "pc-jbadge";
     overlay.appendChild(this.svg);
     overlay.appendChild(this.calloutLayer);
+    overlay.appendChild(this.journeyBadge);
 
     const el = this.renderer.domElement;
     el.addEventListener("pointerdown", this.onDown);
@@ -273,26 +335,33 @@ export class PcEngine {
     const names = Object.keys(manifest.exterior) as PartId[];
     const total = names.reduce((s, n) => s + (manifest.exterior[n]?.bytes ?? 0), 0);
     let got = 0;
-    const report = () => this.cb.onProgress?.(Math.min(0.97, (got / total) * 0.92));
+    const report = () => this.cb.onProgress?.(Math.min(0.97, (got / total) * 0.9));
     try {
       await Promise.all(
         names.map(async (id) => {
-          const bytes = await fetchBytes(urlOf(id), (n) => {
+          const bytes = await fetchBytes(urlOf(`${id}.glb`), (n) => {
             got += n;
             report();
           }, this.abort.signal);
           if (this.disposed) return;
-          const mesh = new SplatMesh({ fileBytes: bytes, fileName: `${id}.sog` });
-          await withTimeout(mesh.initialized, 60_000, id);
+          const model = await withTimeout(this.buildModel(bytes, id), 60_000, id);
           if (this.disposed) return;
-          mesh.opacity = 0;
-          this.parts.get(id)!.mesh = mesh;
-          this.parts.get(id)!.group.add(mesh);
+          const p = this.parts.get(id)!;
+          p.model = model;
+          this.setModelOpacity(model, 0);
+          p.group.add(model.root);
         }),
       );
     } catch (e) {
       if (!this.disposed) this.cb.onError?.(e instanceof Error ? e.message : String(e));
       return;
+    }
+    if (this.disposed) return;
+    // upload everything once before the intro so the first frames do not stutter
+    try {
+      await this.renderer.compileAsync(this.scene, this.camera);
+    } catch {
+      /* compile lazily on first draw instead */
     }
     if (this.disposed) return;
     this.cb.onProgress?.(1);
@@ -301,11 +370,16 @@ export class PcEngine {
   }
 
   select(id: PartId | null) {
-    if (this.state === "loading") return;
+    if (this.state === "loading" || this.state === "journey") return;
     if (id === this.selected) return;
     if (id === null) return this.back();
     if (this.selected) {
       this.back(() => this.select(id));
+      return;
+    }
+    if (this.explodeK > 0) {
+      this.setExplode(0, 0.6);
+      setTimeout(() => void this.open(id), 620);
       return;
     }
     void this.open(id);
@@ -319,19 +393,18 @@ export class PcEngine {
     const p = this.parts.get(id)!;
     const dur = 0.9;
     if (p.interior) {
-      const im = p.interior.mesh;
-      const ig = p.interior.group;
+      const it = p.interior;
       this.tween(0.45, (k) => {
-        im.opacity = 1 - k;
-        ig.scale.setScalar(1 - 0.08 * k);
+        it.opacity = 1 - k;
+        this.setModelOpacity(it.model, it.opacity);
+        it.group.scale.setScalar(1 - 0.08 * k);
       }, undefined, easeOut, "interior");
     }
     const carry = id === "board" ? MOUNTED : [];
     for (const q of this.parts.values()) this.fadePart(q, 1, 0.8);
     this.slide(id, 0, dur);
     for (const c of carry) this.slide(c, 0, dur, id);
-    if (id === "case") this.moveGlass(0, dur);
-    else this.fadeGlass(1, dur);
+    this.glassTo(1, 0, dur);
     this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 1.1, () => {
       if (p.interior) p.interior.group.visible = false;
       this.selected = null;
@@ -355,13 +428,119 @@ export class PcEngine {
   }
 
   resetView() {
-    if (this.state === "overview") this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 1.0);
+    if (this.state === "overview") this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance() * (1 + this.explodeK * 0.25), 1.0);
     else if (this.selected) this.frameSelected(1.0);
+  }
+
+  /** 灯效：影棚（干净的产品照）或 RGB 氛围灯 */
+  setLightMode(mode: LightMode, rgbMode = 0, color?: string) {
+    this.lightMode = mode;
+    LOOK.uRgbMode.value = rgbMode;
+    if (color) LOOK.uRgbColor.value.set(color);
+    if (mode === "rgb" && !this.composer) this.buildComposer();
+    const from = this.rgbMix;
+    const to = mode === "rgb" ? 1 : 0;
+    this.tween(0.9, (k) => (this.rgbMix = from + (to - from) * k), undefined, ease, "light");
+  }
+
+  /** 爆炸视图：0 = 组装好，1 = 全部拉开 */
+  setExplode(k: number, dur = 0) {
+    if (this.state !== "overview" && this.state !== "intro") return;
+    const from = this.explodeK;
+    const apply = (t: number) => {
+      this.explodeK = from + (k - from) * t;
+      for (const p of this.parts.values()) {
+        const off = EXPLODE_VIEW[p.id];
+        if (!off) continue;
+        p.group.position.copy(p.base).add(new THREE.Vector3(...off).multiplyScalar(this.explodeK));
+      }
+      this.glassSlide = Math.min(1, this.explodeK * 1.6);
+      this.linksDirty = true;
+    };
+    if (dur > 0) this.tween(dur, apply, undefined, ease, "explode");
+    else apply(1);
+  }
+
+  /** 「一次数据的旅程」：从第 i 步开始自动播放 */
+  startJourney(i = 0) {
+    if (this.state === "loading" || this.state === "intro") return;
+    const go = () => {
+      if (this.explodeK > 0) this.setExplode(0, 0.6);
+      this.setState("journey", null);
+      this.controls.enabled = true;
+      this.journeyGo(i);
+    };
+    if (this.selected) this.back(go);
+    else go();
+  }
+
+  journeyGo(i: number) {
+    if (this.state !== "journey") return;
+    if (this.journeyTimer) clearTimeout(this.journeyTimer);
+    if (i < 0) i = 0;
+    if (i >= JOURNEY.length) return this.stopJourney();
+    this.journeyStep = i;
+    this.cb.onJourney?.(i);
+    const step = JOURNEY[i]!;
+    const pts = step.path.map(([part, key]) => this.worldAnchor(part, key)).filter((v): v is THREE.Vector3 => !!v);
+    if (!pts.length) return;
+    this.highlightLink = step.link ?? "__none";
+    this.glassTo(0.06, 0, 0.8); // 旅程中玻璃几乎淡出，免得反光挡住数据包
+    const box = new THREE.Box3().setFromPoints(pts);
+    const c = box.getCenter(new THREE.Vector3());
+    const r = Math.max(0.05, box.getSize(new THREE.Vector3()).length() / 2);
+    // the caption card covers the lower third: aim a little below the path so it sits in the upper part of the view
+    const dist = this.fitDistance(Math.max(r * 1.35, 0.36 * step.zoom));
+    const aim = c.clone().add(new THREE.Vector3(0, -dist * 0.12, 0));
+    this.flyTo(aim, new THREE.Vector3(...step.view).normalize(), dist, 1.5);
+    const color = new THREE.Color(step.color);
+    this.packetMat.uniforms.uColor!.value = color;
+    this.packetLight.color.copy(color);
+    this.journeyBadge.style.setProperty("--c", step.color);
+    this.journeyBadge.textContent = step.badge ?? "";
+    this.journeyBadge.dataset.on = "0";
+    if (pts.length > 1) {
+      const path = pts.map((p) => p.clone().add(new THREE.Vector3(-0.012, 0, 0)));
+      this.packetCurve = new THREE.CatmullRomCurve3(path, false, "centripetal", 0.5);
+    } else {
+      this.packetCurve = new THREE.CatmullRomCurve3([pts[0]!.clone().add(new THREE.Vector3(-0.012, 0, 0)), pts[0]!.clone().add(new THREE.Vector3(-0.0121, 0, 0))]);
+    }
+    this.packetHistory = [];
+    this.packetT = 0;
+    this.packetPulse = 0;
+    const single = pts.length === 1;
+    setTimeout(() => {
+      if (this.state !== "journey" || this.journeyStep !== i) return;
+      this.tween(single ? 0.6 : step.dur * 0.7, (k) => (this.packetT = k), () => {
+        this.journeyBadge.dataset.on = step.badge ? "1" : "0";
+        if (single || step.badge) this.tween(1.6, (k) => (this.packetPulse = k), undefined, (t) => t, "pulse");
+      }, easeInOutSine, "packet");
+    }, 900);
+    this.journeyTimer = setTimeout(() => this.journeyGo(i + 1), (step.dur + 1.9) * 1000);
+  }
+
+  stopJourney() {
+    if (this.journeyTimer) clearTimeout(this.journeyTimer);
+    this.journeyTimer = null;
+    if (this.state !== "journey") return;
+    this.journeyStep = -1;
+    this.packetCurve = null;
+    this.highlightLink = null;
+    this.journeyBadge.dataset.on = "0";
+    this.glassTo(1, 0, 0.8);
+    this.cb.onJourney?.(null);
+    this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 1.4, () => this.setState("overview", null));
+  }
+
+  pauseJourney() {
+    if (this.journeyTimer) clearTimeout(this.journeyTimer);
+    this.journeyTimer = null;
   }
 
   dispose() {
     this.disposed = true;
     this.abort.abort();
+    if (this.journeyTimer) clearTimeout(this.journeyTimer);
     this.renderer.setAnimationLoop(null);
     this.ro.disconnect();
     const el = this.renderer.domElement;
@@ -371,53 +550,125 @@ export class PcEngine {
     el.removeEventListener("pointerleave", this.onLeave);
     this.controls.removeEventListener("start", this.onControlStart);
     this.controls.dispose();
-    for (const p of this.parts.values()) {
-      p.mesh?.dispose();
-      p.interior?.mesh.dispose();
-    }
     this.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
-      const mat = m.material as THREE.Material | undefined;
-      if (mat && "dispose" in mat) mat.dispose();
+      const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+      if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
+      else if (mat && "dispose" in mat) mat.dispose();
     });
-    // Spark's sort worker rejects its in-flight request with "Worker terminate" when disposed mid-sort.
-    // That promise is awaited inside Spark without a catch, so swallow exactly that rejection briefly.
-    const swallow = (ev: PromiseRejectionEvent) => {
-      if (ev.reason instanceof Error && ev.reason.message === "Worker terminate") ev.preventDefault();
-    };
-    window.addEventListener("unhandledrejection", swallow);
-    setTimeout(() => window.removeEventListener("unhandledrejection", swallow), 5000);
-    this.spark.dispose();
+    this.bank.dispose();
+    this.env.dispose();
+    this.composer?.dispose();
+    this.bloom?.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     el.remove();
     this.svg.remove();
     this.calloutLayer.remove();
+    this.journeyBadge.remove();
+  }
+
+  // ---------------------------------------------------------------- models
+  private material(name: string): Promise<THREE.MeshPhysicalMaterial> {
+    let p = this.matCache.get(name);
+    if (!p) {
+      p = makeMaterial(name, manifest.materials[name], this.bank, { value: 0 });
+      this.matCache.set(name, p);
+    }
+    return p;
+  }
+
+  /** Parses a packed GLB and swaps every material for this part's own copy of the studio material. */
+  private async buildModel(bytes: Uint8Array, label: string): Promise<Model> {
+    const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    const gltf = await this.loader.parseAsync(buf, "");
+    const hover = { value: 0 };
+    const own = new Map<string, THREE.MeshPhysicalMaterial>();
+    const meshes: THREE.Mesh[] = [];
+    gltf.scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (m.isMesh) meshes.push(m);
+    });
+    for (const m of meshes) {
+      const src = m.material as THREE.Material;
+      const name = src.name || "_default";
+      let mat = own.get(name);
+      if (!mat) {
+        const base = await this.material(name);
+        mat = base.clone();
+        mat.onBeforeCompile = base.onBeforeCompile;
+        mat.customProgramCacheKey = base.customProgramCacheKey;
+        // the clone keeps the shared look uniforms but gets this part's hover uniform
+        const ob = base.onBeforeCompile;
+        mat.onBeforeCompile = (sh, r) => {
+          ob.call(mat, sh, r);
+          sh.uniforms.uHover = hover;
+        };
+        own.set(name, mat);
+      }
+      src.dispose();
+      m.material = mat;
+      const g = m.geometry;
+      if (!g.getAttribute("color")) {
+        const n = g.getAttribute("position").count;
+        g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(n * 4).fill(1), 4));
+      }
+      m.frustumCulled = true;
+    }
+    gltf.scene.name = label;
+    return { root: gltf.scene, mats: [...own.values()], hover };
+  }
+
+  private setModelOpacity(model: Model, o: number) {
+    for (const m of model.mats) {
+      const t = o < 0.999;
+      if (m.transparent !== t) {
+        m.transparent = t;
+        m.needsUpdate = true;
+      }
+      m.opacity = o;
+      m.depthWrite = o > 0.55;
+    }
+    model.root.visible = o > 0.01;
   }
 
   // ---------------------------------------------------------------- scene setup
   private buildStage() {
-    this.scene.background = new THREE.Color(0x0a0c10);
-    // floor with radial falloff
+    this.scene.background = new THREE.Color(0x090a0d);
+    // the floor fades into the backdrop colour, so there is no visible horizon
+    // seamless studio floor: soft pool of light + contact shadow under the case
     const floorMat = new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: true,
-      uniforms: {},
+      uniforms: { uRgb: LOOK.uRgb, uTint: { value: LOOK.uRgbColor.value }, uTime: LOOK.uTime },
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-      fragmentShader: `varying vec2 vUv; void main(){ vec2 q = vUv*2.0-1.0; float r = length(q);
-        float g = 1.0 - smoothstep(0.0, 1.0, r);
-        float ring = exp(-pow((r-0.33)/0.004,2.0))*0.5 + exp(-pow((r-0.36)/0.002,2.0))*0.25;
-        float sh = 1.0 - 0.75*exp(-pow(q.x/0.13,2.0)-pow(q.y/0.24,2.0));
-        vec3 base = mix(vec3(0.039,0.047,0.063), vec3(0.11,0.125,0.15), g*g);
-        vec3 c = base*sh + vec3(0.35,0.55,0.9)*ring*g;
-        gl_FragColor = vec4(c, 1.0); }`,
+      fragmentShader: `varying vec2 vUv; uniform float uRgb; uniform vec3 uTint; uniform float uTime;
+        void main(){ vec2 q = (vUv*2.0-1.0)*1.5; float r = length(q*vec2(1.0,1.15));
+        float pool = 1.0 - smoothstep(0.0, 1.05, r);
+        vec3 base = mix(vec3(0.0027,0.0030,0.0040), vec3(0.15,0.155,0.165), pow(pool, 2.2));
+        float sx = q.x/0.135, sz = q.y/0.29;
+        float contact = exp(-pow(max(abs(sx),abs(sz)*0.95),6.0)*1.2);
+        float soft = exp(-(sx*sx*0.55 + sz*sz*0.55));
+        float sh = 1.0 - 0.92*contact - 0.35*soft;
+        vec3 glow = uTint * exp(-(sx*sx + sz*sz)*0.5) * 0.10 * uRgb;
+        gl_FragColor = vec4(base*clamp(sh,0.0,1.0) + glow, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+        }`,
     });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), floorMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.0005;
+    floor.position.y = -0.0004;
     floor.renderOrder = -10;
     this.scene.add(floor);
+
+    // direct lights complement the studio environment: warm key + cool rim
+    this.key = new THREE.DirectionalLight(0xfff4e8, 1.6);
+    this.key.position.set(-1.2, 1.8, 1.3);
+    this.rim = new THREE.DirectionalLight(0xdfe9ff, 0.9);
+    this.rim.position.set(0.8, 1.0, -1.6);
+    this.caseGlow = new THREE.PointLight(0x7a5cff, 0, 0.6, 1.6);
+    this.caseGlow.position.set(-0.03, 0.27, 0.0);
+    this.scene.add(this.key, this.rim, this.caseGlow);
 
     // parts: groups + pick proxies
     for (const def of PARTS) {
@@ -435,35 +686,40 @@ export class PcEngine {
       proxy.visible = false;
       proxy.userData.part = def.id;
       group.add(proxy);
-      this.parts.set(def.id, {
-        id: def.id,
-        meta,
-        group,
-        mesh: null,
-        proxy,
-        base: group.position.clone(),
-        opacity: 0,
-        center,
-        radius: size.length() / 2,
-      });
+      this.parts.set(def.id, { id: def.id, meta, group, model: null, proxy, base: group.position.clone(), opacity: 0, center, radius: size.length() / 2 });
     }
-    // tempered glass (faint additive sheen, only from the outside)
-    this.glassMat = new THREE.ShaderMaterial({
-      uniforms: { uOpacity: { value: 0 } },
-      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-      fragmentShader: GLASS_FS,
+    // tempered glass side panel
+    this.glass = buildGlass(0.43, 0.452, this.env);
+    this.glass.group.rotation.y = -Math.PI / 2;
+    this.glass.group.position.set(GLASS_X, 0.25, -0.006);
+    this.glass.setOpacity(0);
+    this.scene.add(this.glass.group);
+
+    // data packet for the journey
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute("position", new THREE.BufferAttribute(new Float32Array(TRAIL * 3), 3));
+    const sizes = new Float32Array(TRAIL);
+    const alphas = new Float32Array(TRAIL);
+    for (let i = 0; i < TRAIL; i++) {
+      sizes[i] = i === 0 ? 0.022 : 0.012 * (1 - i / TRAIL) + 0.002;
+      alphas[i] = i === 0 ? 1 : 0.7 * (1 - i / TRAIL);
+    }
+    pg.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    pg.setAttribute("aAlpha", new THREE.BufferAttribute(alphas, 1));
+    this.packetMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: new THREE.Color(1, 1, 1) }, uOpacity: { value: 0 }, uPx: { value: 1000 } },
+      vertexShader: PACKET_VS,
+      fragmentShader: PACKET_FS,
       transparent: true,
       depthWrite: false,
       depthTest: false,
       blending: THREE.AdditiveBlending,
-      side: THREE.FrontSide,
     });
-    const glass = new THREE.Mesh(new THREE.PlaneGeometry(0.434, 0.456), this.glassMat);
-    glass.rotation.y = -Math.PI / 2;
-    glass.position.set(-0.1056, 0.25, -0.006);
-    glass.renderOrder = 900;
-    this.glass = glass;
-    this.scene.add(glass);
+    this.packet = new THREE.Points(pg, this.packetMat);
+    this.packet.frustumCulled = false;
+    this.packet.renderOrder = 1003;
+    this.packetLight = new THREE.PointLight(0xffffff, 0, 0.12, 1.5);
+    this.scene.add(this.packet, this.packetLight);
 
     // connection lines
     const pxScale = () => this.renderer.domElement.height / (2 * Math.tan((this.camera.fov * Math.PI) / 360));
@@ -517,6 +773,18 @@ export class PcEngine {
       this.overlay.appendChild(label);
       this.links.push({ def, core, halo, dots, curve: null, mat, haloMat, dotMat, vis: 0, label, length: 0.3 });
     }
+
+  }
+
+  private buildComposer() {
+    const size = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples: 4 });
+    this.composer = new EffectComposer(this.renderer, rt);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(size.x / 2, size.y / 2), 0.55, 0.5, 0.92);
+    this.composer.addPass(this.bloom);
+    this.composer.addPass(new OutputPass());
+    this.resize();
   }
 
   private worldAnchor(part: PartId, key: string, out = new THREE.Vector3()): THREE.Vector3 | null {
@@ -563,6 +831,7 @@ export class PcEngine {
     this.linksDirty = false;
   }
 
+
   // ---------------------------------------------------------------- flow
   private setState(s: EngineState, part: PartId | null) {
     this.state = s;
@@ -579,14 +848,13 @@ export class PcEngine {
     order.forEach((id, i) => {
       const p = this.parts.get(id);
       if (!p) return;
-      setTimeout(() => this.fadePart(p, 1, id === "case" ? 1.2 : 0.8), (id === "case" ? 0 : 500 + i * 140));
+      setTimeout(() => this.fadePart(p, 1, id === "case" ? 1.2 : 0.8), id === "case" ? 0 : 500 + i * 140);
     });
-    this.tween(1.4, (k) => (this.glassMat.uniforms.uOpacity!.value = k), undefined, easeOut);
+    this.glassTo(1, 0, 1.4);
     this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 3.4, () => {
       this.controls.enabled = true;
       this.setState("overview", null);
     }, ease);
-    // reveal lines after the camera settles
     setTimeout(() => {
       if (this.disposed) return;
       this.tween(1.6, (k) => {
@@ -603,7 +871,6 @@ export class PcEngine {
     const p = this.parts.get(id)!;
     this.selected = id;
     this.setState("extracting", id);
-    this.dispatchProgress(id);
     const carry = id === "board" ? MOUNTED : [];
     for (const q of this.parts.values()) {
       if (q.id === id || carry.includes(q.id)) continue;
@@ -612,15 +879,15 @@ export class PcEngine {
     this.slide(id, 1, 0.95);
     for (const c of carry) this.slide(c, 1, 0.95, id);
     if (id === "case") {
-      this.moveGlass(1, 0.95);
-      this.flyTo(CENTER.clone().add(new THREE.Vector3(0, 0.0, 0.0)), new THREE.Vector3(...def.view).normalize(), this.overviewDistance() * 0.92, 1.1, () => {
+      this.glassTo(0, 1, 0.95);
+      this.flyTo(CENTER.clone(), new THREE.Vector3(...def.view).normalize(), this.overviewDistance() * 0.92, 1.1, () => {
         if (this.selected !== id) return;
         this.setState("open", id);
         this.showCallouts(id, false);
       });
       return;
     }
-    this.fadeGlass(0, 0.6);
+    this.glassTo(0, 0, 0.6);
     const exploded = p.base.clone().add(new THREE.Vector3(...def.explode));
     const center = exploded.clone().add(p.center);
     this.flyTo(center, new THREE.Vector3(...def.view).normalize(), this.fitDistance(p.radius * 1.05), 1.0);
@@ -634,19 +901,20 @@ export class PcEngine {
     }
     if (this.selected !== id || this.disposed) return;
     const it = p.interior!;
-    // place the interior so its bbox centre coincides with the exploded part centre
     const ilo = v3(it.meta.bbox[0]);
     const ihi = v3(it.meta.bbox[1]);
     const ic = ilo.clone().add(ihi).multiplyScalar(0.5).applyQuaternion(it.group.quaternion);
     it.group.position.copy(center).sub(ic);
     it.group.visible = true;
-    it.mesh.opacity = 0;
+    it.opacity = 0;
+    this.setModelOpacity(it.model, 0);
     it.group.scale.setScalar(0.92);
     this.fadePart(p, 0, 0.5);
     for (const c of carry) this.fadePart(this.parts.get(c)!, 0, 0.5);
     for (const q of this.parts.values()) if (q.id !== id && !carry.includes(q.id)) this.fadePart(q, 0, 0.6);
     this.tween(0.75, (k) => {
-      it.mesh.opacity = k;
+      it.opacity = k;
+      this.setModelOpacity(it.model, k);
       it.group.scale.setScalar(0.92 + 0.08 * k);
     }, undefined, easeOut, "interior");
     const ir = ihi.clone().sub(ilo).length() / 2;
@@ -683,30 +951,30 @@ export class PcEngine {
       p.interiorPromise = (async () => {
         let got = 0;
         this.cb.onInteriorProgress?.(0);
-        const bytes = await fetchBytes(urlOf(`${id}_open`), (n) => {
+        const bytes = await fetchBytes(urlOf(`${id}_open.glb`), (n) => {
           got += n;
           this.cb.onInteriorProgress?.(Math.min(0.99, got / meta.bytes));
         }, this.abort.signal);
-        const mesh = new SplatMesh({ fileBytes: bytes, fileName: `${id}_open.sog` });
-        await withTimeout(mesh.initialized, 60_000, id);
+        const model = await withTimeout(this.buildModel(bytes, `${id}_open`), 60_000, id);
         const group = new THREE.Group();
         group.visible = false;
         const rot = INTERIOR_ROT[id];
         if (rot) group.quaternion.setFromRotationMatrix(rot);
-        group.add(mesh);
+        group.add(model.root);
         this.scene.add(group);
-        p.interior = { group, mesh, meta };
+        group.visible = true;
+        try {
+          await this.renderer.compileAsync(group, this.camera, this.scene);
+        } catch {
+          /* compile on first draw */
+        }
+        group.visible = false;
+        p.interior = { group, model, meta, opacity: 0 };
         this.cb.onInteriorProgress?.(null);
       })();
       p.interiorPromise.catch(() => (p.interiorPromise = undefined));
     }
     await p.interiorPromise;
-  }
-
-  private dispatchProgress(id: PartId) {
-    const pid = PART_BY_ID[id].progressId;
-    if (!pid) return;
-    window.dispatchEvent(new CustomEvent("lab:event", { detail: { type: "part_focused", partId: pid } }));
   }
 
   // ---------------------------------------------------------------- animation helpers
@@ -717,13 +985,10 @@ export class PcEngine {
 
   private fadePart(p: PartRT, to: number, dur: number) {
     const from = p.opacity;
-    if (p.mesh) p.mesh.visible = true;
     this.tween(dur, (k) => {
       p.opacity = from + (to - from) * k;
-      if (p.mesh) p.mesh.opacity = p.opacity;
-    }, () => {
-      if (p.mesh) p.mesh.visible = p.opacity > 0.01;
-    }, ease, "fade-" + p.id);
+      if (p.model) this.setModelOpacity(p.model, p.opacity);
+    }, undefined, ease, "fade-" + p.id);
   }
 
   private slide(id: PartId, to: 0 | 1, dur: number, as?: PartId) {
@@ -737,19 +1002,14 @@ export class PcEngine {
     }, undefined, ease, "slide-" + id);
   }
 
-  private moveGlass(to: 0 | 1, dur: number) {
-    const from = this.glass.position.x;
-    const target = -0.1056 - 0.16 * to;
-    const o0 = this.glassMat.uniforms.uOpacity!.value as number;
+  /** glass opacity + how far it is slid out (case opened / exploded view) */
+  private glassTo(opacity: number, slide: number, dur: number) {
+    const o0 = this.glassOpacity;
+    const s0 = this.glassSlide;
     this.tween(dur, (k) => {
-      this.glass.position.x = from + (target - from) * k;
-      this.glassMat.uniforms.uOpacity!.value = o0 + ((to ? 0 : 1) - o0) * k;
+      this.glassOpacity = o0 + (opacity - o0) * k;
+      this.glassSlide = s0 + (slide - s0) * k;
     }, undefined, ease, "glass");
-  }
-
-  private fadeGlass(to: number, dur: number) {
-    const o0 = this.glassMat.uniforms.uOpacity!.value as number;
-    this.tween(dur, (k) => (this.glassMat.uniforms.uOpacity!.value = o0 + (to - o0) * k), undefined, ease, "glass");
   }
 
   private overviewDistance() {
@@ -791,6 +1051,7 @@ export class PcEngine {
     }, e, "camera");
   }
 
+
   // ---------------------------------------------------------------- callouts
   private showCallouts(id: PartId, interior: boolean) {
     this.clearCallouts();
@@ -831,56 +1092,57 @@ export class PcEngine {
     this.callouts = [];
   }
 
+  /**
+   * Labels sit in two columns (left / right of the part). Within a column they keep the vertical order of
+   * their anchors, so leader lines never cross; they are spread to a minimum gap and kept clear of the
+   * header (top) and the part buttons (bottom).
+   */
   private layoutCallouts() {
     if (!this.callouts.length) return;
     const el = this.renderer.domElement;
-    const FW = el.clientWidth; // NDC spans the whole canvas (the panel inset is a view offset)
-    const W = FW - this.inset; // usable area left of the panel
+    const FW = el.clientWidth;
+    const W = FW - this.inset;
     const H = el.clientHeight;
     const v = new THREE.Vector3();
     const pts = this.callouts.map((c) => {
       v.copy(c.anchor).applyMatrix4(c.obj.matrixWorld).project(this.camera);
       return { c, x: (v.x * 0.5 + 0.5) * FW, y: (-v.y * 0.5 + 0.5) * H, behind: v.z > 1 };
     });
-    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const sorted = [...pts].sort((a, b) => a.x - b.x);
+    const half = Math.ceil(sorted.length / 2);
+    const sides = { l: sorted.slice(0, half), r: sorted.slice(half) };
     const minX = Math.min(...pts.map((p) => p.x));
     const maxX = Math.max(...pts.map((p) => p.x));
     const narrow = W < 640;
-    const sides: Record<"l" | "r", typeof pts> = { l: [], r: [] };
-    for (const p of pts) sides[p.x < cx ? "l" : "r"].push(p);
-    // balance sides
-    while (sides.l.length > sides.r.length + 1) {
-      sides.l.sort((a, b) => b.x - a.x);
-      sides.r.push(sides.l.shift()!);
-    }
-    while (sides.r.length > sides.l.length + 1) {
-      sides.r.sort((a, b) => a.x - b.x);
-      sides.l.push(sides.r.shift()!);
-    }
     const gap = narrow ? 26 : 30;
+    const top = 84;
+    const bottom = H - (narrow ? 160 : 150);
     for (const side of ["l", "r"] as const) {
       const list = sides[side].sort((a, b) => a.y - b.y);
-      const ys = list.map((p) => p.y);
+      const ys = list.map((p) => Math.min(bottom, Math.max(top, p.y)));
       for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i]!, ys[i - 1]! + gap);
-      const overflow = ys.length ? ys[ys.length - 1]! - (H - 110) : 0;
+      const overflow = ys.length ? ys[ys.length - 1]! - bottom : 0;
       if (overflow > 0) for (let i = 0; i < ys.length; i++) ys[i] = ys[i]! - overflow;
       for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i]!, ys[i + 1]! - gap);
+      const widths = list.map((p) => p.c.el.offsetWidth);
+      const colW = Math.max(0, ...widths);
+      // column edge nearest the part
+      const edge = side === "l" ? Math.max(10 + colW, minX - 36) : Math.min(W - 10 - colW, maxX + 36);
       list.forEach((p, i) => {
-        const y = Math.max(78, ys[i]!);
+        const y = Math.max(top, ys[i]!);
         const { el: lab, line, dot } = p.c;
-        const lw = lab.offsetWidth;
-        let lx: number;
-        if (side === "l") lx = Math.max(10, Math.min(minX - 40, p.x - 60) - lw);
-        else lx = Math.min(W - lw - 10, Math.max(maxX + 40, p.x + 60));
-        const ex = side === "l" ? lx + lw : lx;
+        const lw = widths[i]!;
+        const lx = side === "l" ? edge - lw : edge;
+        const ex = side === "l" ? edge : edge;
         lab.style.transform = `translate(${lx}px, ${y - 12}px)`;
-        lab.style.opacity = p.behind ? "0" : String(this.calloutVis);
-        const kx = side === "l" ? ex + 14 : ex - 14;
+        const op = p.behind ? "0" : String(this.calloutVis);
+        lab.style.opacity = op;
+        const kx = side === "l" ? ex + 12 : ex - 12;
         line.setAttribute("points", `${p.x},${p.y} ${kx},${y} ${ex},${y}`);
-        line.style.opacity = p.behind ? "0" : String(this.calloutVis);
+        line.style.opacity = op;
         dot.setAttribute("cx", String(p.x));
         dot.setAttribute("cy", String(p.y));
-        dot.style.opacity = p.behind ? "0" : String(this.calloutVis);
+        dot.style.opacity = op;
       });
     }
   }
@@ -897,7 +1159,11 @@ export class PcEngine {
     for (const L of this.links) {
       let target = 0;
       let labelOn = false;
-      if (this.state === "intro" || this.state === "overview") {
+      if (this.state === "journey") {
+        const related = this.highlightLink === L.def.id;
+        target = related ? 1 : 0.06;
+        labelOn = related;
+      } else if (this.state === "intro" || this.state === "overview") {
         const related = (hov && L.def.parts.includes(hov)) || this.highlightLink === L.def.id;
         target = this.showAll ? (hov || this.highlightLink ? (related ? 1 : 0.25) : 0.85) : related ? 1 : 0;
         labelOn = !!related;
@@ -942,6 +1208,54 @@ export class PcEngine {
     }
   }
 
+
+  private updatePacket(dt: number) {
+    const on = this.state === "journey" && !!this.packetCurve;
+    const target = on ? 1 : 0;
+    const u = this.packetMat.uniforms;
+    u.uOpacity!.value += (target - (u.uOpacity!.value as number)) * Math.min(1, dt * 5);
+    u.uPx!.value = this.renderer.domElement.height / (2 * Math.tan((this.camera.fov * Math.PI) / 360));
+    this.packet.visible = (u.uOpacity!.value as number) > 0.01;
+    this.packetLight.intensity = (u.uOpacity!.value as number) * (0.25 + 0.2 * Math.sin(this.clock.elapsedTime * 6));
+    if (!this.packetCurve) return;
+    const head = this.packetCurve.getPointAt(Math.min(1, Math.max(0, this.packetT)));
+    this.packetHistory.unshift(head.clone());
+    if (this.packetHistory.length > TRAIL) this.packetHistory.length = TRAIL;
+    const pos = this.packet.geometry.getAttribute("position") as THREE.BufferAttribute;
+    const size = this.packet.geometry.getAttribute("aSize") as THREE.BufferAttribute;
+    for (let i = 0; i < TRAIL; i++) {
+      const p = this.packetHistory[Math.min(i, this.packetHistory.length - 1)]!;
+      pos.setXYZ(i, p.x, p.y, p.z);
+    }
+    // pulse: the head swells and rings while the CPU / cache works on it
+    const pulse = this.packetPulse > 0 && this.packetPulse < 1 ? Math.sin(this.packetPulse * Math.PI * 6) * 0.5 + 0.5 : 0;
+    size.setX(0, 0.022 + 0.018 * pulse);
+    size.needsUpdate = true;
+    pos.needsUpdate = true;
+    this.packetLight.position.copy(head);
+    if (this.journeyBadge.dataset.on === "1") {
+      const v = head.clone().project(this.camera);
+      const el = this.renderer.domElement;
+      this.journeyBadge.style.transform = `translate(${(v.x * 0.5 + 0.5) * el.clientWidth}px, ${(-v.y * 0.5 + 0.5) * el.clientHeight}px) translate(-50%, -190%)`;
+    }
+  }
+
+  private updateLook(time: number) {
+    LOOK.uTime.value = time;
+    const k = this.rgbMix;
+    LOOK.uRgb.value = k;
+    this.scene.environmentIntensity = 1 - 0.62 * k;
+    this.key.intensity = 1.6 * (1 - 0.75 * k);
+    this.rim.intensity = 0.9 * (1 - 0.5 * k);
+    let glow = LOOK.uRgbColor.value.clone();
+    if (LOOK.uRgbMode.value < 0.5) glow = new THREE.Color().setHSL((time * 0.18) % 1, 0.8, 0.55);
+    this.caseGlow.color.copy(glow);
+    this.caseGlow.intensity = 0.35 * k * (LOOK.uRgbMode.value > 1.5 ? 0.55 + 0.45 * Math.sin(time * 2.2) : 1);
+    if (this.bloom) this.bloom.strength = 0.6 * k;
+    this.glass.setOpacity(this.glassOpacity);
+    this.glass.group.position.x = GLASS_X - 0.3 * this.glassSlide;
+  }
+
   private adaptQuality(dt: number) {
     this.frameTimes.push(dt);
     if (this.frameTimes.length < 40) return;
@@ -960,6 +1274,7 @@ export class PcEngine {
     }
   }
 
+
   private frame = () => {
     const dt = Math.min(0.1, this.clock.getDelta());
     const time = this.clock.elapsedTime;
@@ -977,7 +1292,10 @@ export class PcEngine {
     if (this.controls.enabled) this.controls.update();
     this.clampTarget();
     this.updateLinks(time, dt);
-    this.renderer.render(this.scene, this.camera);
+    this.updatePacket(dt);
+    this.updateLook(time);
+    if (this.composer && this.rgbMix > 0.001) this.composer.render(dt);
+    else this.renderer.render(this.scene, this.camera);
     this.layoutCallouts();
     if (this.state !== "loading") this.adaptQuality(dt);
     this.stats.frames++;
@@ -1000,6 +1318,8 @@ export class PcEngine {
     this.renderer.setSize(w, h, false);
     this.renderer.domElement.style.width = `${w}px`;
     this.renderer.domElement.style.height = `${h}px`;
+    this.composer?.setPixelRatio(this.dpr);
+    this.composer?.setSize(w, h);
     this.camera.aspect = w / h;
     if (this.inset > 0 && w - this.inset > 200) {
       this.camera.setViewOffset(w, h, this.inset / 2, 0, w, h);
@@ -1047,18 +1367,19 @@ export class PcEngine {
     }
   };
 
+
   private onMove = (e: PointerEvent) => {
     if (e.pointerType !== "mouse" || this.state !== "overview" || e.buttons) return;
     const id = this.pick(e.clientX, e.clientY);
     if (id !== this.hovered) {
       if (this.hovered) {
         const p = this.parts.get(this.hovered);
-        if (p?.mesh) p.mesh.recolor = new THREE.Color(1, 1, 1);
+        if (p?.model) p.model.hover.value = 0;
       }
       this.hovered = id;
       if (id) {
         const p = this.parts.get(id);
-        if (p?.mesh && id !== "case") p.mesh.recolor = new THREE.Color(1.22, 1.2, 1.12);
+        if (p?.model && id !== "case") p.model.hover.value = 1;
       }
       this.renderer.domElement.style.cursor = id ? "pointer" : "";
       this.cb.onHover?.(id);
@@ -1068,7 +1389,7 @@ export class PcEngine {
   private onLeave = () => {
     if (this.hovered) {
       const p = this.parts.get(this.hovered);
-      if (p?.mesh) p.mesh.recolor = new THREE.Color(1, 1, 1);
+      if (p?.model) p.model.hover.value = 0;
       this.hovered = null;
       this.cb.onHover?.(null);
     }

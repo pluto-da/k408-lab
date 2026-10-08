@@ -103,8 +103,15 @@ describe("账号", () => {
     expect(String(out.headers["set-cookie"])).toMatch(/k408_session=;/);
     const forged = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: "k408_session=abc.def.ghi" } });
     expect(forged.json().user).toBeNull();
-    const prog = await ctx.app.inject({ method: "GET", url: "/api/progress", headers: { cookie: "k408_session=abc.def.ghi" } });
-    expect(prog.statusCode).toBe(401);
+    const patch = await ctx.app.inject({ method: "PATCH", url: "/api/me", headers: { cookie: "k408_session=abc.def.ghi" }, payload: { nickname: "x" } });
+    expect(patch.statusCode).toBe(401);
+  });
+
+  it("学习进度与错题本接口已移除", async () => {
+    for (const url of ["/api/progress", "/api/mistakes", "/api/events"]) {
+      const res = await ctx.app.inject({ method: url === "/api/events" ? "POST" : "GET", url, payload: url === "/api/events" ? { events: [] } : undefined });
+      expect(res.statusCode).toBe(404);
+    }
   });
 
   it("修改昵称", async () => {

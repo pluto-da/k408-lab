@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { bootLegacy, legacyBootedInto, removeLegacyCss } from "../legacy/loadLegacy";
-import { useAuth } from "../store/auth";
-import { useSync } from "../store/sync";
+
+const BOOT = ["载入四门课章节目录", "装配 3D 主板与总线", "加载 11 个动画实验", "连接流程演示", "准备自测题"];
 
 export default function LabPage() {
   const ref = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
-  const status = useAuth((s) => s.status);
-  const pending = useSync((s) => s.pending);
 
   useEffect(() => {
     const el = ref.current;
@@ -50,11 +47,13 @@ export default function LabPage() {
             <i style={{ width: `${Math.round(progress * 100)}%` }} />
           </div>
           <p>正在搭建实验室… {Math.round(progress * 100)}%</p>
-        </div>
-      )}
-      {status === "anon" && (
-        <div className="lab-hint">
-          学习记录暂存在本页{pending ? `（${pending} 条）` : ""}，<Link to="/login?next=/lab">登录</Link>后自动保存进度和错题。
+          <ul className="lab-boot" aria-hidden="true">
+            {BOOT.filter((_, i) => progress >= i / BOOT.length).map((b) => (
+              <li key={b}>
+                {b} <b>OK</b>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       <div ref={ref} className="legacy-root" />

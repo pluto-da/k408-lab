@@ -331,7 +331,6 @@
             if (!focusKey) home = { pos: camera.position.clone(), tgt: controls.target.clone() };
             var EX = window.EXPLODE || {}; EX.ctx = { camera: camera, canvas: cv }; if (focusKey && focusKey !== k && EX[focusKey]) EX[focusKey].close();
             prepExplode(k);
-            if (focusKey !== k && window.LAB_EMIT) LAB_EMIT("part_focused", { partId: k });
             focusKey = k; focusSet = groupsOf(f); if (EX[k]) EX[k].open();
             controls.minDistance = 1.5;
             /* frame the part at its full lift plus its sub-parts at their open targets, 15% margin */

@@ -2,11 +2,11 @@
 
 面向考研同学的 408（数据结构 / 计算机组成原理 / 操作系统 / 计算机网络）学习站：
 3D 拆开一块主板看考点、11 个可视化实验、3 条流程自动演示、跨科知识连线、自测题；
-v1 增加账号、学习进度和错题本。
+另有「整机拆解」（/pc）：一台写实整机逐个部件拆开看，并附数据旅程演示。账号仅用于登录与昵称。
 
 - 前端：Vite + React 18 + TypeScript + React Router + Zustand + TanStack Query（`apps/web`）
 - 后端：Node 20 + Fastify 5 + Prisma 5 + PostgreSQL 16 + zod（`apps/api`）
-- 共享：题目/章节/流程目录与事件校验（`packages/shared`）
+- 共享：题目/章节/流程目录（`packages/shared`）
 - 部署：Docker Compose（Postgres + API + Caddy），Caddy 自动 HTTPS
 - 所有库与字体均本地打包，不依赖任何境外 CDN 或字体服务
 
@@ -39,8 +39,6 @@ v1 增加账号、学习进度和错题本。
 | 功能 | 说明 |
 | --- | --- |
 | 账号 | 用户名或邮箱 + 密码注册/登录（argon2id），会话为 httpOnly Cookie 中的 JWT，退出登录，修改昵称；登录/注册按 IP 限流；手机号短信登录已预留接口（`/api/auth/sms/*` 返回 501，见 `apps/api/src/lib/sms.ts`） |
-| 学习进度 | 记录看过的章节考点、打开的实验、聚焦过的部件、看过的流程演示、答对的自测题，按四门课显示完成百分比 |
-| 错题本 | 自测答错的题自动收录（题干、你的选择、正确答案、解析）；按科目筛选；标记已掌握；重做（服务端判分，答对自动掌握） |
 | 健康检查 | `GET /api/health`（含数据库检查），`GET /api/health/live`（仅进程） |
 
 ### 旧版实验室如何接入
@@ -49,18 +47,6 @@ v1 不重写 3D 和实验。原单页里的内联脚本和样式被拆成 `apps/
 `/lab` 页面（`src/pages/Lab.tsx`）把 `body.html` 注入容器后按原顺序串行加载脚本，行为与原页面一致。
 主板模型改为直接加载 `legacy/assets/motherboard.glb`（不再用 base64 数据文件）。
 
-旧模块里加了最少量的钩子，通过 `window.dispatchEvent(new CustomEvent("lab:event", { detail }))` 发出学习事件：
-
-| type | detail |
-| --- | --- |
-| `chapter_viewed` | `{ subject, chapterNo }` |
-| `part_focused` | `{ partId }` |
-| `lab_opened` | `{ labId }` |
-| `quiz_answered` | `{ questionId, correct, chosen }` |
-| `flow_viewed` | `{ flowId }`（点开某条流程的自动演示） |
-
-React 端的桥接器（`src/bridge/labBridge.ts`）接收事件：已登录则批量上报 `POST /api/events`；
-未登录先在内存队列里排队（同时镜像到 sessionStorage），登录后自动补传。
 旧脚本只能执行一次，所以从 `/lab` 切换到其他页面时会整页加载目标页，以释放 3D 场景。
 
 ---
@@ -225,11 +211,6 @@ gunzip -c backups/k408-20261008-040000.sql.gz | docker compose exec -T postgres 
 | POST | `/api/auth/logout` | 退出登录 |
 | POST | `/api/auth/sms/send`、`/api/auth/sms/login` | 预留，返回 501 |
 | GET / PATCH | `/api/me` | 当前用户 / 修改昵称 |
-| POST | `/api/events` | 批量上报学习事件（≤100 条） |
-| GET | `/api/progress` | 四门课进度 |
-| GET | `/api/mistakes?subject=&status=active\|mastered\|all` | 错题列表（仅自测题） |
-| PATCH / DELETE | `/api/mistakes/:id` | 标记掌握 / 删除 |
-| POST | `/api/mistakes/:id/redo` | 重做，`{ answer }`（选项序号） |
 | GET | `/api/questions` | 自测题（不含答案） |
 
 ## 安全说明
@@ -238,4 +219,3 @@ gunzip -c backups/k408-20261008-040000.sql.gz | docker compose exec -T postgres 
 - 会话 Cookie：httpOnly、SameSite=Lax，HTTPS 下带 Secure；写请求若带 Origin 必须与站点同源。
 - 登录/注册每 IP 每分钟默认 10 次（`AUTH_RATE_LIMIT_MAX`），其余接口每 IP 每分钟 300 次。
 - Caddy 下发 CSP 等安全响应头，所有脚本均为本站文件。
-- 学习进度由浏览器上报，服务端逐条校验事件格式与 id；自测题以服务端题库答案判分。

@@ -33,7 +33,6 @@
             }
           });
           function show(k, user) {
-            if (user && items[k] && items[k].tab.getAttribute("aria-selected") !== "true" && window.LAB_EMIT) LAB_EMIT("lab_opened", { labId: items[k].d.id });
             items.forEach(function (o, i) {
               var on = i === k;
               o.tab.setAttribute("aria-selected", on ? "true" : "false");

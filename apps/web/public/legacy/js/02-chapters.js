@@ -51,7 +51,6 @@
           var cur = 0;
           function select(i, user) {
             cur = i;
-            if (user && window.LAB_EMIT) LAB_EMIT("chapter_viewed", { subject: key, chapterNo: subj.chapters[i].no });
             btns.forEach(function (b, j) { b.setAttribute("aria-pressed", j === i ? "true" : "false"); });
             card.innerHTML = cardHTML(subj, subj.chapters[i]);
             if (user && list.scrollWidth > list.clientWidth) {
@@ -61,15 +60,6 @@
           }
           el.appendChild(list); el.appendChild(card);
           select(0, false);
-          /* 默认展示的章节卡进入视野一半以上，也算看过 */
-          if (window.IntersectionObserver && window.LAB_EMIT) {
-            var io = new IntersectionObserver(function (es) {
-              es.forEach(function (e) {
-                if (e.isIntersecting) { io.disconnect(); LAB_EMIT("chapter_viewed", { subject: key, chapterNo: subj.chapters[cur].no }); }
-              });
-            }, { threshold: 0.5 });
-            io.observe(card);
-          }
         }
         var els = document.querySelectorAll(".x-study[data-subject]");
         for (var i = 0; i < els.length; i++) mount(els[i]);

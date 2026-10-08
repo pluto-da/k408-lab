@@ -28,8 +28,6 @@ export interface PartDef {
   explode: [number, number, number];
   /** 打开后观察方向（从目标指向相机） */
   view: [number, number, number];
-  /** 学习进度里的部件 id（catalog PARTS） */
-  progressId?: string;
   /** 打开时是否有独立的内部模型 */
   hasInterior: boolean;
 }
@@ -63,15 +61,12 @@ export const PARTS: PartDef[] = [
       { anchor: "l1", label: "L1 Cache（指令/数据分离）", color: "#82D278" },
       { anchor: "l2", label: "L2 Cache（每核私有）", color: "#28965A" },
       { anchor: "l3", label: "L3 Cache（多核共享）", color: "#22AAAA" },
-      { anchor: "ring", label: "片上环形互连", color: "#E6E6EE" },
       { anchor: "imc", label: "内存控制器 IMC", color: "#965AC8" },
       { anchor: "io", label: "PCIe / I/O 控制", color: "#D2B446" },
       { anchor: "ihs", label: "顶盖 IHS（已开盖）" },
-      { anchor: "substrate", label: "封装基板 · LGA 触点" },
     ],
     explode: [-0.3, 0.07, 0.02],
     view: [-0.35, 0.95, 0.75],
-    progressId: "cpu",
     hasInterior: true,
   },
   {
@@ -100,7 +95,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.28, 0.1, 0.06],
     view: [-0.25, 0.75, 1.0],
-    progressId: "ram",
     hasInterior: true,
   },
   {
@@ -127,7 +121,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.26, 0.03, 0.06],
     view: [-0.3, 1.0, 0.9],
-    progressId: "disk",
     hasInterior: true,
   },
   {
@@ -157,7 +150,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.3, 0.1, -0.04],
     view: [-0.35, 1.0, 0.85],
-    progressId: "disk",
     hasInterior: true,
   },
   {
@@ -185,7 +177,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.34, 0.02, 0.0],
     view: [-0.2, 1.0, 1.0],
-    progressId: "io",
     hasInterior: true,
   },
   {
@@ -214,7 +205,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.3, -0.04, 0.02],
     view: [-0.2, 1.0, 0.95],
-    progressId: "nic",
     hasInterior: true,
   },
   {
@@ -273,7 +263,6 @@ export const PARTS: PartDef[] = [
     ],
     explode: [-0.3, 0.0, 0.0],
     view: [-1.0, 0.3, 0.4],
-    progressId: "board",
     hasInterior: true,
   },
   {
@@ -322,7 +311,7 @@ export const LINKS: LinkDef[] = [
   { id: "sata", label: "SATA 6Gb/s", color: "#FF9A3C", parts: ["hdd", "board"], points: [["board", "chipset"], ["board", "sata"], ["hdd", "sata"]], lift: 0.01, bidir: true },
   { id: "pcie_nic", label: "PCIe x1 → 网卡", color: "#4CE38A", parts: ["nic", "board"], points: [["board", "chipset"], ["board", "pcie1_2"], ["nic", "chip"]], lift: 0.012, bidir: true },
   { id: "pwr_board", label: "+12V/+5V/+3.3V 主供电", color: "#FFC24A", parts: ["psu", "board"], points: [["psu", "out"], ["case", "pw_a"], ["case", "pw_b"], ["case", "pw_c"], ["board", "atx24"]], lift: 0.0, bidir: false },
-  { id: "pwr_cpu", label: "CPU 8pin 供电", color: "#FFC24A", parts: ["psu", "cpu"], points: [["psu", "out"], ["case", "pw_a"], ["case", "pw_b"], ["case", "pw_c"], ["case", "pw_top"], ["case", "pw_eps"], ["board", "eps8"], ["cpu", "cpu"]], lift: 0.0, bidir: false },
+  { id: "pwr_cpu", label: "CPU 8pin 供电", color: "#FFC24A", parts: ["psu", "cpu"], points: [["psu", "out"], ["case", "pw_a"], ["case", "pw_b"], ["case", "pw_c"], ["case", "pw_top"], ["board", "eps8"], ["board", "vrm"]], lift: 0.0, bidir: false },
   { id: "pwr_gpu", label: "显卡 12V 供电", color: "#FFC24A", parts: ["psu", "gpu"], points: [["psu", "out"], ["case", "pw_g"], ["gpu", "power"]], lift: 0.0, bidir: false },
   { id: "pwr_hdd", label: "SATA 供电", color: "#FFC24A", parts: ["psu", "hdd"], points: [["psu", "out"], ["case", "pw_h"], ["hdd", "sata"]], lift: 0.0, bidir: false },
 ];

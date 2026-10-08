@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LINKS, PART_BY_ID, PARTS, type PartId } from "../pc/parts";
-import type { EngineState, PcEngine } from "../pc/engine";
+import type { EngineState, LightMode, PcEngine } from "../pc/engine";
+import { JOURNEY } from "../pc/journey";
 import "../pc/pc.css";
+
+const RGB_SWATCHES = ["#7a5cff", "#22c3ff", "#ff4f8b", "#3fe08a", "#ffb02e"];
+const RGB_MODES = ["彩虹流动", "单色常亮", "呼吸"];
 
 const ORDER: PartId[] = ["cpu", "ram", "gpu", "ssd", "hdd", "nic", "psu", "board", "case"];
 
@@ -33,7 +37,13 @@ export default function PcPage() {
   const [opening, setOpening] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [light, setLight] = useState<LightMode>("studio");
+  const [rgbMode, setRgbMode] = useState(0);
+  const [rgbColor, setRgbColor] = useState(RGB_SWATCHES[0]!);
+  const [explode, setExplode] = useState(0);
+  const [jStep, setJStep] = useState<number | null>(null);
   const wide = useWide();
+  const touringNow = state === "journey";
 
   useEffect(() => {
     document.documentElement.classList.add("is-pc");
@@ -65,6 +75,7 @@ export default function PcPage() {
           onHover: (p) => alive && setHovered(p),
           onInteriorProgress: (p) => alive && setOpening(p),
           onError: (m) => alive && setError(m),
+          onJourney: (i) => alive && setJStep(i),
         });
       } catch {
         setSupported(false);
@@ -84,17 +95,41 @@ export default function PcPage() {
   useEffect(() => {
     const e = engineRef.current;
     if (!e) return;
-    const w = wide && panelOpen && panelRef.current ? panelRef.current.offsetWidth + 24 : 0;
+    const w = wide && panelOpen && !touringNow && panelRef.current ? panelRef.current.offsetWidth + 24 : 0;
     e.setInset(w);
-  }, [wide, panelOpen, ready, selected]);
+  }, [wide, panelOpen, ready, selected, touringNow]);
 
   useEffect(() => {
     engineRef.current?.setShowAll(showAll);
   }, [showAll]);
 
   useEffect(() => {
+    engineRef.current?.setLightMode(light, rgbMode, rgbColor);
+  }, [light, rgbMode, rgbColor, ready]);
+
+  useEffect(() => {
+    if (state === "overview") engineRef.current?.setExplode(explode);
+  }, [explode, state]);
+
+  useEffect(() => {
+    if (selected || state === "journey") setExplode(0);
+  }, [selected, state]);
+
+  // /pc?tour=1（首页「跟着数据走一遍」）：整机就绪后自动开始数据旅程
+  const tourAsked = useRef(new URLSearchParams(window.location.search).get("tour") === "1");
+  useEffect(() => {
+    if (state !== "overview" || !tourAsked.current) return;
+    tourAsked.current = false;
+    const t = setTimeout(() => engineRef.current?.startJourney(0), 400);
+    return () => clearTimeout(t);
+  }, [state]);
+
+  useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") engineRef.current?.select(null);
+      if (ev.key === "Escape") {
+        engineRef.current?.stopJourney();
+        engineRef.current?.select(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -107,6 +142,8 @@ export default function PcPage() {
 
   const def = selected ? PART_BY_ID[selected] : null;
   const busy = state === "extracting" || state === "closing";
+  const touring = state === "journey";
+  const step = jStep !== null ? JOURNEY[jStep] : null;
 
   if (!supported) return <Fallback />;
 
@@ -117,7 +154,7 @@ export default function PcPage() {
 
       <header className="pc-head">
         <h1>整机拆解</h1>
-        <p>{def ? `${def.name} · ${def.tag}` : "点一下任意部件，把它从机箱里拆出来看看里面"}</p>
+        <p>{touring ? "一次数据的旅程 · 跟着发光的数据包走一遍" : def ? `${def.name} · ${def.tag}` : "点一下任意部件，把它从机箱里拆出来看看里面"}</p>
       </header>
 
       {!ready && !error && (
@@ -143,13 +180,13 @@ export default function PcPage() {
       )}
       {hovered && state === "overview" && <div className="pc-hoverchip">{PART_BY_ID[hovered].name}</div>}
 
-      <nav className="pc-parts" aria-label="部件">
+      <nav className="pc-parts" aria-label="部件" hidden={touring}>
         {ORDER.map((id) => (
           <button
             key={id}
             type="button"
             className={selected === id ? "is-on" : undefined}
-            disabled={!ready || busy}
+            disabled={!ready || busy || touring}
             onClick={() => pick(selected === id ? null : id)}
           >
             {PART_BY_ID[id].name}
@@ -158,6 +195,19 @@ export default function PcPage() {
       </nav>
 
       <div className="pc-tools">
+        {!selected && !touring && (
+          <button type="button" className="pc-btn pc-btn--tour" disabled={!ready || state !== "overview"} onClick={() => engineRef.current?.startJourney(0)}>
+            ▶ 数据旅程
+          </button>
+        )}
+        <div className="pc-seg" role="group" aria-label="灯光">
+          <button type="button" className={light === "studio" ? "is-on" : undefined} onClick={() => setLight("studio")}>
+            影棚
+          </button>
+          <button type="button" className={light === "rgb" ? "is-on" : undefined} onClick={() => setLight("rgb")}>
+            氛围灯
+          </button>
+        </div>
         {selected && (
           <button type="button" className="pc-btn pc-btn--back" disabled={busy} onClick={() => pick(null)}>
             ← 返回整机
@@ -177,7 +227,74 @@ export default function PcPage() {
         )}
       </div>
 
-      {panelOpen && (
+      {light === "rgb" && (
+        <div className="pc-rgb" role="group" aria-label="灯效">
+          {RGB_MODES.map((m, i) => (
+            <button key={m} type="button" className={rgbMode === i ? "is-on" : undefined} onClick={() => setRgbMode(i)}>
+              {m}
+            </button>
+          ))}
+          {rgbMode > 0 &&
+            RGB_SWATCHES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={rgbColor === c ? "pc-sw is-on" : "pc-sw"}
+                style={{ ["--c" as string]: c }}
+                aria-label={`灯光颜色 ${c}`}
+                onClick={() => setRgbColor(c)}
+              />
+            ))}
+        </div>
+      )}
+
+      {ready && !selected && !touring && (
+        <label className="pc-explode">
+          <span>爆炸视图</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={explode}
+            disabled={state !== "overview"}
+            onChange={(e) => setExplode(Number(e.target.value))}
+          />
+        </label>
+      )}
+
+      {touring && step && (
+        <div className="pc-journey" role="status" aria-live="polite">
+          <div className="pc-journey__dots">
+            {JOURNEY.map((s, i) => (
+              <button
+                key={s.title}
+                type="button"
+                className={i === jStep ? "is-on" : i < (jStep ?? 0) ? "is-done" : undefined}
+                style={{ ["--c" as string]: s.color }}
+                aria-label={s.title}
+                onClick={() => engineRef.current?.journeyGo(i)}
+              />
+            ))}
+          </div>
+          <h2 style={{ ["--c" as string]: step.color }}>{step.title}</h2>
+          <p>{step.caption}</p>
+          <small>{step.tag}</small>
+          <div className="pc-journey__nav">
+            <button type="button" className="pc-btn" disabled={jStep === 0} onClick={() => engineRef.current?.journeyGo((jStep ?? 0) - 1)}>
+              上一站
+            </button>
+            <button type="button" className="pc-btn" onClick={() => engineRef.current?.journeyGo((jStep ?? 0) + 1)}>
+              {jStep === JOURNEY.length - 1 ? "完成" : "下一站"}
+            </button>
+            <button type="button" className="pc-btn pc-btn--ghost" onClick={() => engineRef.current?.stopJourney()}>
+              退出
+            </button>
+          </div>
+        </div>
+      )}
+
+      {panelOpen && !touring && (
         <aside ref={panelRef} className={wide ? "pc-panel" : "pc-panel pc-panel--sheet"} aria-live="polite">
           {def ? (
             <>
@@ -240,6 +357,8 @@ export default function PcPage() {
                 <li>拖动旋转，双指或滚轮缩放。</li>
                 <li>点部件：先从机箱里滑出来，再打开看内部结构。</li>
                 <li>点空白处或「返回整机」回到全景。</li>
+                <li>「数据旅程」：跟着一个数据包从网卡走到内存、CPU、显卡和硬盘。</li>
+                <li>「爆炸视图」滑块把所有部件一起拉开；「氛围灯」切换机箱灯效。</li>
               </ul>
             </>
           )}

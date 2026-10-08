@@ -4,7 +4,7 @@ import { syncCatalog } from "../src/lib/catalog-sync";
 const prisma = new PrismaClient();
 syncCatalog(prisma)
   .then((r) => {
-    console.log(`种子数据已写入：进度条目 ${r.items}，自测题 ${r.questions}`);
+    console.log(`种子数据已写入：自测题 ${r.questions}`);
   })
   .catch((e: unknown) => {
     console.error(e);

@@ -1,7 +1,7 @@
 {
  "exterior": {
   "board": {
-   "count": 189987,
+   "tris": 117310,
    "origin": [
     0.085,
     0.292,
@@ -81,10 +81,10 @@
      0.123
     ]
    ],
-   "bytes": 917492
+   "bytes": 2329468
   },
   "case": {
-   "count": 168084,
+   "tris": 95368,
    "origin": [
     0,
     0.25,
@@ -150,14 +150,14 @@
     ],
     [
      0.105,
-     0.2324,
+     0.2325,
      0.2258
     ]
    ],
-   "bytes": 885729
+   "bytes": 2120724
   },
   "cpu": {
-   "count": 76019,
+   "tris": 40568,
    "origin": [
     0.025,
     0.365,
@@ -182,10 +182,10 @@
      0.034
     ]
    ],
-   "bytes": 428990
+   "bytes": 817708
   },
   "gpu": {
-   "count": 114024,
+   "tris": 104242,
    "origin": [
     0.0154,
     0.2505,
@@ -220,10 +220,10 @@
      0.15
     ]
    ],
-   "bytes": 582602
+   "bytes": 1727888
   },
   "hdd": {
-   "count": 31994,
+   "tris": 11576,
    "origin": [
     0,
     0.0372,
@@ -253,10 +253,10 @@
      0.0735
     ]
    ],
-   "bytes": 163253
+   "bytes": 197348
   },
   "nic": {
-   "count": 21984,
+   "tris": 10760,
    "origin": [
     0.0384,
     0.1855,
@@ -291,10 +291,10 @@
      0.06
     ]
    ],
-   "bytes": 140544
+   "bytes": 302860
   },
   "psu": {
-   "count": 49968,
+   "tris": 15124,
    "origin": [
     0,
     0.067,
@@ -324,10 +324,10 @@
      0.0712
     ]
    ],
-   "bytes": 250655
+   "bytes": 295636
   },
   "ram": {
-   "count": 29985,
+   "tris": 23624,
    "origin": [
     0.065,
     0.369,
@@ -342,7 +342,7 @@
    },
    "bbox": [
     [
-     -0.0242,
+     -0.0272,
      -0.0673,
      -0.0105
     ],
@@ -352,10 +352,10 @@
      0.0165
     ]
    ],
-   "bytes": 171124
+   "bytes": 336500
   },
   "ssd": {
-   "count": 14004,
+   "tris": 1476,
    "origin": [
     0.081,
     0.295,
@@ -380,12 +380,12 @@
      0.04
     ]
    ],
-   "bytes": 85318
+   "bytes": 40528
   }
  },
  "interior": {
   "board": {
-   "count": 245056,
+   "tris": 82164,
    "origin": [
     0,
     0,
@@ -465,10 +465,10 @@
      0.1525
     ]
    ],
-   "bytes": 1041575
+   "bytes": 1497664
   },
   "cpu": {
-   "count": 239951,
+   "tris": 26488,
    "origin": [
     0,
     0,
@@ -534,19 +534,19 @@
    "bbox": [
     [
      -0.0225,
-     -0.0001,
-     -0.0422
+     -0.0002,
+     -0.042
     ],
     [
      0.0225,
-     0.033,
-     0.0187
+     0.0327,
+     0.0188
     ]
    ],
-   "bytes": 1110817
+   "bytes": 405504
   },
   "gpu": {
-   "count": 245048,
+   "tris": 98096,
    "origin": [
     0,
     0,
@@ -601,10 +601,10 @@
      0.064
     ]
    ],
-   "bytes": 1186564
+   "bytes": 1883316
   },
   "hdd": {
-   "count": 245087,
+   "tris": 60994,
    "origin": [
     0,
     0,
@@ -655,19 +655,19 @@
    "bbox": [
     [
      -0.0508,
-     -0.0065,
-     -0.1386
+     -0.0063,
+     -0.1384
     ],
     [
-     0.058,
-     0.1309,
+     0.0574,
+     0.1307,
      0.0735
     ]
    ],
-   "bytes": 1090986
+   "bytes": 941108
   },
   "nic": {
-   "count": 229960,
+   "tris": 26048,
    "origin": [
     0,
     0,
@@ -723,14 +723,14 @@
     ],
     [
      0.06,
-     0.0494,
+     0.0493,
      0.044
     ]
    ],
-   "bytes": 1079260
+   "bytes": 471000
   },
   "psu": {
-   "count": 245086,
+   "tris": 71563,
    "origin": [
     0,
     0,
@@ -776,19 +776,19 @@
    "bbox": [
     [
      -0.075,
-     -0.0005,
-     -0.1406
+     -0.0003,
+     -0.1405
     ],
     [
      0.075,
-     0.1462,
+     0.1461,
      0.0712
     ]
    ],
-   "bytes": 1267100
+   "bytes": 1497308
   },
   "ram": {
-   "count": 240119,
+   "tris": 60040,
    "origin": [
     0,
     0,
@@ -811,9 +811,9 @@
      0.0014
     ],
     "hs": [
-     0.04,
-     0.04,
-     -0.052
+     0.0003,
+     0.0145,
+     -0.021
     ],
     "gold": [
      0,
@@ -834,19 +834,19 @@
    "bbox": [
     [
      -0.0673,
-     -0.0006,
-     -0.0507
+     -0.0005,
+     -0.0505
     ],
     [
      0.0673,
-     0.0685,
-     0.0171
+     0.0684,
+     0.017
     ]
    ],
-   "bytes": 1103986
+   "bytes": 1000728
   },
   "ssd": {
-   "count": 230017,
+   "tris": 38864,
    "origin": [
     0,
     0,
@@ -896,7 +896,1169 @@
      0.011
     ]
    ],
-   "bytes": 959092
+   "bytes": 478908
   }
+ },
+ "materials": {
+  "alu": {
+   "color": [
+    200,
+    202,
+    207
+   ],
+   "metal": 1,
+   "rough": 0.28,
+   "tex_side": "top",
+   "kind": "brushed"
+  },
+  "alu_dark": {
+   "color": [
+    62,
+    64,
+    70
+   ],
+   "metal": 1,
+   "rough": 0.34,
+   "tex_side": "top",
+   "kind": "brushed"
+  },
+  "audio_b": {
+   "color": [
+    80,
+    140,
+    230
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "audio_g": {
+   "color": [
+    110,
+    200,
+    80
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "audio_p": {
+   "color": [
+    230,
+    120,
+    170
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "banks": {
+   "color": [
+    18,
+    20,
+    26
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "banks",
+   "tex_side": "top"
+  },
+  "banks__plain": {
+   "color": [
+    18,
+    20,
+    26
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "cap_blue": {
+   "color": [
+    40,
+    70,
+    150
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "cap_sleeve": {
+   "color": [
+    30,
+    30,
+    36
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "cap_top": {
+   "color": [
+    190,
+    192,
+    198
+   ],
+   "metal": 1,
+   "rough": 0.3,
+   "tex_side": "top"
+  },
+  "case_black": {
+   "color": [
+    26,
+    27,
+    30
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "kind": "powder"
+  },
+  "case_inner": {
+   "color": [
+    22,
+    23,
+    26
+   ],
+   "metal": 0,
+   "rough": 0.6,
+   "tex_side": "top",
+   "kind": "powder"
+  },
+  "chipset": {
+   "color": [
+    32,
+    32,
+    36
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "chipset",
+   "tex_side": "top"
+  },
+  "chipset__plain": {
+   "color": [
+    32,
+    32,
+    36
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "choke": {
+   "color": [
+    64,
+    64,
+    68
+   ],
+   "metal": 0.4,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "copper": {
+   "color": [
+    206,
+    122,
+    82
+   ],
+   "metal": 1,
+   "rough": 0.28,
+   "tex_side": "top"
+  },
+  "die": {
+   "color": [
+    46,
+    40,
+    52
+   ],
+   "metal": 0,
+   "rough": 0.25,
+   "tex": "die",
+   "tex_side": "top"
+  },
+  "die__plain": {
+   "color": [
+    46,
+    40,
+    52
+   ],
+   "metal": 0,
+   "rough": 0.25,
+   "tex_side": "top"
+  },
+  "dram": {
+   "color": [
+    20,
+    20,
+    23
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "dram",
+   "tex_side": "top"
+  },
+  "dram__plain": {
+   "color": [
+    20,
+    20,
+    23
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "fanhub": {
+   "color": [
+    24,
+    24,
+    27
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "fanhub",
+   "tex_side": "top"
+  },
+  "fanhub__plain": {
+   "color": [
+    24,
+    24,
+    27
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ferrite": {
+   "color": [
+    40,
+    40,
+    44
+   ],
+   "metal": 0,
+   "rough": 0.7,
+   "tex_side": "top"
+  },
+  "fin_alu": {
+   "color": [
+    206,
+    208,
+    212
+   ],
+   "metal": 1,
+   "rough": 0.32,
+   "tex_side": "top"
+  },
+  "fins_x": {
+   "color": [
+    190,
+    192,
+    198
+   ],
+   "metal": 1,
+   "rough": 0.35,
+   "tex": "fins_x",
+   "tex_side": "box"
+  },
+  "fins_z": {
+   "color": [
+    196,
+    198,
+    204
+   ],
+   "metal": 1,
+   "rough": 0.3,
+   "tex": "fins_z",
+   "tex_side": "box"
+  },
+  "frit": {
+   "color": [
+    8,
+    8,
+    10
+   ],
+   "metal": 0,
+   "rough": 0.15,
+   "tex_side": "top",
+   "coat": 1
+  },
+  "front_mesh": {
+   "color": [
+    34,
+    35,
+    39
+   ],
+   "metal": 0,
+   "rough": 0.75,
+   "tex_side": "top",
+   "kind": "mesh"
+  },
+  "gddr": {
+   "color": [
+    20,
+    20,
+    23
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "gddr",
+   "tex_side": "top"
+  },
+  "gddr__plain": {
+   "color": [
+    20,
+    20,
+    23
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "gold": {
+   "color": [
+    222,
+    180,
+    92
+   ],
+   "metal": 1,
+   "rough": 0.25,
+   "tex_side": "top"
+  },
+  "gpu_die": {
+   "color": [
+    46,
+    48,
+    56
+   ],
+   "metal": 0.4,
+   "rough": 0.25,
+   "tex": "gpu_die",
+   "tex_side": "top"
+  },
+  "gpu_die__plain": {
+   "color": [
+    46,
+    48,
+    56
+   ],
+   "metal": 0.4,
+   "rough": 0.25,
+   "tex_side": "top"
+  },
+  "gpu_pcb": {
+   "color": [
+    18,
+    20,
+    24
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "gpu_pcb",
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "gpu_pcb__plain": {
+   "color": [
+    18,
+    20,
+    24
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "gpu_side": {
+   "color": [
+    28,
+    29,
+    33
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "gpu_side",
+   "tex_side": "top"
+  },
+  "gpu_side__plain": {
+   "color": [
+    28,
+    29,
+    33
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "gunmetal": {
+   "color": [
+    48,
+    50,
+    55
+   ],
+   "metal": 0.9,
+   "rough": 0.38,
+   "tex_side": "top",
+   "kind": "brushed"
+  },
+  "hdd_label": {
+   "color": [
+    214,
+    216,
+    220
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "hdd_label",
+   "tex_side": "top",
+   "rot": true
+  },
+  "hdd_label__plain": {
+   "color": [
+    214,
+    216,
+    220
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "rot": true
+  },
+  "hdd_pcb": {
+   "color": [
+    24,
+    70,
+    50
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ihs": {
+   "color": [
+    206,
+    206,
+    210
+   ],
+   "metal": 1,
+   "rough": 0.2,
+   "tex": "ihs",
+   "tex_side": "top"
+  },
+  "ihs__plain": {
+   "color": [
+    206,
+    206,
+    210
+   ],
+   "metal": 1,
+   "rough": 0.2,
+   "tex_side": "top"
+  },
+  "led_amber": {
+   "color": [
+    255,
+    170,
+    40
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "emit": 2
+  },
+  "led_green": {
+   "color": [
+    60,
+    230,
+    110
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "emit": 2
+  },
+  "led_white": {
+   "color": [
+    235,
+    240,
+    255
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "emit": 1.6
+  },
+  "lga": {
+   "color": [
+    180,
+    150,
+    80
+   ],
+   "metal": 0.6,
+   "rough": 0.5,
+   "tex": "lga",
+   "tex_side": "top"
+  },
+  "lga__plain": {
+   "color": [
+    180,
+    150,
+    80
+   ],
+   "metal": 0.6,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "lga_pads": {
+   "color": [
+    180,
+    150,
+    80
+   ],
+   "metal": 0.7,
+   "rough": 0.3,
+   "tex": "lga_pads",
+   "tex_side": "both"
+  },
+  "lga_pads__plain": {
+   "color": [
+    180,
+    150,
+    80
+   ],
+   "metal": 0.7,
+   "rough": 0.3,
+   "tex_side": "both"
+  },
+  "nand": {
+   "color": [
+    24,
+    24,
+    27
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "nand",
+   "tex_side": "top",
+   "rot": true
+  },
+  "nand__plain": {
+   "color": [
+    24,
+    24,
+    27
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "rot": true
+  },
+  "nand_die": {
+   "color": [
+    120,
+    130,
+    150
+   ],
+   "metal": 0.6,
+   "rough": 0.3,
+   "tex_side": "top"
+  },
+  "nic_die": {
+   "color": [
+    30,
+    30,
+    36
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "nic_die",
+   "tex_side": "top"
+  },
+  "nic_die__plain": {
+   "color": [
+    30,
+    30,
+    36
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "nic_pcb": {
+   "color": [
+    22,
+    80,
+    58
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "nic_pcb",
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "nic_pcb__plain": {
+   "color": [
+    22,
+    80,
+    58
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "nickel": {
+   "color": [
+    206,
+    206,
+    210
+   ],
+   "metal": 1,
+   "rough": 0.18,
+   "tex_side": "top"
+  },
+  "pcb_black": {
+   "color": [
+    20,
+    22,
+    26
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "pcb_mobo": {
+   "color": [
+    25,
+    29,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "mobo",
+   "tex_side": "top",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "pcb_mobo__plain": {
+   "color": [
+    25,
+    29,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "top",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "phy": {
+   "color": [
+    26,
+    26,
+    30
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "phy",
+   "tex_side": "top"
+  },
+  "phy__plain": {
+   "color": [
+    26,
+    26,
+    30
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "plastic": {
+   "color": [
+    24,
+    24,
+    27
+   ],
+   "metal": 0,
+   "rough": 0.6,
+   "tex_side": "top"
+  },
+  "plastic_blue": {
+   "color": [
+    40,
+    92,
+    200
+   ],
+   "metal": 0,
+   "rough": 0.45,
+   "tex_side": "top"
+  },
+  "plastic_gray": {
+   "color": [
+    92,
+    94,
+    100
+   ],
+   "metal": 0,
+   "rough": 0.55,
+   "tex_side": "top"
+  },
+  "plastic_white": {
+   "color": [
+    226,
+    226,
+    222
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "platter": {
+   "color": [
+    190,
+    194,
+    200
+   ],
+   "metal": 0.85,
+   "rough": 0.12,
+   "tex": "platter",
+   "tex_side": "top"
+  },
+  "platter__plain": {
+   "color": [
+    190,
+    194,
+    200
+   ],
+   "metal": 0.85,
+   "rough": 0.12,
+   "tex_side": "top"
+  },
+  "psu_label": {
+   "color": [
+    30,
+    31,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "psu_label",
+   "tex_side": "top"
+  },
+  "psu_label__plain": {
+   "color": [
+    30,
+    31,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "psu_pcb": {
+   "color": [
+    150,
+    120,
+    60
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "psu_pcb",
+   "tex_side": "top",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "psu_pcb__plain": {
+   "color": [
+    150,
+    120,
+    60
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "top",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "psu_side": {
+   "color": [
+    30,
+    31,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "psu_label",
+   "tex_side": "top"
+  },
+  "psu_side__plain": {
+   "color": [
+    30,
+    31,
+    35
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ram_label": {
+   "color": [
+    196,
+    198,
+    202
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "ram_label",
+   "tex_side": "top"
+  },
+  "ram_label__plain": {
+   "color": [
+    196,
+    198,
+    202
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ram_label_back": {
+   "color": [
+    196,
+    198,
+    202
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "ram_label",
+   "tex_side": "both"
+  },
+  "ram_label_back__plain": {
+   "color": [
+    196,
+    198,
+    202
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "both"
+  },
+  "ram_pcb": {
+   "color": [
+    24,
+    60,
+    44
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "ram_pcb",
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "ram_pcb__plain": {
+   "color": [
+    24,
+    60,
+    44
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "rgb_fan": {
+   "color": [
+    225,
+    228,
+    235
+   ],
+   "metal": 0,
+   "rough": 0.35,
+   "tex_side": "top",
+   "emit": 0.6,
+   "kind": "rgb"
+  },
+  "rgb_gpu": {
+   "color": [
+    225,
+    228,
+    235
+   ],
+   "metal": 0,
+   "rough": 0.35,
+   "tex_side": "top",
+   "emit": 0.6,
+   "kind": "rgb"
+  },
+  "rgb_ram": {
+   "color": [
+    225,
+    228,
+    235
+   ],
+   "metal": 0,
+   "rough": 0.35,
+   "tex_side": "top",
+   "emit": 0.6,
+   "kind": "rgb"
+  },
+  "rubber": {
+   "color": [
+    16,
+    16,
+    18
+   ],
+   "metal": 0,
+   "rough": 0.9,
+   "tex_side": "top",
+   "kind": "rubber"
+  },
+  "sleeve": {
+   "color": [
+    30,
+    30,
+    34
+   ],
+   "metal": 0,
+   "rough": 0.7,
+   "tex_side": "top",
+   "kind": "braid"
+  },
+  "smd": {
+   "color": [
+    160,
+    140,
+    110
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "spd": {
+   "color": [
+    22,
+    22,
+    25
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "spd",
+   "tex_side": "top"
+  },
+  "spd__plain": {
+   "color": [
+    22,
+    22,
+    25
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ssd_label": {
+   "color": [
+    24,
+    24,
+    28
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "ssd_label",
+   "tex_side": "top"
+  },
+  "ssd_label__plain": {
+   "color": [
+    24,
+    24,
+    28
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ssd_pcb": {
+   "color": [
+    18,
+    20,
+    24
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex": "ssd_pcb",
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "ssd_pcb__plain": {
+   "color": [
+    18,
+    20,
+    24
+   ],
+   "metal": 0,
+   "rough": 0.42,
+   "tex_side": "both",
+   "kind": "pcb",
+   "coat": 0.5
+  },
+  "ssdctrl": {
+   "color": [
+    30,
+    30,
+    33
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "ssdctrl",
+   "tex_side": "top"
+  },
+  "ssdctrl__plain": {
+   "color": [
+    30,
+    30,
+    33
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "ssddram": {
+   "color": [
+    22,
+    22,
+    25
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "ssddram",
+   "tex_side": "top",
+   "rot": true
+  },
+  "ssddram__plain": {
+   "color": [
+    22,
+    22,
+    25
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top",
+   "rot": true
+  },
+  "steel": {
+   "color": [
+    160,
+    162,
+    168
+   ],
+   "metal": 1,
+   "rough": 0.35,
+   "tex_side": "top"
+  },
+  "substrate": {
+   "color": [
+    40,
+    96,
+    60
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex": "substrate",
+   "tex_side": "top"
+  },
+  "substrate__plain": {
+   "color": [
+    40,
+    96,
+    60
+   ],
+   "metal": 0,
+   "rough": 0.5,
+   "tex_side": "top"
+  },
+  "thermal_pad": {
+   "color": [
+    150,
+    156,
+    170
+   ],
+   "metal": 0,
+   "rough": 0.8,
+   "tex_side": "top"
+  },
+  "tim": {
+   "color": [
+    180,
+    182,
+    186
+   ],
+   "metal": 0.5,
+   "rough": 0.45,
+   "tex_side": "top"
+  },
+  "usb_blue": {
+   "color": [
+    30,
+    80,
+    210
+   ],
+   "metal": 0,
+   "rough": 0.4,
+   "tex_side": "top"
+  },
+  "yellow_tape": {
+   "color": [
+    226,
+    190,
+    70
+   ],
+   "metal": 0,
+   "rough": 0.45,
+   "tex_side": "top"
+  }
+ },
+ "textures": {
+  "banks": 59274,
+  "chipset": 6980,
+  "die": 136110,
+  "dram": 6588,
+  "fanhub": 6862,
+  "fin_braid": 91504,
+  "fin_brushed": 17266,
+  "fin_mesh": 43612,
+  "fin_powder": 26102,
+  "fins_x": 1262,
+  "fins_z": 650,
+  "gddr": 4914,
+  "gpu_die": 4010,
+  "gpu_pcb": 228152,
+  "gpu_side": 6082,
+  "hdd_label": 18470,
+  "ihs": 39454,
+  "lga": 361378,
+  "lga_pads": 305766,
+  "mobo": 255858,
+  "nand": 7240,
+  "nic_die": 39134,
+  "nic_pcb": 114828,
+  "phy": 7370,
+  "platter": 620212,
+  "psu_label": 21164,
+  "psu_pcb": 171934,
+  "ram_label": 12444,
+  "ram_pcb": 53708,
+  "spd": 1092,
+  "ssd_label": 11652,
+  "ssd_pcb": 33590,
+  "ssdctrl": 8892,
+  "ssddram": 4052,
+  "substrate": 77226
  }
 }

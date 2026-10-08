@@ -102,34 +102,6 @@ export const QUIZ: readonly QuizDef[] = [
   { id: "q8", subject: "cn" },
 ];
 
-export type ItemKind = "chapter" | "lab" | "flow" | "part" | "quiz";
-export interface CatalogItem { id: string; kind: ItemKind; subject: Subject; title: string }
-
-export const itemId = {
-  chapter: (subject: string, no: number) => `chapter:${subject}:${no}`,
-  lab: (id: string) => `lab:${id}`,
-  flow: (id: string) => `flow:${id}`,
-  part: (id: string) => `part:${id}`,
-  quiz: (id: string) => `quiz:${id}`,
-};
-
-export const KIND_NAMES: Record<ItemKind, string> = {
-  chapter: "章节考点",
-  lab: "可视化实验",
-  flow: "流程演示",
-  part: "部件拆解",
-  quiz: "自测题（答对）",
-};
-
-/** 进度分母：每科所有可完成条目 */
-export const CATALOG: readonly CatalogItem[] = [
-  ...CHAPTERS.map((c) => ({ id: itemId.chapter(c.subject, c.no), kind: "chapter" as const, subject: c.subject, title: `第 ${c.no} 章 ${c.title}` })),
-  ...LABS.map((l) => ({ id: itemId.lab(l.id), kind: "lab" as const, subject: l.subject, title: l.title })),
-  ...FLOWS.map((f) => ({ id: itemId.flow(f.id), kind: "flow" as const, subject: f.subject, title: f.title })),
-  ...PARTS.map((p) => ({ id: itemId.part(p.id), kind: "part" as const, subject: p.subject, title: p.title })),
-  ...QUIZ.map((q, i) => ({ id: itemId.quiz(q.id), kind: "quiz" as const, subject: q.subject, title: `自测第 ${i + 1} 题` })),
-];
-
 export const FLOW_IDS = FLOWS.map((f) => f.id);
 export const LAB_IDS = LABS.map((l) => l.id);
 export const PART_IDS = PARTS.map((p) => p.id);

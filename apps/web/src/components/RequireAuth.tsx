@@ -12,7 +12,7 @@ export default function RequireAuth({ children, title }: { children: ReactNode; 
       <div className="page-pad">
         <div className="empty">
           <h1>{title}</h1>
-          <p>登录后，你在实验室里的每一步都会被记下来：看过的考点、打开的实验、看过的流程演示和自测错题。</p>
+          <p>登录后即可管理你的账号资料。</p>
           <div className="row">
             <Link className="app-btn" to={`/login?next=${next}`}>
               登录

@@ -6,7 +6,20 @@
 }
 
 {$SITE_ADDRESS::80} {
-	encode zstd gzip
+	# 3D 模型（.glb）默认不在 Caddy 的压缩类型里，显式加上
+	encode {
+		zstd
+		gzip
+		match {
+			header Content-Type text/*
+			header Content-Type application/json*
+			header Content-Type application/javascript*
+			header Content-Type application/xml*
+			header Content-Type image/svg+xml*
+			header Content-Type model/gltf-binary*
+			header Content-Type application/octet-stream*
+		}
+	}
 
 	header {
 		X-Content-Type-Options "nosniff"

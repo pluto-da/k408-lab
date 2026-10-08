@@ -1,9 +1,0 @@
-{
-  "name": "pc-splat-tools",
-  "private": true,
-  "description": "Build-time tools for the /pc module (not part of the pnpm workspace). npm install here, then node pack.mjs",
-  "type": "module",
-  "devDependencies": {
-    "@playcanvas/splat-transform": "3.10.0"
-  }
-}

@@ -7,7 +7,6 @@
     "css/legacy-03.css"
   ],
   "scripts": [
-    "js/00-bridge.js",
     "js/00-hark.js",
     "js/01-x408-data.js",
     "js/02-chapters.js",

@@ -5,5 +5,5 @@ export function fmtDate(iso: string): string {
 
 /** 登录后的跳转地址只允许站内路径 */
 export function safeNext(raw: string | null): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/dashboard";
+  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
 }

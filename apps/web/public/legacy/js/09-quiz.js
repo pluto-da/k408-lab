@@ -59,7 +59,6 @@
         function answer(k) {
           var q = Q[i], ok = k === q.a, L = "ABCD".charAt(q.a);
           picks[i] = k;
-          if (window.LAB_EMIT) LAB_EMIT("quiz_answered", { questionId: q.id, correct: ok, chosen: k });
           root.querySelectorAll(".x-quiz__opt").forEach(function (b, j) {
             b.disabled = true;
             if (j === q.a) { b.classList.add("is-ok"); b.querySelector("em").textContent = "✓ 正确答案"; }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import manifest from "./manifest.json";
 import { LINKS, PARTS } from "./parts";
 
-type Meta = { count: number; bytes: number; anchors: Record<string, number[]>; bbox: number[][]; origin: number[] };
+type Meta = { tris: number; bytes: number; anchors: Record<string, number[]>; bbox: number[][]; origin: number[] };
 const ext = manifest.exterior as Record<string, Meta>;
 const int = manifest.interior as Record<string, Meta>;
 
@@ -30,10 +30,19 @@ describe("整机拆解 data", () => {
     }
   });
 
-  it("stays inside the tablet splat budget", () => {
-    const closed = Object.values(ext).reduce((s, m) => s + m.count, 0);
-    expect(closed).toBeLessThanOrEqual(720_000);
-    for (const [id, m] of Object.entries(int)) expect(m.count, id).toBeLessThanOrEqual(250_000);
+  it("stays inside the tablet budget (first load ≤ 8 MB, lazy interiors)", () => {
+    const closed = Object.values(ext).reduce((s, m) => s + m.bytes, 0);
+    expect(closed).toBeLessThanOrEqual(8 * 1024 * 1024);
+    const tris = Object.values(ext).reduce((s, m) => s + m.tris, 0);
+    expect(tris).toBeLessThanOrEqual(700_000);
+    for (const [id, m] of Object.entries(int)) expect(m.tris, id).toBeLessThanOrEqual(300_000);
+  });
+
+  it("every material the models use is defined, and its texture is packed", () => {
+    const mats = manifest.materials as Record<string, { tex?: string }>;
+    const tex = manifest.textures as Record<string, number>;
+    for (const m of Object.values(mats)) if (m.tex) expect(tex[m.tex], m.tex).toBeGreaterThan(0);
+    for (const t of ["fin_brushed", "fin_powder", "fin_braid", "fin_mesh"]) expect(tex[t], t).toBeGreaterThan(0);
   });
 
   it("visible copy avoids implementation jargon", () => {

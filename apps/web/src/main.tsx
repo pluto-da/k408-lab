@@ -3,15 +3,11 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
-import { installLabBridge } from "./bridge/labBridge";
 import "./styles/app.css";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 30_000, retry: 1 } },
 });
-
-// 必须早于 /lab 页加载旧模块之前安装，才能接住所有 lab:event
-installLabBridge(queryClient);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

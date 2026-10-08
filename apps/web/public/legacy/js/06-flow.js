@@ -196,7 +196,6 @@
           bar.hidden = false; hero.classList.add("is-flow"); sync(id);
           buildStep(); setPlaying(!reduced);
           if (!wasRunning) requestAnimationFrame(loop);
-          if (window.LAB_EMIT) LAB_EMIT("flow_viewed", { flowId: id });
         }
         function stop() {
           if (!cur) return;

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { MistakeDto, ProgressResponse, PublicUser, Subject } from "@k408/shared";
+import type { PublicUser } from "@k408/shared";
 import { api } from "./client";
 import { useAuth } from "../store/auth";
 
@@ -71,48 +71,4 @@ export function useUpdateProfile() {
       qc.setQueryData(["me"], r.user);
     },
   });
-}
-
-export function useProgress(enabled: boolean) {
-  return useQuery({ queryKey: ["progress"], queryFn: () => api<ProgressResponse>("/progress"), enabled });
-}
-
-export type MistakeStatus = "active" | "mastered" | "all";
-export interface MistakeFilter {
-  subject?: Subject;
-  status: MistakeStatus;
-}
-export interface MistakeList {
-  items: MistakeDto[];
-  counts: Record<Subject, { active: number; mastered: number }>;
-}
-
-export function useMistakes(f: MistakeFilter, enabled: boolean) {
-  const qs = new URLSearchParams({ status: f.status });
-  if (f.subject) qs.set("subject", f.subject);
-  return useQuery({ queryKey: ["mistakes", f], queryFn: () => api<MistakeList>(`/mistakes?${qs}`), enabled });
-}
-
-export function useMistakeActions() {
-  const qc = useQueryClient();
-  const done = () => {
-    void qc.invalidateQueries({ queryKey: ["mistakes"] });
-    void qc.invalidateQueries({ queryKey: ["progress"] });
-  };
-  return {
-    setMastered: useMutation({
-      mutationFn: (v: { id: string; mastered: boolean }) =>
-        api<{ item: MistakeDto }>(`/mistakes/${v.id}`, { method: "PATCH", body: { mastered: v.mastered } }),
-      onSuccess: done,
-    }),
-    remove: useMutation({
-      mutationFn: (id: string) => api<{ ok: true }>(`/mistakes/${id}`, { method: "DELETE" }),
-      onSuccess: done,
-    }),
-    redo: useMutation({
-      mutationFn: (v: { id: string; answer: number }) =>
-        api<{ correct: boolean; item: MistakeDto }>(`/mistakes/${v.id}/redo`, { body: { answer: v.answer } }),
-    }),
-    refresh: done,
-  };
 }

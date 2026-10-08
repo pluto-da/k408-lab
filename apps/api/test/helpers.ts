@@ -29,7 +29,7 @@ export async function makeApp(overrides: Record<string, string> = {}): Promise<C
 
 export async function resetDb(prisma: PrismaClient) {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE "Mistake", "QuizAnswer", "ProgressRecord", "User" RESTART IDENTITY CASCADE',
+    'TRUNCATE "User" RESTART IDENTITY CASCADE',
   );
 }
 
@@ -52,16 +52,4 @@ export async function registerUser(app: FastifyInstance, name?: string, nickname
   if (res.statusCode !== 201) throw new Error(`注册失败 ${res.statusCode} ${res.body}`);
   const body = res.json() as { user: { id: string } };
   return { cookie: cookieOf(res), id: body.user.id, username };
-}
-
-let eidN = 0;
-export const eid = () => `e${Date.now()}x${eidN++}`;
-
-export async function postEvents(app: FastifyInstance, cookie: string, events: Record<string, unknown>[]) {
-  return app.inject({
-    method: "POST",
-    url: "/api/events",
-    headers: { cookie },
-    payload: { events: events.map((e) => ({ eid: eid(), ...e })) },
-  });
 }

@@ -15,14 +15,6 @@ enum Subject {
   cn
 }
 
-enum ItemKind {
-  chapter
-  lab
-  flow
-  part
-  quiz
-}
-
 model User {
   id           String   @id @default(cuid())
   /// 小写存储，唯一；与 email 至少有一个
@@ -36,36 +28,6 @@ model User {
   tokenVersion Int      @default(0)
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @db.Timestamptz(3)
-
-  progress    ProgressRecord[]
-  mistakes    Mistake[]
-  quizAnswers QuizAnswer[]
-}
-
-/// 进度分母：章节考点、实验、流程演示、部件、自测题
-model ContentItem {
-  id       String           @id
-  kind     ItemKind
-  subject  Subject
-  title    String
-  sort     Int              @default(0)
-  progress ProgressRecord[]
-
-  @@index([subject])
-}
-
-model ProgressRecord {
-  id      String      @id @default(cuid())
-  userId  String
-  itemId  String
-  count   Int         @default(1)
-  firstAt DateTime    @default(now()) @db.Timestamptz(3)
-  lastAt  DateTime    @default(now()) @db.Timestamptz(3)
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  item    ContentItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, itemId])
-  @@index([userId, lastAt])
 }
 
 model Question {
@@ -76,43 +38,4 @@ model Question {
   answer      Int
   explanation String
   sort        Int          @default(0)
-  answers     QuizAnswer[]
-  mistakes    Mistake[]
-}
-
-model QuizAnswer {
-  id         String   @id @default(cuid())
-  userId     String
-  questionId String
-  chosen     Int
-  correct    Boolean
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@index([userId, questionId])
-}
-
-model Mistake {
-  id            String        @id @default(cuid())
-  userId        String
-  subject       Subject
-  /// 去重键：quiz:<题号>
-  dedupeKey     String
-  questionId    String?
-  prompt        String
-  options       Json?
-  chosen        String
-  correctAnswer String
-  explanation   String
-  wrongCount    Int           @default(1)
-  mastered      Boolean       @default(false)
-  masteredAt    DateTime?     @db.Timestamptz(3)
-  lastWrongAt   DateTime      @default(now()) @db.Timestamptz(3)
-  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  question      Question?     @relation(fields: [questionId], references: [id], onDelete: SetNull)
-
-  @@unique([userId, dedupeKey])
-  @@index([userId, subject, mastered])
 }
