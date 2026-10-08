@@ -5,6 +5,7 @@ import { useSync } from "../store/sync";
 
 const NAV = [
   { to: "/lab", label: "实验室" },
+  { to: "/pc", label: "整机拆解" },
   { to: "/dashboard", label: "学习进度" },
   { to: "/mistakes", label: "错题本" },
 ];
@@ -39,13 +40,14 @@ export default function Layout() {
   const lastError = useSync((s) => s.lastError);
   const loc = useLocation();
   const isLab = loc.pathname === "/lab";
+  const isFull = loc.pathname === "/pc";
 
   useEffect(() => {
     if (!isLab) window.scrollTo(0, 0);
   }, [loc.pathname, isLab]);
 
   return (
-    <div className={isLab ? "app app--lab" : "app"}>
+    <div className={isLab ? "app app--lab" : isFull ? "app app--full" : "app"}>
       <div className="app-bar">
         <div className="app-bar__in">
           <Link to="/" className="app-brand">
@@ -81,10 +83,10 @@ export default function Layout() {
           </div>
         </div>
       </div>
-      <main className={isLab ? "app-main app-main--lab" : "app-main"}>
+      <main className={isLab ? "app-main app-main--lab" : isFull ? "app-main app-main--full" : "app-main"}>
         <Outlet />
       </main>
-      {!isLab && (
+      {!isLab && !isFull && (
         <footer className="app-foot">
           <p>考研408动画实验室 · 数据结构 / 计算机组成原理 / 操作系统 / 计算机网络</p>
         </footer>

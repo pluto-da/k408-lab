@@ -11,6 +11,7 @@ const DashboardPage = lazy(() => import("./pages/Dashboard"));
 const MistakesPage = lazy(() => import("./pages/Mistakes"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
+const PcPage = lazy(() => import("./pages/Pc"));
 
 export default function App() {
   useMe();
@@ -20,6 +21,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="lab" element={<LabPage />} />
+          <Route path="pc" element={<PcPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="dashboard" element={<DashboardPage />} />

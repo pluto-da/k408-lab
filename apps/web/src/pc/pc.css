@@ -1,0 +1,136 @@
+/* 整机拆解（/pc）。深色舞台，所有类名带 pc- 前缀。 */
+html.is-pc body { background: #0a0c10; }
+.app--full .app-bar { position: relative; }
+.app-main--full { padding: 0; max-width: none; margin: 0; }
+
+.pc-page {
+  position: relative;
+  height: calc(100dvh - var(--bar-h));
+  min-height: 480px;
+  overflow: hidden;
+  background: #0a0c10;
+  color: #e9eaee;
+  font-family: var(--font);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.pc-stage { position: absolute; inset: 0; touch-action: none; }
+.pc-canvas { display: block; outline: none; touch-action: none; }
+.pc-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.pc-leaders { position: absolute; inset: 0; overflow: visible; }
+.pc-leader { fill: none; stroke: var(--c); stroke-width: 1.2; stroke-opacity: 0.85; transition: opacity 0.2s; }
+.pc-leader-dot { fill: var(--c); stroke: #0a0c10; stroke-width: 1.5; }
+.pc-callouts { position: absolute; inset: 0; }
+.pc-callout {
+  position: absolute; left: 0; top: 0; white-space: nowrap;
+  padding: 4px 10px 4px 9px; border-radius: 3px;
+  font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: 0.01em;
+  color: #f2f3f5; background: rgba(14, 17, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.1); border-left: 3px solid var(--c);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  will-change: transform;
+}
+.pc-linklabel {
+  position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0;
+  padding: 2px 8px; border-radius: 10px; font-size: 12px; line-height: 16px; font-weight: 500;
+  color: #0a0c10; background: var(--c); box-shadow: 0 0 14px color-mix(in srgb, var(--c) 60%, transparent);
+  will-change: transform, opacity;
+}
+
+.pc-head { position: absolute; left: clamp(14px, 3vw, 28px); top: 16px; pointer-events: none; max-width: 52vw; }
+.pc-head h1 { margin: 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: 0.04em; color: #f4f5f7; }
+.pc-head p { margin: 4px 0 0; font-size: 13px; color: rgba(233, 234, 238, 0.62); }
+
+.pc-loading {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: radial-gradient(ellipse at 50% 55%, #141820 0%, #0a0c10 70%);
+}
+.pc-loading b { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; color: #f4f5f7; margin-top: -78px; height: 68px; line-height: 68px; }
+.pc-loading span { font-size: 13px; color: rgba(233, 234, 238, 0.6); letter-spacing: 0.08em; }
+.pc-loading__ring {
+  width: 68px; height: 68px; border-radius: 50%;
+  background: conic-gradient(#5ab0ff calc(var(--p, 0) * 360deg), rgba(255, 255, 255, 0.08) 0);
+  -webkit-mask: radial-gradient(circle, transparent 29px, #000 30px); mask: radial-gradient(circle, transparent 29px, #000 30px);
+}
+.pc-loading--err b { margin: 0; height: auto; line-height: 1.4; }
+.pc-opening {
+  position: absolute; left: 50%; bottom: 76px; transform: translateX(-50%);
+  padding: 6px 14px; border-radius: 14px; font-size: 13px; background: rgba(20, 24, 31, 0.9); border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.pc-hoverchip {
+  position: absolute; left: 50%; top: 18px; transform: translateX(-50%); pointer-events: none;
+  padding: 5px 12px; border-radius: 14px; font-size: 13px; font-weight: 500; background: rgba(90, 176, 255, 0.16); border: 1px solid rgba(90, 176, 255, 0.45);
+}
+
+.pc-parts {
+  position: absolute; left: clamp(10px, 3vw, 28px); bottom: 16px; display: flex; flex-wrap: wrap; gap: 6px; max-width: min(640px, 62vw);
+}
+.pc-parts button, .pc-btn {
+  font: inherit; font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer;
+  padding: 9px 12px; min-height: 36px; border-radius: 18px;
+  color: rgba(240, 241, 244, 0.86); background: rgba(22, 26, 33, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.pc-parts button:hover:not(:disabled), .pc-btn:hover:not(:disabled) { background: rgba(40, 46, 58, 0.9); color: #fff; }
+.pc-parts button.is-on { background: #5ab0ff; color: #0a0c10; border-color: #5ab0ff; }
+.pc-parts button:disabled, .pc-btn:disabled { opacity: 0.45; cursor: default; }
+.pc-btn--back { background: #f4f5f7; color: #0a0c10; border-color: #f4f5f7; }
+.pc-btn--back:hover:not(:disabled) { background: #fff; color: #0a0c10; }
+
+.pc-tools { position: absolute; right: clamp(10px, 3vw, 28px); top: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.pc-switch { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer; padding: 0 12px; min-height: 36px; border-radius: 18px; background: rgba(22, 26, 33, 0.78); border: 1px solid rgba(255, 255, 255, 0.12); }
+.pc-switch input { width: 15px; height: 15px; accent-color: #5ab0ff; margin: 0; }
+
+.pc-panel {
+  position: absolute; right: clamp(10px, 2vw, 24px); top: 62px; bottom: 16px; width: 348px;
+  overflow-y: auto; overscroll-behavior: contain; -webkit-user-select: text; user-select: text;
+  padding: 18px 18px 20px; border-radius: 6px;
+  background: rgba(15, 18, 24, 0.86); border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.pc-panel--sheet { left: 10px; right: 10px; top: auto; bottom: 64px; width: auto; max-height: 42%; }
+.pc-panel__tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #5ab0ff; text-transform: uppercase; }
+.pc-panel h2 { margin: 6px 0 8px; font-size: 20px; line-height: 1.3; font-weight: 600; color: #f6f7f9; }
+.pc-panel h2 small { font-size: 12px; font-weight: 400; color: rgba(233, 234, 238, 0.5); margin-left: 6px; letter-spacing: 0.02em; }
+.pc-panel h3 { margin: 16px 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: rgba(233, 234, 238, 0.55); }
+.pc-panel__brief { margin: 0; font-size: 14px; line-height: 1.65; color: rgba(233, 234, 238, 0.82); }
+.pc-points { margin: 0; padding: 0; list-style: none; counter-reset: pt; }
+.pc-points li { position: relative; padding: 7px 0 7px 26px; font-size: 13.5px; line-height: 1.62; color: rgba(240, 241, 244, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.pc-points li::before {
+  counter-increment: pt; content: counter(pt); position: absolute; left: 0; top: 9px;
+  width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 18px; text-align: center; font-weight: 600;
+  color: #0a0c10; background: rgba(90, 176, 255, 0.85);
+}
+.pc-points--tips li::before { background: rgba(255, 255, 255, 0.35); }
+.pc-legend { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.pc-legend li { display: flex; align-items: center; gap: 9px; font-size: 13px; color: rgba(240, 241, 244, 0.86); }
+.pc-legend i { flex: none; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+.pc-legend--links { margin-top: 14px; }
+.pc-legend--links li { padding: 6px 8px; border-radius: 4px; cursor: default; }
+.pc-legend--links li:hover { background: rgba(255, 255, 255, 0.06); }
+.pc-legend--links i { width: 22px; height: 4px; border-radius: 2px; }
+.pc-chapters { display: grid; gap: 6px; }
+.pc-chapters a { font-size: 13px; color: #8cc8ff; text-decoration: none; }
+.pc-chapters a:hover { text-decoration: underline; }
+
+.pc-fallback { max-width: 760px; margin: 0 auto; color: var(--ink); }
+.pc-fallback__msg { padding: 12px 14px; border: 1px solid var(--line); background: var(--paper-2); border-radius: 2px; }
+.pc-parts--static { position: static; max-width: none; margin: 16px 0; }
+.pc-parts--static button { color: var(--ink); background: transparent; border-color: var(--line); }
+.pc-parts--static button.is-on { background: var(--ink); color: var(--paper); }
+.pc-panel--static { position: static; width: auto; background: var(--ink); }
+
+@media (max-width: 899px) {
+  .pc-parts { max-width: none; right: 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; bottom: 12px; }
+  .pc-parts button { flex: none; }
+  .pc-head { max-width: 60vw; }
+  .pc-head h1 { font-size: 18px; }
+  .pc-tools { top: 10px; }
+  .pc-callout { font-size: 12px; padding: 3px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-leader { transition: none; }
+}
+.app-main--full { min-height: 0; }
