@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: { server: "src/server.ts", seed: "prisma/seed.ts" },
+  entry: { server: "src/server.ts" },
   format: ["esm"],
   target: "node20",
   platform: "node",
