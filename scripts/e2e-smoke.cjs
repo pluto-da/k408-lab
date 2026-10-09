@@ -33,22 +33,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const heroState = await page.evaluate(() => ({
     canvas: !!document.querySelector("#stage canvas"),
     labTabs: document.querySelectorAll(".x-lab__tab").length,
-    quiz: !!document.querySelector(".x-quiz__opt"),
     chapters: document.querySelectorAll(".x-ch button").length,
     emit: typeof window.LAB_EMIT,
   }));
   log("实验室已挂载", JSON.stringify(heroState));
   if (SHOTS) await page.screenshot({ path: SHOTS + "/lab-hero.png" });
 
-  // 3. 章节、实验、部件、自测、流程演示都还能用，且不再上报任何学习事件
+  // 3. 章节、实验、部件、流程演示都还能用，且不再上报任何学习事件
   await page.click('#ds .x-ch li:nth-child(5) button');
   await page.click("#tab-banker");
   await page.evaluate(() => window.HERO && window.HERO.focus && window.HERO.focus("cpu"));
   await sleep(300);
   await page.keyboard.press("Escape");
-  await page.click('.x-quiz__opt[data-k="0"]');
-  await page.click(".x-quiz__nav button");
-  await page.click('.x-quiz__opt[data-k="2"]');
   await page.click('#xflows button[data-flow="pagefault"]');
   await sleep(500);
   const flowBar = await page.evaluate(() => !document.getElementById("xflowbar").hidden);
@@ -87,7 +83,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   log("页面错误", errors.length ? JSON.stringify(errors.slice(0, 8)) : "无");
   await browser.close();
   const ok =
-    !/学习进度|错题本|排行榜/.test(navText) && heroState.labTabs > 0 && heroState.quiz && heroState.emit === "undefined" &&
+    !/学习进度|错题本|排行榜/.test(navText) && heroState.labTabs > 0 && heroState.emit === "undefined" &&
     flowBar && me.user && dashGone && gone.every((s) => s === 404) && posted.length === 0;
   console.log(ok ? "E2E 通过" : "E2E 失败");
   process.exit(ok ? 0 : 1);

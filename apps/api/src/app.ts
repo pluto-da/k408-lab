@@ -10,7 +10,6 @@ import authPlugin from "./plugins/auth";
 import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
 import meRoutes from "./routes/me";
-import questionRoutes from "./routes/questions";
 
 export interface BuildOptions {
   env: Env;
@@ -93,7 +92,6 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
       await api.register(healthRoutes);
       await api.register(authRoutes, { prefix: "/auth", rateMax: env.AUTH_RATE_LIMIT_MAX, rateWindow: env.AUTH_RATE_LIMIT_WINDOW });
       await api.register(meRoutes);
-      await api.register(questionRoutes);
     },
     { prefix: "/api" },
   );

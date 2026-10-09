@@ -15,7 +15,8 @@ const schema = z.object({
   DOMAIN: z.string().optional().default(""),
   COOKIE_SECURE: bool,
   TRUST_PROXY: bool,
-  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+  /** 每 IP 每分钟的登录/注册次数。单账号另有“连错 10 次锁 15 分钟”，这里放宽以免宿舍/校园网共用出口 IP 时误伤 */
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
   AUTH_RATE_LIMIT_WINDOW: z.string().default("1 minute"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });

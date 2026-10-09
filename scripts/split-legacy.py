@@ -27,8 +27,10 @@ html = open(os.path.join(src_dir, "index.html"), encoding="utf-8").read()
 head, body = html.split("<body>", 1)
 body = body.rsplit("</body>", 1)[0]
 
-css = ["css/hark.css", "css/hark-hero.css"]
-for f in ("hark.css", "hark-hero.css"):
+# 注意：这是最初拆分旧版单页时用的一次性脚本。public/legacy 之后已有多处手工修改与压缩
+#（模型压缩、移除无用样式与已下线模块等），重新运行会覆盖这些修改，仅作留档。
+css = ["css/hark.css"]
+for f in ("hark.css",):
     shutil.copy(os.path.join(src_dir, f), os.path.join(out, "css", f))
 
 n_style = 0
@@ -43,7 +45,7 @@ for m in re.finditer(r"<style>(.*?)</style>", head, re.S):
     save_style(m.group(1))
 
 VENDOR = {"three.min.js", "OrbitControls.js", "GLTFLoader.js", "RoomEnvironment.js"}
-NAMES = ["x408-data", "chapters", "shared", "hero", "explode", "flow", "hero-extras", "lab", "quiz", "graph", "play"]
+NAMES = ["x408-data", "chapters", "shared", "hero", "explode", "flow", "hero-extras", "lab", None, "graph", "play"]  # None：已下线的模块，不再输出
 scripts, n_js = [], 0
 pos = 0
 token = re.compile(r"<script(?: src=\"([^\"]+)\")?>(.*?)</script>|<style>(.*?)</style>", re.S)
@@ -68,6 +70,8 @@ for m in token.finditer(body):
     else:
         name = NAMES[n_js] if n_js < len(NAMES) else f"part{n_js}"
         n_js += 1
+        if name is None:
+            continue
         fn = f"js/{n_js:02d}-{name}.js"
         open(os.path.join(out, fn), "w", encoding="utf-8").write(code.strip("\n") + "\n")
         scripts.append(fn)

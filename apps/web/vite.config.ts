@@ -7,7 +7,7 @@ const BUILD_ID = process.env.BUILD_ID ?? new Date().toISOString().replace(/\D/g,
 /** 站点根地址（如 https://k408.example.com）。设置后生成 sitemap.xml 并写进 robots.txt；未设置时只输出 robots.txt */
 const SITE_URL = (process.env.SITE_URL ?? "").trim().replace(/\/+$/, "");
 /** 可被搜索引擎收录的页面 */
-const PUBLIC_ROUTES = ["/", "/lab", "/pc"];
+const PUBLIC_ROUTES = ["/", "/lab", "/pc", "/terms", "/privacy"];
 
 function seoFiles(): Plugin {
   return {

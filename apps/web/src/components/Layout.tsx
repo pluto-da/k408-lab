@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { applyRouteMeta } from "../lib/seo";
+import { CONTACT_EMAIL } from "../lib/site";
 
 /** ICP 备案号：域名备案通过后在构建时通过 VITE_ICP_BEIAN 传入，页脚按工信部要求展示并链接到 beian.miit.gov.cn */
 const ICP = import.meta.env.VITE_ICP_BEIAN?.trim();
@@ -69,9 +70,15 @@ export default function Layout() {
           <nav className="app-foot__nav" aria-label="页脚导航">
             <Link to="/lab">实验室</Link>
             <Link to="/pc">整机拆解</Link>
-            <Link to="/lab#quiz">自测题</Link>
+            <Link to="/terms">用户协议</Link>
+            <Link to="/privacy">隐私政策</Link>
           </nav>
           <p className="app-foot__note">内容依据 408 统考大纲与常见教材整理，仅供个人复习参考。</p>
+          {CONTACT_EMAIL && (
+            <p>
+              联系我们：<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            </p>
+          )}
           {ICP && (
             <p>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">

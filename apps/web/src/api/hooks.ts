@@ -61,6 +61,33 @@ export function useLogout() {
   });
 }
 
+/** 退出所有设备 / 注销账号成功后：清空本地登录态与缓存 */
+function useSignedOut() {
+  const qc = useQueryClient();
+  const setUser = useAuth((s) => s.setUser);
+  return () => {
+    setUser(null);
+    qc.clear();
+    qc.setQueryData(["me"], null);
+  };
+}
+
+export function useLogoutAll() {
+  const signedOut = useSignedOut();
+  return useMutation({
+    mutationFn: () => api<{ ok: true }>("/auth/logout-all", { method: "POST", body: {} }),
+    onSuccess: signedOut,
+  });
+}
+
+export function useDeleteAccount() {
+  const signedOut = useSignedOut();
+  return useMutation({
+    mutationFn: (v: { password: string }) => api<{ ok: true }>("/me", { method: "DELETE", body: v }),
+    onSuccess: signedOut,
+  });
+}
+
 export function useUpdateProfile() {
   const qc = useQueryClient();
   const setUser = useAuth((s) => s.setUser);

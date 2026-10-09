@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { bootLegacy, legacyBootedInto, removeLegacyCss } from "../legacy/loadLegacy";
 
-const BOOT = ["载入四门课章节目录", "装配 3D 主板与总线", "加载 11 个动画实验", "连接流程演示", "准备自测题"];
+const BOOT = ["载入四门课章节目录", "装配 3D 主板与总线", "加载 11 个动画实验", "连接流程演示", "串起跨科知识连线"];
 
 export default function LabPage() {
   const ref = useRef<HTMLDivElement>(null);
@@ -48,7 +48,7 @@ export default function LabPage() {
       {failed && (
         <div className="lab-error" role="alert">
           <h1>实验室没能加载出来</h1>
-          <p>可能是网络不稳定。实验室需要下载约 3 MB 的 3D 模型和脚本，建议在 Wi-Fi 下打开。</p>
+          <p>可能是网络不稳定。实验室需要下载约 1.5 MB 的 3D 模型和脚本，网络较慢时请稍候或换个网络再试。</p>
           <button type="button" className="app-btn app-btn--big" onClick={() => window.location.reload()}>
             重新加载
           </button>

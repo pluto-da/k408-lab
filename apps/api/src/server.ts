@@ -3,7 +3,6 @@ import { fileURLToPath } from "node:url";
 import { loadEnv } from "./env";
 import { createPrisma } from "./db";
 import { buildApp } from "./app";
-import { syncCatalog } from "./lib/catalog-sync";
 
 /** 本地开发时读取仓库根目录的 .env（Docker 部署由 compose 注入环境变量） */
 function loadDotEnv() {
@@ -17,11 +16,6 @@ async function main() {
   const env = loadEnv();
   const prisma = createPrisma();
   const app = await buildApp({ env, prisma });
-  try {
-    await syncCatalog(prisma);
-  } catch (e) {
-    app.log.warn({ err: e }, "题库/目录同步失败（数据库未迁移？）");
-  }
   const close = async (signal: string) => {
     app.log.info(`收到 ${signal}，正在关闭`);
     await app.close();

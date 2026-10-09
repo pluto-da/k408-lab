@@ -64,7 +64,7 @@
 	}
 
 	# 单页应用的已知路由 → index.html（200）。新增前端路由时记得同步这里
-	@spa path_regexp spa ^/(lab|pc|login|register|profile)?/?$
+	@spa path_regexp spa ^/(lab|pc|login|register|profile|terms|privacy)?/?$
 	handle @spa {
 		root * /srv
 		header Cache-Control "no-cache"

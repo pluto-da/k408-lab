@@ -24,7 +24,14 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/fonts/fonts.css" />
+    <!-- 西文字体（Geist，本地托管）：@font-face 内联，省掉一次阻塞渲染的 CSS 请求；正文字重预加载。中文用系统字体 -->
+    <link rel="preload" href="/fonts/geist-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @font-face { font-family: "Geist"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/geist-sans-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Geist"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/geist-sans-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Geist"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/geist-sans-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/geist-mono-latin-400-normal.woff2") format("woff2"); }
+    </style>
   </head>
   <body>
     <div id="root"></div>

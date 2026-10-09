@@ -89,6 +89,14 @@ const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string; logi
     return { ok: true };
   });
 
+  /** 退出所有设备：tokenVersion +1，此前签发的所有会话（包括本机）立即失效 */
+  app.post("/logout-all", limited, async (req, reply) => {
+    const user = await app.requireUser(req);
+    await app.prisma.user.update({ where: { id: user.id }, data: { tokenVersion: { increment: 1 } } });
+    app.clearSession(reply);
+    return { ok: true };
+  });
+
   // —— 手机号短信登录：接口预留，v1 未开放（见 src/lib/sms.ts）——
   const notYet = () => {
     throw new HttpError(501, "SMS_NOT_AVAILABLE", "手机号登录暂未开放，敬请期待");

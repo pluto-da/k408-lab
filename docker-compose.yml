@@ -49,7 +49,7 @@ services:
       DOMAIN: ${DOMAIN:-}
       COOKIE_SECURE: ${COOKIE_SECURE:-}
       TRUST_PROXY: "true"
-      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-10}
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-60}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_OPTIONS: --max-old-space-size=384
       TZ: Asia/Shanghai
@@ -68,6 +68,7 @@ services:
         # 站点完整地址（如 https://k408.example.com），设置后生成 sitemap.xml
         SITE_URL: ${SITE_URL:-}
         VITE_ICP_BEIAN: ${ICP_BEIAN:-}
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
     image: k408-web:latest
     restart: unless-stopped
     depends_on:

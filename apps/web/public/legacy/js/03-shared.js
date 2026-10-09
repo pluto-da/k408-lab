@@ -41,7 +41,7 @@
         return { subjects: subjects, svg: svg, el: el, dim: dim, bySubject: bySubject, go: go, reduced: reduced, ink: "#16181D", paper: "#F2EFE8" };
       })();
 
-      /* §02 score bar + question cells */
+      /* §02 score bar + 题号格 */
       (function () {
         var s = document.getElementById("scorebar"), W = 600, x = 0;
         X.dim(s, 0, W, 12, "150 分");

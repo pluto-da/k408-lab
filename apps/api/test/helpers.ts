@@ -3,7 +3,6 @@ import type { FastifyInstance, LightMyRequestResponse } from "fastify";
 import { PrismaClient } from "@prisma/client";
 import { buildApp } from "../src/app";
 import { loadEnv } from "../src/env";
-import { syncCatalog } from "../src/lib/catalog-sync";
 
 export interface Ctx {
   app: FastifyInstance;
@@ -21,7 +20,6 @@ export async function makeApp(overrides: Record<string, string> = {}): Promise<C
     ...overrides,
   });
   const prisma = new PrismaClient({ datasources: { db: { url } } });
-  await syncCatalog(prisma);
   const app = await buildApp({ env, prisma, ownsPrisma: true, logger: false });
   await app.ready();
   return { app, prisma };

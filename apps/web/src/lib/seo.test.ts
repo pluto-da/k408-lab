@@ -9,6 +9,9 @@ describe("routeMeta", () => {
     expect(routeMeta("/").title).toContain(SITE_NAME);
     expect(routeMeta("/nope")).toMatchObject({ noindex: true });
     expect(routeMeta("/login").noindex).toBe(true);
+    expect(routeMeta("/terms").title).toContain("用户协议");
+    expect(routeMeta("/privacy").title).toContain("隐私政策");
+    expect(routeMeta("/privacy").noindex).toBeFalsy();
   });
 
   it("写入 document.title 与 meta", () => {

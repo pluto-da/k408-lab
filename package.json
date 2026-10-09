@@ -14,8 +14,7 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
-    "db:migrate": "pnpm --filter @k408/api db:migrate",
-    "db:seed": "pnpm --filter @k408/api db:seed"
+    "db:migrate": "pnpm --filter @k408/api db:migrate"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

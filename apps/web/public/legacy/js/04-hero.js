@@ -240,7 +240,10 @@
           };
           if (!(window.MB_GLB_BUF || window.MB_GLB_B64) || typeof THREE.GLTFLoader !== "function") throw new Error("board unavailable");
           function b64buf(s) { var bin = atob(s), n = bin.length, u = new Uint8Array(n); for (var i = 0; i < n; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
-          new THREE.GLTFLoader().parse(window.MB_GLB_BUF || b64buf(window.MB_GLB_B64), "", function (gltf) {
+          var gltfLoader = new THREE.GLTFLoader();
+          /* 模型几何体用 meshopt 压缩（EXT_meshopt_compression），解码器为本地 vendor/meshopt_decoder.js */
+          if (window.MeshoptDecoder && typeof gltfLoader.setMeshoptDecoder === "function") gltfLoader.setMeshoptDecoder(window.MeshoptDecoder);
+          gltfLoader.parse(window.MB_GLB_BUF || b64buf(window.MB_GLB_B64), "", function (gltf) {
             try {
               var mb = gltf.scene; mb.scale.setScalar(GS); root.add(mb);
               root.updateMatrixWorld(true);

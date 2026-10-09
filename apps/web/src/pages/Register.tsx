@@ -74,6 +74,9 @@ export default function RegisterPage() {
         <button className="app-btn app-btn--big" disabled={reg.isPending}>
           {reg.isPending ? "注册中…" : "注册并登录"}
         </button>
+        <p className="muted small">
+          注册即表示你已阅读并同意<Link to="/terms">《用户协议》</Link>和<Link to="/privacy">《隐私政策》</Link>。
+        </p>
         <p className="muted">
           已有账号？<Link to={`/login?next=${encodeURIComponent(next)}`}>登录</Link>
         </p>

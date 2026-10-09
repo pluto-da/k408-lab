@@ -1,4 +1,4 @@
-// 本文件由旧版页面数据整理而来（章节、实验、流程、部件、自测题 id），前后端共用。
+// 本文件由旧版页面数据整理而来（章节、实验、流程、部件），前后端共用。
 export const SUBJECTS = ["ds", "co", "os", "cn"] as const;
 export type Subject = (typeof SUBJECTS)[number];
 
@@ -27,7 +27,6 @@ export interface ChapterDef { subject: Subject; no: number; title: string }
 export interface LabDef { id: string; subject: Subject; title: string }
 export interface FlowDef { id: string; subject: Subject; title: string }
 export interface PartDef { id: string; subject: Subject; title: string }
-export interface QuizDef { id: string; subject: Subject }
 
 export const CHAPTERS: readonly ChapterDef[] = [
   { subject: "ds", no: 1, title: "绪论" },
@@ -91,21 +90,9 @@ export const PARTS: readonly PartDef[] = [
   { id: "ds", subject: "ds", title: "数据结构" },
 ];
 
-export const QUIZ: readonly QuizDef[] = [
-  { id: "q1", subject: "ds" },
-  { id: "q2", subject: "ds" },
-  { id: "q3", subject: "co" },
-  { id: "q4", subject: "co" },
-  { id: "q5", subject: "os" },
-  { id: "q6", subject: "os" },
-  { id: "q7", subject: "cn" },
-  { id: "q8", subject: "cn" },
-];
-
 export const FLOW_IDS = FLOWS.map((f) => f.id);
 export const LAB_IDS = LABS.map((l) => l.id);
 export const PART_IDS = PARTS.map((p) => p.id);
-export const QUIZ_IDS = QUIZ.map((q) => q.id);
 
 export function flowById(id: string): FlowDef | undefined {
   return FLOWS.find((f) => f.id === id);

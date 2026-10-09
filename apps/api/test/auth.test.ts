@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { cookieOf, makeApp, resetDb, type Ctx } from "./helpers";
+import { cookieOf, makeApp, registerUser, resetDb, type Ctx } from "./helpers";
 
 let ctx: Ctx;
 beforeAll(async () => {
@@ -139,6 +139,41 @@ describe("账号", () => {
       payload: { account: "x", password: "yyyyyyyy" },
     });
     expect(same.statusCode).toBe(401);
+  });
+
+  it("退出所有设备：旧会话全部失效，可重新登录", async () => {
+    const { cookie, username } = await registerUser(ctx.app);
+    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    const other = cookieOf(login);
+    const anon = await ctx.app.inject({ method: "POST", url: "/api/auth/logout-all", payload: {} });
+    expect(anon.statusCode).toBe(401);
+    const res = await ctx.app.inject({ method: "POST", url: "/api/auth/logout-all", headers: { cookie }, payload: {} });
+    expect(res.statusCode).toBe(200);
+    expect(String(res.headers["set-cookie"])).toMatch(/k408_session=;/);
+    for (const c of [cookie, other]) {
+      const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: c } });
+      expect(me.json().user).toBeNull();
+    }
+    const again = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    expect(again.statusCode).toBe(200);
+    const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: cookieOf(again) } });
+    expect(me.json().user.username).toBe(username);
+  });
+
+  it("注销账号需要密码，注销后无法再登录，用户名可重新注册", async () => {
+    const { cookie, username } = await registerUser(ctx.app);
+    const wrong = await ctx.app.inject({ method: "DELETE", url: "/api/me", headers: { cookie }, payload: { password: "nope-nope" } });
+    expect(wrong.statusCode).toBe(403);
+    const anon = await ctx.app.inject({ method: "DELETE", url: "/api/me", payload: { password: "password123" } });
+    expect(anon.statusCode).toBe(401);
+    const ok = await ctx.app.inject({ method: "DELETE", url: "/api/me", headers: { cookie }, payload: { password: "password123" } });
+    expect(ok.statusCode).toBe(200);
+    expect((await ctx.prisma.user.count({ where: { username } }))).toBe(0);
+    const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie } });
+    expect(me.json().user).toBeNull();
+    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    expect(login.statusCode).toBe(401);
+    await registerUser(ctx.app, username);
   });
 
   it("短信登录接口已预留但未开放", async () => {

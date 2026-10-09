@@ -14,7 +14,7 @@ const ROUTES: Record<string, RouteMeta> = {
   "/": { title: `${SITE_NAME} · 把计算机拆开给你看`, description: DEFAULT_DESC },
   "/lab": {
     title: `实验室 · ${SITE_NAME}`,
-    description: "408 四门课章节考点卡、排序/二叉树/Dijkstra/页面置换/TCP 拥塞控制等 11 个可单步的动画实验、流程演示、跨科知识连线与自测题。",
+    description: "408 四门课章节考点卡、排序/二叉树/Dijkstra/页面置换/TCP 拥塞控制等 11 个可单步的动画实验、流程演示与跨科知识连线。",
   },
   "/pc": {
     title: `整机拆解 · ${SITE_NAME}`,
@@ -23,6 +23,11 @@ const ROUTES: Record<string, RouteMeta> = {
   "/login": { title: `登录 · ${SITE_NAME}`, noindex: true },
   "/register": { title: `注册 · ${SITE_NAME}`, noindex: true },
   "/profile": { title: `个人资料 · ${SITE_NAME}`, noindex: true },
+  "/terms": { title: `用户协议 · ${SITE_NAME}`, description: `${SITE_NAME}用户协议：服务内容、账号、使用规范、学习内容说明与免责声明。` },
+  "/privacy": {
+    title: `隐私政策 · ${SITE_NAME}`,
+    description: `${SITE_NAME}隐私政策：只收集用户名或邮箱、昵称与加密后的密码，不使用第三方统计、广告或追踪。`,
+  },
 };
 
 export function routeMeta(pathname: string): RouteMeta & { description: string } {

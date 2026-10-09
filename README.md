@@ -1,12 +1,12 @@
 # 考研408动画实验室 · 全栈 v1
 
 面向考研同学的 408（数据结构 / 计算机组成原理 / 操作系统 / 计算机网络）学习站：
-3D 拆开一块主板看考点、11 个可视化实验、3 条流程自动演示、跨科知识连线、自测题；
+3D 拆开一块主板看考点、11 个可视化实验、3 条流程自动演示、跨科知识连线；
 另有「整机拆解」（/pc）：一台写实整机逐个部件拆开看，并附数据旅程演示。账号仅用于登录与昵称。
 
 - 前端：Vite + React 18 + TypeScript + React Router + Zustand + TanStack Query（`apps/web`）
 - 后端：Node 20 + Fastify 5 + Prisma 5 + PostgreSQL 16 + zod（`apps/api`）
-- 共享：题目/章节/流程目录（`packages/shared`）
+- 共享：章节/实验/流程目录（`packages/shared`）
 - 部署：Docker Compose（Postgres + API + Caddy），Caddy 自动 HTTPS
 - 所有库与字体均本地打包，不依赖任何境外 CDN 或字体服务
 
@@ -18,7 +18,7 @@
 .
 ├── apps/
 │   ├── api/                  # Fastify 接口服务
-│   │   ├── prisma/           # schema、迁移、种子数据（8 道自测题）
+│   │   ├── prisma/           # schema 与迁移
 │   │   ├── src/              # app.ts / routes / lib / plugins
 │   │   ├── test/             # 接口集成测试（vitest + 真实 PostgreSQL）
 │   │   └── Dockerfile
@@ -69,9 +69,8 @@ cp .env.example .env
 #           JWT_SECRET 随便填一个 32 位以上的字符串
 ln -s ../../.env apps/api/.env      # 让 prisma 命令也能读到同一份 .env
 
-# 4. 建表 + 种子数据
+# 4. 建表
 pnpm db:migrate
-pnpm db:seed
 
 # 5. 同时启动前后端
 pnpm dev
@@ -210,12 +209,13 @@ gunzip -c backups/k408-20261008-040000.sql.gz | docker compose exec -T postgres 
 | POST | `/api/auth/login` | `{ account, password }`，account 为用户名或邮箱 |
 | POST | `/api/auth/logout` | 退出登录 |
 | POST | `/api/auth/sms/send`、`/api/auth/sms/login` | 预留，返回 501 |
+| POST | `/api/auth/logout-all` | 退出所有设备（`tokenVersion` +1，所有旧会话失效） |
 | GET / PATCH | `/api/me` | 当前用户 / 修改昵称 |
-| GET | `/api/questions` | 自测题（不含答案） |
+| DELETE | `/api/me` | `{ password }`，注销账号（立即删除） |
 
 ## 安全说明
 
 - 密码使用 argon2id（19 MiB / t=2）哈希；登录失败对“账号不存在”和“密码错误”返回相同提示。
 - 会话 Cookie：httpOnly、SameSite=Lax，HTTPS 下带 Secure；写请求若带 Origin 必须与站点同源。
-- 登录/注册每 IP 每分钟默认 10 次（`AUTH_RATE_LIMIT_MAX`），其余接口每 IP 每分钟 300 次。
+- 登录/注册每 IP 每分钟默认 60 次（`AUTH_RATE_LIMIT_MAX`，宿舍/校园网常共用出口 IP），同一账号连续输错 10 次锁定 15 分钟，其余接口每 IP 每分钟 300 次。
 - Caddy 下发 CSP 等安全响应头，所有脚本均为本站文件。
