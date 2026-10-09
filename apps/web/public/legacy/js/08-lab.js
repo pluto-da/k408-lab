@@ -1,4 +1,4 @@
-      /* §07 lab shell. Add a demo with one call:
+      /* 实验室外壳。 Add a demo with one call:
          LAB.push({ id, name, color, note, mount: function (panel, K) { ... return { step, reset, done }; } })
          K = { opts, stage, out, restart }. step() advances one frame and returns true while frames remain. */
       (function () {
@@ -14,9 +14,9 @@
             tabs.appendChild(tab);
             var p = X.el("div", { class: "x-lab__panel", role: "tabpanel", id: "lab-" + d.id, "aria-labelledby": "tab-" + d.id, style: "--c:" + d.color },
               '<div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div>' +
-              '<div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="step">单步</button>' +
-              '<button type="button" class="x-lab__btn" data-a="play" aria-pressed="false">播放</button>' +
-              '<button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
+              '<div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
+              '<button type="button" class="x-lab__btn x-lab__btn--main" data-a="play" aria-pressed="false">播放</button>' +
+              '<button type="button" class="x-lab__btn" data-a="step">下一步</button>' +
               '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5"></label></div>' +
               '<div class="x-lab__out"></div></div><aside class="x-lab__note"><b>考点</b><p></p></aside>');
             p.querySelector(".x-lab__note p").textContent = d.note || "";
@@ -28,7 +28,8 @@
             var k = items.findIndex(function (o) { return o.tab.getAttribute("aria-selected") === "true"; });
             if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
               e.preventDefault();
-              k = (k + (e.key === "ArrowRight" ? 1 : -1) + items.length) % items.length;
+              var dir = e.key === "ArrowRight" ? 1 : -1;
+              for (var n = 0; n < items.length; n++) { k = (k + dir + items.length) % items.length; if (!items[k].tab.hidden) break; }
               show(k, true); items[k].tab.focus();
             }
           });

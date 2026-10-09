@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         </>
       }
     >
-      <section>
+      <section id="s1">
         <h2>一、我们收集的信息</h2>
         <h3>1. 注册和登录时你主动提供的</h3>
         <ul>
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
         <h3>3. 我们不收集的</h3>
         <p>本站不收集你的真实姓名、身份证号、手机号、通讯录、位置、照片等信息，不读取你的设备标识，也不记录你的学习行为与做题记录。</p>
       </section>
-      <section>
+      <section id="s2">
         <h2>二、Cookie 与本地存储</h2>
         <ul>
           <li>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
           <li>本站不使用任何第三方 Cookie。网页字体、脚本和 3D 模型均由本站服务器直接提供，不会因此向第三方发送你的访问信息。</li>
         </ul>
       </section>
-      <section>
+      <section id="s3">
         <h2>三、我们如何使用这些信息</h2>
         <ul>
           <li>创建和管理你的账号，让你可以登录、修改昵称、退出所有设备或注销账号；</li>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
         </ul>
         <p>如需将信息用于上述以外的目的，我们会事先征得你的同意。</p>
       </section>
-      <section>
+      <section id="s4">
         <h2>四、信息的存储与保护</h2>
         <ul>
           <li>你的账号信息存储在本站租用的云服务器上，由本站自行运维，不委托第三方处理。</li>
@@ -74,11 +74,11 @@ export default function PrivacyPage() {
           <li>如果不幸发生个人信息安全事件，我们会按照法律法规的要求及时告知你，并采取补救措施。</li>
         </ul>
       </section>
-      <section>
+      <section id="s5">
         <h2>五、共享、转让与公开披露</h2>
         <p>本站不会出售、出租你的个人信息，也不会与任何第三方共享、转让或公开披露，除非：事先获得你的明确同意；或根据法律法规、诉讼、政府主管部门的强制性要求必须提供。</p>
       </section>
-      <section>
+      <section id="s6">
         <h2>六、你的权利</h2>
         <ul>
           <li>
@@ -95,15 +95,15 @@ export default function PrivacyPage() {
           </li>
         </ul>
       </section>
-      <section>
+      <section id="s7">
         <h2>七、未成年人保护</h2>
         <p>本站面向备考研究生入学考试的学生。若你是未满 14 周岁的未成年人，请在监护人同意和指导下使用；监护人发现未成年人在未经同意的情况下注册的，可联系我们删除相关账号。</p>
       </section>
-      <section>
+      <section id="s8">
         <h2>八、本政策的更新</h2>
         <p>本政策可能会随服务调整而更新，更新后的版本会在本页公布并修改更新日期。如有收集范围扩大等重要变化，我们会在站内显著位置提示，必要时重新征得你的同意。</p>
       </section>
-      <section>
+      <section id="s9">
         <h2>九、联系我们</h2>
         <p>
           对本政策或你的个人信息有任何疑问、意见或投诉，请<Contact />与我们联系。

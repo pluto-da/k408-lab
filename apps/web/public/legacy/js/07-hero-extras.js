@@ -1,4 +1,4 @@
-      /* hero extras: hotspot chips, board signal traces, dust, light pool, intro move */
+      /* 立体图附加：部件热点（可点按）。走线、浮尘、光斑与入场运镜已停用 */
       (function () {
         var H = window.HERO; if (!H || !window.THREE) return;
         var THREE = H.THREE, V3 = THREE.Vector3, cam = H.camera, ctl = H.controls, root = H.root, stage = H.stage, reduced = H.reduced;
@@ -171,7 +171,7 @@
         }
 
         /* ---------- 5. intro move ---------- */
-        var intro = null, introDone = reduced, introT = 0, EV = ["pointerdown", "wheel", "keydown", "touchstart"];
+        var intro = null, introDone = true /* 不播放入场运镜 */, introT = 0, EV = ["pointerdown", "wheel", "keydown", "touchstart"];
         function ioc(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
         introAlpha = function (i) {
           if (introDone) return 1;
@@ -208,12 +208,9 @@
         /* ---------- per frame ---------- */
         var built = false, last = 0;
         H.post.push(function (t) {
-          if (H.ready && !built) { built = true; try { buildTraces(); buildAtmosphere(); } catch (err) { if (window.console) console.error(err); } }
+          if (H.ready && !built) { built = true; /* 信号走线、浮尘与光斑属于装饰，已去掉，只保留部件热点 */ }
           var dt = Math.min(0.1, Math.max(0, t - last)); last = t;
-          if (built) {
-            updateTraces(dt);
-            if (dust && !reduced) moveDust(t);
-          }
+          if (built && traces.length) updateTraces(dt);
           updateChips();
         });
       })();

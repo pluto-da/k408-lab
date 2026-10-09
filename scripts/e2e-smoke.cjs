@@ -31,26 +31,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await page.waitForFunction(() => window.__LEGACY_BOOTED__ === true, null, { timeout: 60000 });
   await sleep(1500);
   const heroState = await page.evaluate(() => ({
-    canvas: !!document.querySelector("#stage canvas"),
+    // 立体结构图默认收起、不下载模型
+    boardLoaded: !!document.querySelector("#stage canvas") || !!window.HERO,
     labTabs: document.querySelectorAll(".x-lab__tab").length,
     chapters: document.querySelectorAll(".x-ch button").length,
     emit: typeof window.LAB_EMIT,
   }));
   log("实验室已挂载", JSON.stringify(heroState));
-  if (SHOTS) await page.screenshot({ path: SHOTS + "/lab-hero.png" });
+  if (SHOTS) await page.screenshot({ path: SHOTS + "/lab.png" });
 
-  // 3. 章节、实验、部件、流程演示都还能用，且不再上报任何学习事件
+  // 3. 章节、实验、搜索、流程演示（自动展开并加载立体图）、部件都还能用，且不再上报任何学习事件
   await page.click('#ds .x-ch li:nth-child(5) button');
   await page.click("#tab-banker");
+  await page.fill("#x-q", "LRU");
+  await sleep(400);
+  const searchOk = await page.evaluate(() => !document.getElementById("tab-paging").hidden && document.getElementById("tab-sort").hidden);
+  await page.fill("#x-q", "");
+  await sleep(300);
+  await page.click('#xflows button[data-flow="pagefault"]');
+  await page.waitForFunction(() => !document.getElementById("xflowbar").hidden, null, { timeout: 60000 }).catch(() => undefined);
+  const flowBar = await page.evaluate(() => !document.getElementById("xflowbar").hidden);
+  log("搜索", searchOk, "流程演示", flowBar);
+  if (SHOTS) await page.screenshot({ path: SHOTS + "/lab-flow.png" });
+  await page.click("#xf-exit");
+  await sleep(500);
   await page.evaluate(() => window.HERO && window.HERO.focus && window.HERO.focus("cpu"));
   await sleep(300);
   await page.keyboard.press("Escape");
-  await page.click('#xflows button[data-flow="pagefault"]');
-  await sleep(500);
-  const flowBar = await page.evaluate(() => !document.getElementById("xflowbar").hidden);
-  log("流程演示", flowBar);
-  await page.click("#xf-exit");
-  await sleep(500);
 
   // 4. 注册并登录后回到首页
   await page.goto(BASE + "/register");
@@ -83,7 +90,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   log("页面错误", errors.length ? JSON.stringify(errors.slice(0, 8)) : "无");
   await browser.close();
   const ok =
-    !/学习进度|错题本|排行榜/.test(navText) && heroState.labTabs > 0 && heroState.emit === "undefined" &&
+    !/学习进度|错题本|排行榜/.test(navText) && heroState.labTabs > 0 && !heroState.boardLoaded && searchOk && heroState.emit === "undefined" &&
     flowBar && me.user && dashGone && gone.every((s) => s === 404) && posted.length === 0;
   console.log(ok ? "E2E 通过" : "E2E 失败");
   process.exit(ok ? 0 : 1);

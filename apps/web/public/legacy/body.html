@@ -1,18 +1,86 @@
-<div class="page" id="top">
-      <header class="x-bar">
-        <a class="x-brand" href="#top">考研408动画实验室</a>
-        <ul class="x-chips" aria-label="四门科目">
-          <li><a class="x-chip" style="--c: var(--x-ds)" href="#ds">数据<span class="x-long">结构</span></a></li>
-          <li><a class="x-chip" style="--c: var(--x-co)" href="#co">组成<span class="x-long">原理</span></a></li>
-          <li><a class="x-chip" style="--c: var(--x-os)" href="#os">操作<span class="x-long">系统</span></a></li>
-          <li><a class="x-chip" style="--c: var(--x-cn)" href="#cn">网络</a></li>
-        </ul>
-      </header>
-      <main>
-        <!-- §01 -->
-        <section class="x-hero" id="hero" aria-label="§01 408 立体图">
-          <div class="x-stage" id="stage"></div>
-          <div class="x-fallback" aria-hidden="true">
+<div class="page x-page" id="top">
+      <div class="x-tool" id="x-tool">
+        <div class="x-tool__search">
+          <label class="x-search">
+            <span class="x-vh">搜索考点或实验</span>
+            <input type="search" id="x-q" placeholder="搜索考点或实验，例如 LRU、Cache、TCP" autocomplete="off" enterkeyhint="search" />
+          </label>
+          <p class="x-q__sum" id="x-q-sum" aria-live="polite"></p>
+        </div>
+        <div class="x-tool__row">
+          <ul class="x-chips" aria-label="科目">
+            <li><a class="x-chip" style="--c: var(--x-ds)" href="#ds" aria-label="数据结构">数据<span class="x-long">结构</span></a></li>
+            <li><a class="x-chip" style="--c: var(--x-co)" href="#co" aria-label="计算机组成原理">组成<span class="x-long">原理</span></a></li>
+            <li><a class="x-chip" style="--c: var(--x-os)" href="#os" aria-label="操作系统">操作<span class="x-long">系统</span></a></li>
+            <li><a class="x-chip" style="--c: var(--x-cn)" href="#cn" aria-label="计算机网络"><span class="x-long">计算机</span>网络</a></li>
+          </ul>
+          <button type="button" class="x-tocbtn" id="x-tocbtn" aria-expanded="false" aria-controls="x-toc">目录</button>
+        </div>
+      </div>
+      <div class="x-layout">
+        <nav class="x-toc" id="x-toc" aria-label="实验室目录">
+          <ol>
+            <li><a href="#overview">分值</a></li>
+            <li><a href="#ds"><i class="x-dot" style="--c: var(--x-ds)" aria-hidden="true"></i>数据结构</a></li>
+            <li><a href="#co"><i class="x-dot" style="--c: var(--x-co)" aria-hidden="true"></i>计算机组成原理</a></li>
+            <li><a href="#os"><i class="x-dot" style="--c: var(--x-os)" aria-hidden="true"></i>操作系统</a></li>
+            <li><a href="#cn"><i class="x-dot" style="--c: var(--x-cn)" aria-hidden="true"></i>计算机网络</a></li>
+            <li><a href="#lab">动画实验</a><ol class="x-toc__labs" id="x-toc-labs"></ol></li>
+            <li><a href="#board">立体结构图与流程演示</a></li>
+            <li><a href="#links">跨科知识连线</a></li>
+          </ol>
+        </nav>
+        <div class="x-main">
+        <header class="x-sec x-head" id="overview">
+          <h1>408 实验室</h1>
+          <p class="x-head__lead">四门课的章节考点、可以单步看的动画实验，和跨科知识连线。</p>
+          <ul class="x-scores" aria-label="150 分按科目分配">
+            <li style="--c: var(--x-ds)"><b>数据结构</b><span><em>45</em> 分</span><small>选择 1–11</small></li>
+            <li style="--c: var(--x-co)"><b>组成原理</b><span><em>45</em> 分</span><small>选择 12–22</small></li>
+            <li style="--c: var(--x-os)"><b>操作系统</b><span><em>35</em> 分</span><small>选择 23–32</small></li>
+            <li style="--c: var(--x-cn)"><b>计算机网络</b><span><em>25</em> 分</span><small>选择 33–40</small></li>
+          </ul>
+          <p class="x-note">共 150 分：40 道单选 × 2 分 = 80 分，41–47 题综合应用共 70 分；各科综合题分值逐年略有浮动。</p>
+        </header>
+        <section class="x-sec x-subj" id="ds" style="--c: var(--x-ds); --ct: var(--x-ds-ink)" aria-labelledby="h-ds">
+          <div class="x-sec__head"><h2 id="h-ds"><i class="x-dot" aria-hidden="true"></i>数据结构</h2><p class="x-sec__meta">45 分 · 8 章 · 选择题 1–11 + 2 道综合题</p><p>点选章节，右侧看核心考点和最常丢分的一处。</p></div>
+          <div class="x-study" data-subject="ds"></div>
+        </section>
+        <section class="x-sec x-subj" id="co" style="--c: var(--x-co); --ct: var(--x-co-ink)" aria-labelledby="h-co">
+          <div class="x-sec__head"><h2 id="h-co"><i class="x-dot" aria-hidden="true"></i>计算机组成原理</h2><p class="x-sec__meta">45 分 · 7 章 · 选择题 12–22 + 2 道综合题</p><p>计算量最大的一门，存储系统和 CPU 是重点。</p></div>
+          <div class="x-study" data-subject="co"></div>
+        </section>
+        <section class="x-sec x-subj" id="os" style="--c: var(--x-os); --ct: var(--x-os-ink)" aria-labelledby="h-os">
+          <div class="x-sec__head"><h2 id="h-os"><i class="x-dot" aria-hidden="true"></i>操作系统</h2><p class="x-sec__meta">35 分 · 5 章 · 选择题 23–32 + 2 道综合题</p><p>PV 操作和内存管理是综合题常客。</p></div>
+          <div class="x-study" data-subject="os"></div>
+        </section>
+        <section class="x-sec x-subj" id="cn" style="--c: var(--x-cn); --ct: var(--x-cn-ink)" aria-labelledby="h-cn">
+          <div class="x-sec__head"><h2 id="h-cn"><i class="x-dot" aria-hidden="true"></i>计算机网络</h2><p class="x-sec__meta">25 分 · 6 章 · 选择题 33–40 + 1 道综合题</p><p>网络层与传输层分值最重。</p></div>
+          <div class="x-study" data-subject="cn"></div>
+        </section>
+        <section class="x-sec" id="lab" aria-labelledby="h-lab">
+          <div class="x-sec__head"><h2 id="h-lab">动画实验</h2><p class="x-sec__meta">11 个实验 · 都能单步、播放、改数据</p><p>选一个实验，按“下一步”看算法每一步怎么走。</p></div>
+          <div class="x-lab" id="x-lab"><div class="x-lab__tabs" role="tablist" aria-label="实验"></div></div>
+        </section>
+        <section class="x-sec x-3d" id="board" aria-labelledby="h-board">
+          <div class="x-3d__bar">
+            <div class="x-sec__head">
+              <h2 id="h-board">立体结构图与流程演示</h2>
+              <p>一块主板上的 CPU、内存、硬盘、网卡对应哪几章；跟着数据走一遍指令执行、缺页和访问网页。</p>
+            </div>
+            <button type="button" class="x-3d__toggle" id="x-3d-toggle" aria-expanded="false" aria-controls="x-3d-body">展开立体图</button>
+          </div>
+          <div class="x-parts x-flows" id="xflows" role="group" aria-label="流程演示">
+            <span class="x-flows__lab">流程演示</span>
+            <span class="x-flowitem"><span class="x-flowitem__name">一条指令的一生</span><button type="button" data-flow="life" aria-pressed="false" aria-label="看演示：一条指令的一生">看演示</button></span>
+            <span class="x-flowitem"><span class="x-flowitem__name">缺页中断</span><button type="button" data-flow="pagefault" aria-pressed="false" aria-label="看演示：缺页中断">看演示</button></span>
+            <span class="x-flowitem"><span class="x-flowitem__name">访问一个网页</span><button type="button" data-flow="web" aria-pressed="false" aria-label="看演示：访问一个网页">看演示</button></span>
+          </div>
+          <div class="x-3d__body" id="x-3d-body" hidden>
+            <div class="x-3d__load" id="x-3d-load" role="status" aria-live="polite" hidden><div class="x-3d__bar-in"><i id="x-3d-prog"></i></div><p>正在加载立体图…</p></div>
+            <div class="x-hero" id="hero" role="region" aria-label="主板立体图">
+              <div class="x-stage" id="stage"></div>
+              <div class="x-fallback" aria-hidden="true">
             <svg viewBox="0 0 520 440" fill="none" stroke="#16181D" stroke-width="1.5" stroke-linejoin="round">
               <!-- top: DS -->
               <path d="M110 90 L260 40 L410 90 L260 140 Z" fill="#1F7A6D" />
@@ -35,16 +103,12 @@
               <path d="M410 320 C470 340 470 400 430 410" stroke="#2D4FA3" stroke-width="5" stroke-linecap="round" />
               <path d="M380 410 L420 396 L460 410 L420 424 Z" fill="#2D4FA3" />
               <path d="M380 410 V426 L420 440 V424 Z M460 410 V426 L420 440 V424 Z" fill="#22408A" />
-              <!-- dimension -->
-              <g stroke-width="1"><line x1="80" y1="90" x2="80" y2="310" /><line x1="74" y1="90" x2="86" y2="90" /><line x1="74" y1="310" x2="86" y2="310" /></g>
-              <text x="68" y="204" fill="#16181D" stroke="none" font-family="Menlo,monospace" font-size="12" text-anchor="end">150</text>
             </svg>
           </div>
-          <p class="x-hero__tag x-secno">§01 · 爆炸视图</p>
-          <p class="x-hero__hint" id="hint">拖动旋转 · 悬停/点按查看</p>
-          <div class="x-callout" id="callout" role="status" aria-live="polite"></div>
-          <p class="x-crumb" id="crumb" aria-live="polite"><b>整机</b></p>
-          <aside class="x-panel" id="xpanel" aria-label="部件详情" hidden>
+              <p class="x-hero__hint" id="hint">拖动旋转 · 点部件查看</p>
+              <div class="x-callout" id="callout" role="status" aria-live="polite"></div>
+              <p class="x-crumb" id="crumb" aria-live="polite"><b>整机</b></p>
+              <aside class="x-panel" id="xpanel" aria-label="部件详情" hidden>
             <p class="x-panel__tag" id="xp-tag"></p>
             <h3 id="xp-name"></h3>
             <ul id="xp-list"></ul>
@@ -67,82 +131,16 @@
               <button type="button" class="x-panel__btn" id="xf-exit">退出</button>
             </div>
           </div>
-          <div class="x-hero__copy">
-            <h1><span class="x-nb">考研408</span><span class="x-nb">动画实验室</span></h1>
-            <p class="x-hero__sub">把计算机拆开给你看</p>
-            <p class="x-hero__eq">150 分 = <i style="--c: var(--x-ds)">数据结构 45</i> + <i style="--c: var(--x-co-ink)">组成原理 45</i> + <i style="--c: var(--x-os-ink)">操作系统 35</i> + <i style="--c: var(--x-cn)">计算机网络 25</i></p>
-          </div>
-        </section>
-        <div class="x-parts x-flows" id="xflows" role="group" aria-label="流程演示">
-          <span class="x-flows__lab">流程演示</span>
-          <span class="x-flowitem"><span class="x-flowitem__name">一条指令的一生</span><button type="button" data-flow="life" aria-pressed="false" aria-label="看演示：一条指令的一生">看演示</button></span>
-          <span class="x-flowitem"><span class="x-flowitem__name">缺页中断</span><button type="button" data-flow="pagefault" aria-pressed="false" aria-label="看演示：缺页中断">看演示</button></span>
-          <span class="x-flowitem"><span class="x-flowitem__name">访问一个网页</span><button type="button" data-flow="web" aria-pressed="false" aria-label="看演示：访问一个网页">看演示</button></span>
-        </div>
-        <div class="x-parts" id="xparts" role="group" aria-label="选择部件"></div>
-        <!-- §02 -->
-        <section class="x-sec" id="overview" aria-labelledby="h-overview">
-          <div class="x-sec__head">
-            <p class="x-secno">§02 · 考情总览</p>
-            <h2 id="h-overview">一张卷子，150 分，四门课按 45 / 45 / 35 / 25 切开。</h2>
-            <p>40 道单选打底，7 道综合题拉开差距。先看分值分布，再决定复习时间怎么分。</p>
-          </div>
-          <div class="x-score">
-            <svg id="scorebar" viewBox="0 0 600 92" role="img" aria-label="150 分按科目分配：数据结构 45，组成原理 45，操作系统 35，计算机网络 25"></svg>
-            <ul class="x-legend">
-              <li style="--c: var(--x-ds)"><b>数据结构</b><span><em>45</em> 分 · 30%</span></li>
-              <li style="--c: var(--x-co)"><b>计算机组成原理</b><span><em>45</em> 分 · 30%</span></li>
-              <li style="--c: var(--x-os)"><b>操作系统</b><span><em>35</em> 分 · 23%</span></li>
-              <li style="--c: var(--x-cn)"><b>计算机网络</b><span><em>25</em> 分 · 17%</span></li>
-            </ul>
-            <div class="x-rows">
-              <div>
-                <div class="x-row__top"><h3>单项选择</h3><p>40 题 × 2 分 = 80 分</p></div>
-                <div class="x-cells" id="mcq" aria-hidden="true"></div>
-                <div class="x-ranges">
-                  <div style="flex: 11; --c: var(--x-ds)"><b>1–11</b> 数据结构</div>
-                  <div style="flex: 11; --c: var(--x-co-ink)"><b>12–22</b> 组成原理</div>
-                  <div style="flex: 10; --c: var(--x-os-ink)"><b>23–32</b> 操作系统</div>
-                  <div style="flex: 8; --c: var(--x-cn)"><b>33–40</b> 网络</div>
-                </div>
-              </div>
-              <div>
-                <div class="x-row__top"><h3>综合应用</h3><p>41–47 题 · 共 70 分</p></div>
-                <div class="x-cells x-cells--big" aria-hidden="true">
-                  <div class="x-cell">41</div><div class="x-cell">42</div><div class="x-cell">43</div><div class="x-cell">44</div><div class="x-cell">45</div><div class="x-cell">46</div><div class="x-cell">47</div>
-                </div>
-                <div class="x-dim" style="margin-top: 10px">70 分</div>
-              </div>
             </div>
-            <p class="x-note">注：各科综合题分值逐年略有浮动。</p>
+            <div class="x-parts" id="xparts" role="group" aria-label="选择部件"></div>
           </div>
-        </section>
-        <section class="x-sec" id="ds" style="--c: var(--x-ds); --ct: var(--x-ds)" aria-labelledby="h-ds">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§03 · 45 分</p><h2 id="h-ds">数据结构</h2><p>8 章，选择题 1–11 加两道综合题。点选章节，右侧看核心考点和最常丢分的一处。</p></div>
-          <div class="x-study" data-subject="ds"></div>
-        </section>
-        <section class="x-sec" id="co" style="--c: var(--x-co); --ct: var(--x-co-ink)" aria-labelledby="h-co">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§04 · 45 分</p><h2 id="h-co">计算机组成原理</h2><p>7 章，选择题 12–22 加两道综合题，计算量最大的一门。</p></div>
-          <div class="x-study" data-subject="co"></div>
-        </section>
-        <section class="x-sec" id="os" style="--c: var(--x-os); --ct: var(--x-os-ink)" aria-labelledby="h-os">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§05 · 35 分</p><h2 id="h-os">操作系统</h2><p>5 章，选择题 23–32 加两道综合题，PV 和内存管理是大题常客。</p></div>
-          <div class="x-study" data-subject="os"></div>
-        </section>
-        <section class="x-sec" id="cn" style="--c: var(--x-cn); --ct: var(--x-cn)" aria-labelledby="h-cn">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§06 · 25 分</p><h2 id="h-cn">计算机网络</h2><p>6 章，选择题 33–40 加一道综合题，网络层与传输层最重。</p></div>
-          <div class="x-study" data-subject="cn"></div>
-        </section>
-        <section class="x-sec" id="lab" aria-labelledby="h-lab">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§07</p><h2 id="h-lab">可视化实验室</h2><p>选一个演示，单步或播放，看算法每一步怎么走。</p></div>
-          <div class="x-lab" id="x-lab"><div class="x-lab__tabs" role="tablist" aria-label="演示"></div></div>
         </section>
         <section class="x-sec" id="links" aria-labelledby="h-links">
-          <div class="x-sec__head"><div class="x-sec__rule"></div><p class="x-secno">§08 · 23 条</p><h2 id="h-links">跨科知识连线</h2><p>像政治一样串起来记：点一个节点，看它连到哪几门课。</p></div>
+          <div class="x-sec__head"><h2 id="h-links">跨科知识连线</h2><p class="x-sec__meta">23 条 · 四门课里同一个思想的不同样子</p><p>点一个节点，看它连到哪几门课；下方是全部连线的文字版。</p></div>
           <div class="x-graph" id="x-graph" hidden>
             <div class="x-graph__stage" id="x-graph-stage"></div>
             <div class="x-graph__labels" id="x-graph-labels" aria-hidden="true"></div>
-            <p class="x-graph__hint" aria-hidden="true">拖动旋转 · 滚轮缩放 · 点节点看连线</p>
+            <p class="x-graph__hint" aria-hidden="true">拖动旋转 · 缩放 · 点节点看连线</p>
             <aside class="x-gcard" id="x-gcard" aria-live="polite" hidden></aside>
           </div>
           <div class="x-links" id="x-links">
@@ -201,6 +199,7 @@
             </div>
           </div>
         </section>
-      </main>
-      <footer class="x-foot">内容依据王道 2027 四本复习全书目录与 408 考纲整理 · 仅供个人复习</footer>
+        <footer class="x-foot">内容依据王道 2027 四本复习全书目录与 408 考纲整理 · 仅供个人复习</footer>
+        </div>
+      </div>
     </div>

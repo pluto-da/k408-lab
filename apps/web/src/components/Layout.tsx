@@ -66,26 +66,17 @@ export default function Layout() {
       </main>
       {!isLab && !isFull && (
         <footer className="app-foot">
-          <p>考研408动画实验室 · 数据结构 / 计算机组成原理 / 操作系统 / 计算机网络</p>
+          <p>考研408动画实验室 · 内容依据 408 统考大纲整理，仅供个人复习</p>
           <nav className="app-foot__nav" aria-label="页脚导航">
-            <Link to="/lab">实验室</Link>
-            <Link to="/pc">整机拆解</Link>
             <Link to="/terms">用户协议</Link>
             <Link to="/privacy">隐私政策</Link>
-          </nav>
-          <p className="app-foot__note">内容依据 408 统考大纲与常见教材整理，仅供个人复习参考。</p>
-          {CONTACT_EMAIL && (
-            <p>
-              联系我们：<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            </p>
-          )}
-          {ICP && (
-            <p>
+            {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
+            {ICP && (
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
                 {ICP}
               </a>
-            </p>
-          )}
+            )}
+          </nav>
         </footer>
       )}
     </div>

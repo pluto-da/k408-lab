@@ -1,27 +1,46 @@
 {
   "css": [
-    "css/hark.css",
     "css/legacy-01.css",
     "css/legacy-02.css",
     "css/legacy-03.css"
   ],
   "scripts": [
-    "js/00-hark.js",
     "js/01-x408-data.js",
     "js/02-chapters.js",
-    "vendor/three.min.js",
-    "vendor/OrbitControls.js",
-    "vendor/GLTFLoader.js",
-    "vendor/meshopt_decoder.js",
-    "vendor/RoomEnvironment.js",
     "js/03-shared.js",
-    "js/04-hero.js",
-    "js/05-explode.js",
-    "js/06-flow.js",
-    "js/07-hero-extras.js",
     "js/08-lab.js",
-    "js/10-graph.js"
+    "js/09-tool.js"
   ],
-  "glb": "assets/motherboard.glb",
-  "glbBytes": 992656
+  "lazy": {
+    "three": {
+      "scripts": [
+        "vendor/three.min.js",
+        "vendor/OrbitControls.js"
+      ]
+    },
+    "board": {
+      "needs": [
+        "three"
+      ],
+      "glb": "assets/motherboard.glb",
+      "glbBytes": 992656,
+      "scripts": [
+        "vendor/GLTFLoader.js",
+        "vendor/meshopt_decoder.js",
+        "vendor/RoomEnvironment.js",
+        "js/04-hero.js",
+        "js/05-explode.js",
+        "js/06-flow.js",
+        "js/07-hero-extras.js"
+      ]
+    },
+    "graph": {
+      "needs": [
+        "three"
+      ],
+      "scripts": [
+        "js/10-graph.js"
+      ]
+    }
+  }
 }

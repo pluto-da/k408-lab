@@ -45,9 +45,6 @@ export default function LoginPage() {
         <button className="app-btn app-btn--big" disabled={login.isPending || !account || !password}>
           {login.isPending ? "登录中…" : "登录"}
         </button>
-        <button type="button" className="app-btn app-btn--ghost" disabled title="即将开放">
-          手机号验证码登录（即将开放）
-        </button>
         <p className="muted">
           还没有账号？<Link to={`/register?next=${encodeURIComponent(next)}`}>注册</Link>
         </p>

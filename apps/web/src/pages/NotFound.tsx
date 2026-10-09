@@ -17,9 +17,6 @@ export default function NotFoundPage() {
           <Link className="app-btn app-btn--ghost" to="/lab">
             去实验室
           </Link>
-          <Link className="app-btn app-btn--ghost" to="/pc">
-            整机拆解
-          </Link>
         </div>
       </div>
     </div>

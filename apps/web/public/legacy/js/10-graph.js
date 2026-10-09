@@ -1,4 +1,4 @@
-      /* §08 3D cross-subject link graph; the text list below is the fallback */
+      /* 跨科连线立体图（滚动到附近才加载）；下方文字列表始终可用 */
       (function () {
         var wrap = document.getElementById("x-graph"), stage = document.getElementById("x-graph-stage");
         var labelsEl = document.getElementById("x-graph-labels"), card = document.getElementById("x-gcard");
@@ -9,10 +9,10 @@
         if (typeof window.THREE === "undefined" || typeof THREE.OrbitControls !== "function") return;
 
         var SUBJ = {
-          ds: { hex: 0x1f7a6d, css: "#1F7A6D", tag: "数据结构" },
-          co: { hex: 0xc2512b, css: "#C2512B", tag: "组成" },
-          os: { hex: 0xd9a21b, css: "#D9A21B", tag: "操作系统" },
-          cn: { hex: 0x2d4fa3, css: "#2D4FA3", tag: "网络" }
+          ds: { hex: 0x3a8475, css: "#3A8475", tag: "数据结构" },
+          co: { hex: 0xc0603e, css: "#C0603E", tag: "组成" },
+          os: { hex: 0xc49431, css: "#C49431", tag: "操作系统" },
+          cn: { hex: 0x4766b3, css: "#4766B3", tag: "网络" }
         };
         var NODES = [
           ["栈", "ds"], ["队列", "ds"], ["循环队列", "ds"], ["图·Dijkstra", "ds"], ["Bellman-Ford思想", "ds"], ["拓扑排序/环检测", "ds"],
@@ -91,20 +91,20 @@
           });
           links.forEach(function (L) {
             var g = new THREE.BufferGeometry().setFromPoints([spheres[L.a].position, spheres[L.b].position]);
-            L.mat = new THREE.LineBasicMaterial({ color: 0x16181d, transparent: true, opacity: 0.55 });
+            L.mat = new THREE.LineBasicMaterial({ color: 0x9aa0aa, transparent: true, opacity: 0.6 });
             scene.add(new THREE.Line(g, L.mat));
           });
 
           var controls = new THREE.OrbitControls(camera, cv);
           controls.enableDamping = true; controls.enablePan = false;
           controls.minDistance = 12; controls.maxDistance = 48;
-          controls.autoRotate = !X.reduced; controls.autoRotateSpeed = 0.5;
+          controls.autoRotate = false; controls.autoRotateSpeed = 0.5;
 
           var sel = null;
           function tagHTML(s) { return '<span class="x-ltag" data-s="' + s + '">' + SUBJ[s].tag + "</span>"; }
           function select(i) {
             sel = i;
-            controls.autoRotate = !X.reduced && i == null;
+            controls.autoRotate = false;
             var near = {};
             if (i != null) { near[i] = 1; nodes[i].links.forEach(function (L) { near[L.a] = 1; near[L.b] = 1; }); }
             nodes.forEach(function (nd, k) {
@@ -115,7 +115,9 @@
               nd.label.classList.toggle("is-sel", k === i);
             });
             links.forEach(function (L) {
-              L.mat.opacity = i == null ? 0.55 : (L.a === i || L.b === i ? 1 : 0.07);
+              var hit = i != null && (L.a === i || L.b === i);
+              L.mat.opacity = i == null ? 0.6 : (hit ? 1 : 0.07);
+              L.mat.color.setHex(hit ? 0x2f5bea : 0x9aa0aa);
             });
             if (i == null) { card.hidden = true; card.innerHTML = ""; return; }
             var nd = nodes[i];

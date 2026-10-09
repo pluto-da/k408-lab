@@ -1,7 +1,7 @@
 /** 每个路由的标题与描述：SPA 切换路由时同步到 <title> 与 meta，便于分享、收藏与搜索收录 */
 export const SITE_NAME = "考研408动画实验室";
 
-const DEFAULT_DESC = "考研 408 计算机学科专业基础可视化学习站：3D 整机拆解、11 个动画实验与流程演示，数据结构、组成原理、操作系统、计算机网络四门课考点串联。";
+const DEFAULT_DESC = "考研 408 计算机学科专业基础可视化学习站：能拆开看的整机、11 个动画实验与流程演示，数据结构、组成原理、操作系统、计算机网络四门课考点串联。";
 
 interface RouteMeta {
   title: string;
@@ -18,7 +18,7 @@ const ROUTES: Record<string, RouteMeta> = {
   },
   "/pc": {
     title: `整机拆解 · ${SITE_NAME}`,
-    description: "一台写实的 3D 整机：逐个拆开 CPU、内存、显卡、硬盘、电源和网卡，对照 408 考点，再跟着一次数据的旅程走一遍。",
+    description: "一台写实的整机：逐个拆开 CPU、内存、显卡、硬盘、电源和网卡，对照 408 考点，再跟着一次数据的旅程走一遍。",
   },
   "/login": { title: `登录 · ${SITE_NAME}`, noindex: true },
   "/register": { title: `注册 · ${SITE_NAME}`, noindex: true },

@@ -5,6 +5,12 @@ interface Window {
   MB_GLB_BUF?: ArrayBuffer | null;
   __LEGACY_LOADER__?: boolean;
   __LEGACY_BOOTED__?: boolean;
+  /** 按需加载实验室旧模块里的一组脚本（立体结构图、跨科连线立体图） */
+  __LEGACY_LOAD__?: (group: string, onProgress?: (f: number) => void) => Promise<void>;
+  /** 实验室立体结构图的开关（由 public/legacy/js/09-tool.js 提供） */
+  X_BOARD?: { open: () => Promise<void>; close: () => void; isOpen: () => boolean };
+  /** 切到实验室里的某个实验并滚过去（由 02-chapters.js 提供） */
+  X_OPEN_LAB?: (id: string) => void;
 }
 
 interface ImportMetaEnv {

@@ -1,4 +1,4 @@
-      /* §01 three.js exploded computer, SVG fallback on failure */
+      /* 立体结构图（点开才加载），失败时显示示意图 */
       (function () {
         var hero = document.getElementById("hero"), stage = document.getElementById("stage");
         function fail() { hero.classList.add("is-fallback"); stage.innerHTML = ""; document.getElementById("hint").textContent = "示意图"; }
@@ -121,7 +121,7 @@
           controls.enableDamping = true; controls.dampingFactor = 0.06; controls.enablePan = false;
           controls.minDistance = MIN_D; controls.maxDistance = MAX_D;
           controls.minPolarAngle = 0.25; controls.maxPolarAngle = 1.25;
-          controls.autoRotate = !X.reduced; controls.autoRotateSpeed = 0.25; /* 2.0 = 2 rpm, so 0.25 = 0.25 rpm */
+          controls.autoRotate = false; controls.autoRotateSpeed = 0.25; /* 安静：不自动旋转，只在用户拖动时转 */
           controls.target.copy(HOME_TGT);
           renderer.domElement.style.touchAction = "pan-y"; /* vertical swipe scrolls the page on touch; horizontal drag orbits */
 
@@ -136,8 +136,8 @@
             if (!g) { callout.classList.remove("is-on"); return; }
             var id = g.userData.subject, s = X.bySubject(id);
             callout.style.setProperty("--c", s.color);
-            callout.innerHTML = "<span>" + s.short + " · §0" + (["ds", "co", "os", "cn"].indexOf(id) + 3) + "</span><strong>" + g.userData.name +
-              "</strong><span>" + info[id].name + " · 分值 " + info[id].score + " / 150</span><br><a href=\"#" + id + "\">跳转到该科 →</a>";
+            callout.innerHTML = "<span>" + info[id].name + " · " + info[id].score + " 分</span><strong>" + g.userData.name +
+              "</strong><a href=\"#" + id + "\">看这门课的考点 →</a>";
             callout.classList.add("is-on");
           }
           var ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
@@ -379,7 +379,7 @@
           function idle() {
             clearTimeout(idleT);
             if (focusKey || X.reduced) return;
-            idleT = setTimeout(function () { if (!focusKey) controls.autoRotate = true; }, 8000);
+            /* 不再闲置后自动旋转 */
           }
           controls.addEventListener("start", function () { controls.autoRotate = false; idle(); });
           function syncParts() {

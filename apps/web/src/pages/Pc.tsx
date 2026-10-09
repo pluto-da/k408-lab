@@ -216,7 +216,7 @@ export default function PcPage() {
         )}
         <div className="pc-seg" role="group" aria-label="灯光">
           <button type="button" className={light === "studio" ? "is-on" : undefined} onClick={() => setLight("studio")}>
-            影棚
+            展示
           </button>
           <button type="button" className={light === "rgb" ? "is-on" : undefined} onClick={() => setLight("rgb")}>
             氛围灯
@@ -262,7 +262,7 @@ export default function PcPage() {
 
       {ready && !selected && !touring && (
         <label className="pc-explode">
-          <span>爆炸视图</span>
+          <span>拆开看</span>
           <input
             type="range"
             min={0}
@@ -390,7 +390,7 @@ export default function PcPage() {
                 <li>点部件：先从机箱里滑出来，再打开看内部结构。</li>
                 <li>点空白处或「返回整机」回到全景。</li>
                 <li>「数据旅程」：跟着一个数据包从网卡走到内存、CPU、显卡和硬盘。</li>
-                <li>「爆炸视图」滑块把所有部件一起拉开；「氛围灯」切换机箱灯效。</li>
+                <li>「拆开看」滑块把所有部件一起拉开；「氛围灯」切换机箱灯效。</li>
               </ul>
             </>
           )}

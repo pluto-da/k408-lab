@@ -39,69 +39,78 @@ function ProfileInner() {
 
   return (
     <div className="page-pad">
-      <div className="auth-card">
+      <div className="auth-card auth-card--wide">
         <h1>个人资料</h1>
-        <dl className="kv">
-          <div>
-            <dt>用户名</dt>
-            <dd>{user.username ?? "未设置"}</dd>
-          </div>
-          <div>
-            <dt>邮箱</dt>
-            <dd>{user.email ?? "未设置"}</dd>
-          </div>
-          <div>
-            <dt>注册时间</dt>
-            <dd>{fmtDate(user.createdAt)}</dd>
-          </div>
-        </dl>
-        <form onSubmit={submit} className="stack">
-          <label>
-            昵称
-            <input value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={20} />
-          </label>
-          {update.error && <p className="form-err" role="alert">{errorMessage(update.error)}</p>}
-          {update.isSuccess && !update.isPending && (
-            <p className="form-ok" role="status">
-              已保存
-            </p>
-          )}
-          <button className="app-btn" disabled={update.isPending || !nickname.trim() || nickname.trim() === user.nickname}>
-            保存昵称
-          </button>
-        </form>
-        <hr />
-        <button
-          type="button"
-          className="app-btn app-btn--ghost"
-          disabled={busy}
-          onClick={() => void after(logout.mutateAsync(), "/")}
-        >
-          退出登录
-        </button>
-        <section className="danger-zone" aria-labelledby="h-security">
-          <h2 id="h-security">账号安全</h2>
-          <p className="muted small">在网吧、图书馆或别人的手机上登录过？退出所有设备后，所有已登录的地方（包括这台设备）都需要重新登录。</p>
-          {logoutAll.error && <p className="form-err" role="alert">{errorMessage(logoutAll.error)}</p>}
-          {confirmAll ? (
+        <section className="pf-group" aria-labelledby="h-account">
+          <h2 id="h-account">账户信息</h2>
+          <dl className="kv">
+            <div>
+              <dt>用户名</dt>
+              <dd>{user.username ?? "未设置"}</dd>
+            </div>
+            <div>
+              <dt>邮箱</dt>
+              <dd>{user.email ?? "未设置"}</dd>
+            </div>
+            <div>
+              <dt>注册时间</dt>
+              <dd>{fmtDate(user.createdAt)}</dd>
+            </div>
+          </dl>
+          <form onSubmit={submit} className="stack">
+            <label>
+              昵称
+              <input value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={20} />
+            </label>
+            {update.error && <p className="form-err" role="alert">{errorMessage(update.error)}</p>}
+            {update.isSuccess && !update.isPending && (
+              <p className="form-ok" role="status">
+                已保存
+              </p>
+            )}
             <div className="row">
-              <button
-                type="button"
-                className="app-btn"
-                disabled={busy}
-                onClick={() => void after(logoutAll.mutateAsync(), "/login")}
-              >
-                {logoutAll.isPending ? "正在退出…" : "确认退出所有设备"}
-              </button>
-              <button type="button" className="app-btn app-btn--text" onClick={() => setConfirmAll(false)}>
-                取消
+              <button className="app-btn" disabled={update.isPending || !nickname.trim() || nickname.trim() === user.nickname}>
+                保存昵称
               </button>
             </div>
-          ) : (
-            <button type="button" className="app-btn app-btn--ghost" disabled={busy} onClick={() => setConfirmAll(true)}>
-              退出所有设备
+          </form>
+        </section>
+        <section className="pf-group" aria-labelledby="h-security">
+          <h2 id="h-security">安全</h2>
+          <p className="muted small">在网吧、图书馆或别人的手机上登录过？退出所有设备后，所有已登录的地方（包括这台设备）都需要重新登录。</p>
+          {logoutAll.error && <p className="form-err" role="alert">{errorMessage(logoutAll.error)}</p>}
+          <div className="row">
+            <button
+              type="button"
+              className="app-btn app-btn--ghost"
+              disabled={busy}
+              onClick={() => void after(logout.mutateAsync(), "/")}
+            >
+              退出登录
             </button>
-          )}
+            {confirmAll ? (
+              <>
+                <button
+                  type="button"
+                  className="app-btn"
+                  disabled={busy}
+                  onClick={() => void after(logoutAll.mutateAsync(), "/login")}
+                >
+                  {logoutAll.isPending ? "正在退出…" : "确认退出所有设备"}
+                </button>
+                <button type="button" className="app-btn app-btn--text" onClick={() => setConfirmAll(false)}>
+                  取消
+                </button>
+              </>
+            ) : (
+              <button type="button" className="app-btn app-btn--ghost" disabled={busy} onClick={() => setConfirmAll(true)}>
+                退出所有设备
+              </button>
+            )}
+          </div>
+        </section>
+        <section className="pf-group pf-group--danger" aria-labelledby="h-danger">
+          <h2 id="h-danger">危险操作</h2>
           <details className="danger-zone__del">
             <summary>注销账号</summary>
             <form onSubmit={deleteAccount} className="stack">
@@ -113,9 +122,11 @@ function ProfileInner() {
                 <PasswordInput value={delPassword} onChange={(e) => setDelPassword(e.target.value)} autoComplete="current-password" maxLength={72} />
               </label>
               {del.error && <p className="form-err" role="alert">{errorMessage(del.error)}</p>}
-              <button className="app-btn app-btn--danger" disabled={busy || !delPassword}>
-                {del.isPending ? "正在注销…" : "永久注销账号"}
-              </button>
+              <div className="row">
+                <button className="app-btn app-btn--danger" disabled={busy || !delPassword}>
+                  {del.isPending ? "正在注销…" : "永久注销账号"}
+                </button>
+              </div>
             </form>
           </details>
         </section>

@@ -1,31 +1,29 @@
+/* 立体结构图上的部件热点：可点按，不再脉冲闪烁 */
 .x-hots { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-      .x-hots__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-      .x-hots__lines line { stroke: rgba(242, 239, 232, .5); stroke-width: 1; opacity: var(--in, 1); transition: opacity .2s ease; }
-      .x-hots__lines line.is-off { opacity: 0; }
-      .x-hot {
-        position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 7px;
-        padding: 5px 10px 5px 8px; border-radius: 999px; white-space: nowrap; cursor: pointer; pointer-events: auto;
-        background: rgba(14, 16, 20, .72); border: 1px solid rgba(255, 255, 255, .14);
-        -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-        color: #f2efe8; font: 500 12px/1.2 var(--sans, system-ui, sans-serif);
-        opacity: var(--in, 1); transition: opacity .2s ease, background-color .15s ease, border-color .15s ease;
-        -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; will-change: transform;
-      }
-      .x-hot::after { content: ""; position: absolute; inset: -10px -4px; }
-      .x-hot:hover { background: rgba(14, 16, 20, .88); border-color: rgba(255, 255, 255, .3); }
-      .x-hot:focus-visible { outline: 2px solid #f2efe8; outline-offset: 2px; }
-      .x-hot.is-off { opacity: 0; pointer-events: none; }
-      .x-hot__dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #f0c35a; animation: x-hot-pulse 2.2s ease-out infinite; }
-      @keyframes x-hot-pulse { 0% { box-shadow: 0 0 0 0 rgba(240, 195, 90, .6); } 70%, 100% { box-shadow: 0 0 0 7px rgba(240, 195, 90, 0); } }
-      @media (prefers-reduced-motion: reduce) { .x-hot__dot { animation: none; } }
-      @media (max-width: 639px) {
-        .x-hot { gap: 0; padding: 7px; background: transparent; border-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
-        .x-hot__dot { outline: 2px solid rgba(14, 16, 20, .55); }
-        .x-hot__name { display: none; }
-        .x-hot.is-peek { gap: 7px; padding: 5px 10px 5px 8px; background: rgba(14, 16, 20, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-        .x-hot.is-peek .x-hot__name { display: inline; }
-      }
-      @media (max-width: 639px) and (hover: hover) {
-        .x-hot:hover { gap: 7px; padding: 5px 10px 5px 8px; background: rgba(14, 16, 20, .72); border-color: rgba(255, 255, 255, .14); }
-        .x-hot:hover .x-hot__name { display: inline; }
-      }
+.x-hots__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.x-hots__lines line { stroke: rgba(255, 255, 255, .45); stroke-width: 1; opacity: var(--in, 1); transition: opacity .15s ease; }
+.x-hots__lines line.is-off { opacity: 0; }
+.x-hot {
+  position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 7px;
+  min-height: 30px; padding: 4px 11px 4px 9px; border-radius: 999px; white-space: nowrap; cursor: pointer; pointer-events: auto;
+  background: rgba(255, 255, 255, .94); border: 0; box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  color: #1a1c20; font: 500 13px/1.2 var(--x-head, system-ui, sans-serif);
+  opacity: var(--in, 1); transition: opacity .15s ease, background-color .15s ease;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; will-change: transform;
+}
+.x-hot::after { content: ""; position: absolute; inset: -8px -4px; }
+.x-hot:hover { background: #fff; }
+.x-hot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.x-hot.is-off { opacity: 0; pointer-events: none; }
+.x-hot__dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--x-primary, #2f5bea); }
+@media (max-width: 639px) {
+  .x-hot { gap: 0; padding: 7px; min-height: 0; background: transparent; box-shadow: none; }
+  .x-hot__dot { width: 10px; height: 10px; background: #fff; box-shadow: 0 0 0 2px var(--x-primary, #2f5bea); }
+  .x-hot__name { display: none; }
+  .x-hot.is-peek { gap: 7px; padding: 4px 11px 4px 9px; background: rgba(255, 255, 255, .94); box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+  .x-hot.is-peek .x-hot__dot { width: 6px; height: 6px; box-shadow: none; background: var(--x-primary, #2f5bea); }
+  .x-hot.is-peek .x-hot__name { display: inline; }
+}
+@media (pointer: coarse) {
+  .x-hot::after { inset: -11px; }
+}

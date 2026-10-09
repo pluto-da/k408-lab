@@ -1,27 +1,4 @@
 /* 流程演示：流程条目（名称 + 看演示按钮） */
-      .x-flowitem { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-right: 10px; border-right: 1px solid var(--x-line); }
-      .x-flowitem:last-child { border-right: 0; padding-right: 0; }
-      .x-flowitem__name { margin-right: 2px; font: 500 13px/1.2 var(--x-head); color: var(--x-ink); }
-
-      /* 手机竖屏：顶栏科目按钮保持一行，不再把“网络”挤到第二行（2026-10 审计） */
-      @media (max-width: 560px) {
-        .x-bar { gap: 8px; }
-        .x-brand { font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-        .x-chips { flex-wrap: nowrap; gap: 4px; flex: none; }
-        .x-chip { gap: 4px; padding: 0 6px; min-width: 40px; }
-        .x-chip::before { width: 8px; height: 8px; }
-      }
-      @media (max-width: 360px) {
-        .x-brand { font-size: 13px; }
-        .x-chip::before { display: none; }
-        .x-chip { box-shadow: inset 0 -3px 0 var(--c); }
-      }
-      /* 3D 主板热点：手指点按的命中区域扩大到约 44×44 */
-      @media (pointer: coarse) {
-        .x-hot::after { inset: -11px; }
-      }
-      /* 大标题只在“考研408 / 动画实验室”之间换行，避免拆成“考研408动 / 画实验室” */
-      .x-nb { display: inline-block; }
-      /* 顶栏科目按钮：长名称与短名称之间不留 flex 间隙（“数据结构”而非“数据 结构”） */
-      .x-chip .x-long { margin-left: -6px; }
-      @media (max-width: 560px) { .x-chip .x-long { margin-left: -4px; } }
+.x-flowitem { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-right: 14px; border-right: 1px solid var(--x-line); }
+.x-flowitem:last-child { border-right: 0; padding-right: 0; }
+.x-flowitem__name { font: 500 14px/1.3 var(--x-head); color: var(--x-ink); }

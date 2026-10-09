@@ -14,7 +14,7 @@ export default function TermsPage() {
         </p>
       }
     >
-      <section>
+      <section id="s1">
         <h2>一、服务内容</h2>
         <ol>
           <li>本站提供 408 统考四门课（数据结构、计算机组成原理、操作系统、计算机网络）的章节考点、可交互的动画演示、整机拆解和跨科知识连线等学习内容。</li>
@@ -22,7 +22,7 @@ export default function TermsPage() {
           <li>本站免费提供服务，不收取任何费用，也不投放广告。</li>
         </ol>
       </section>
-      <section>
+      <section id="s2">
         <h2>二、账号</h2>
         <ol>
           <li>你可以用用户名或邮箱注册，并设置密码和昵称。请使用真实可用的邮箱，不要冒用他人的名义或邮箱。</li>
@@ -31,7 +31,7 @@ export default function TermsPage() {
           <li>你可以随时在“个人资料”页注销账号，注销后账号数据会被删除且无法恢复。</li>
         </ol>
       </section>
-      <section>
+      <section id="s3">
         <h2>三、使用规范</h2>
         <p>使用本站时，你应遵守中华人民共和国法律法规，并且不得：</p>
         <ol>
@@ -41,7 +41,7 @@ export default function TermsPage() {
         </ol>
         <p>违反上述规范的，本站可视情节采取限制访问、暂停或注销账号等措施。</p>
       </section>
-      <section>
+      <section id="s4">
         <h2>四、学习内容与知识产权</h2>
         <ol>
           <li>本站内容依据 408 统考大纲与常见教材的知识体系整理，仅供个人复习参考，不代表官方观点，也不保证与历年真题、官方大纲或任何教材的表述完全一致；如有出入，以官方发布和教材原文为准。</li>
@@ -49,7 +49,7 @@ export default function TermsPage() {
           <li>如果你认为本站某些内容侵犯了你的合法权益，请<Contact />告知，我们核实后会及时处理。</li>
         </ol>
       </section>
-      <section>
+      <section id="s5">
         <h2>五、免责声明</h2>
         <ol>
           <li>本站按“现状”免费提供，会尽力保证内容准确、服务稳定，但不对内容的完整性、准确性或服务不中断作出保证，也不对你的考试结果负责。</li>
@@ -57,15 +57,15 @@ export default function TermsPage() {
           <li>本站可能根据需要调整、暂停或终止部分功能，重大调整会在站内提前告知。</li>
         </ol>
       </section>
-      <section>
+      <section id="s6">
         <h2>六、协议的变更</h2>
         <p>本站可能会适时修订本协议，修订后的版本会在本页公布并更新日期。涉及你重要权益的变更，会在站内显著位置提示。变更后继续使用本站，即视为你接受修订后的协议；如不同意，可以停止使用并注销账号。</p>
       </section>
-      <section>
+      <section id="s7">
         <h2>七、法律适用与争议解决</h2>
         <p>本协议适用中华人民共和国法律（不含港澳台地区法律）。因本协议产生的争议，双方应友好协商；协商不成的，可依法向有管辖权的人民法院提起诉讼。</p>
       </section>
-      <section>
+      <section id="s8">
         <h2>八、联系我们</h2>
         <p>
           对本协议有任何疑问、意见或投诉，请<Contact />与我们联系。

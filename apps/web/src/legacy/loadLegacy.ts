@@ -1,14 +1,23 @@
 /**
- * 旧版体验（3D 主板、拆解、流程演示、11 个实验、跨科连线）以“遗留模块”方式挂载：
- * public/legacy/ 下的 body.html + 原样脚本：脚本并行下载、按原页面顺序执行（async=false），脚本本身不改写。
+ * 实验室旧模块（章节考点、11 个实验、立体结构图、流程演示、跨科连线）以“遗留模块”方式挂载：
+ * public/legacy/ 下的 body.html + 原样脚本：脚本并行下载、按原页面顺序执行（async=false）。
+ * 首屏只加载章节与实验脚本；立体结构图（3D 库 + 主板模型）与跨科连线立体图分组按需加载，
+ * 由旧模块通过 window.__LEGACY_LOAD__(组名) 触发（见 public/legacy/js/09-tool.js）。
  * 脚本只能执行一次，所以离开 /lab 时整页刷新（见 pages/Lab.tsx）。
  */
-interface Manifest {
-  css: string[];
+interface LazyGroup {
+  /** 先加载的组 */
+  needs?: string[];
   scripts: string[];
+  /** 加载这一组前要下载的主板模型 */
   glb?: string;
   /** 模型文件字节数，用于显示下载进度（经 zstd/gzip 传输时拿不到 Content-Length） */
   glbBytes?: number;
+}
+interface Manifest {
+  css: string[];
+  scripts: string[];
+  lazy?: Record<string, LazyGroup>;
 }
 
 const BASE = "/legacy/";
@@ -109,14 +118,37 @@ async function fetchOk(url: string): Promise<Response> {
   return r;
 }
 
+const lazyDone = new Map<string, Promise<void>>();
+
+/** 按需加载一组脚本（含依赖组与模型）；同一组只加载一次 */
+function loadGroup(manifest: Manifest, name: string, onProgress?: (f: number) => void): Promise<void> {
+  const hit = lazyDone.get(name);
+  if (hit) return hit;
+  const g = manifest.lazy?.[name];
+  if (!g) return Promise.reject(new Error(`未知的模块组：${name}`));
+  const p = (async () => {
+    // 依赖组与本组的模型、脚本同时下载，执行仍按顺序
+    g.scripts.forEach(preloadScript);
+    const glbP = g.glb ? fetchGlb(v(g.glb), g.glbBytes, (f) => onProgress?.(0.85 * f)) : Promise.resolve(null);
+    for (const dep of g.needs ?? []) await loadGroup(manifest, dep);
+    if (g.glb) window.MB_GLB_BUF = await glbP;
+    onProgress?.(0.85);
+    const total = g.scripts.length;
+    await runScripts(g.scripts, (done) => onProgress?.(0.85 + (0.15 * done) / total));
+    onProgress?.(1);
+  })();
+  lazyDone.set(name, p);
+  p.catch(() => lazyDone.delete(name));
+  return p;
+}
+
 export async function bootLegacy(container: HTMLElement, onProgress?: (p: number) => void): Promise<void> {
   if (bootedInto) return;
   bootedInto = container;
   window.__LEGACY_LOADER__ = true;
   let manifest: Manifest;
   let html: string;
-  let glbP: Promise<ArrayBuffer | null>;
-  // 进度：页面骨架 0–0.1，模型下载 0.1–0.6，脚本执行 0.6–1（各段并行，只增不减）
+  // 进度：页面骨架 0–0.3，脚本执行 0.3–1（只增不减）
   let best = 0;
   const report = (p: number) => {
     if (p <= best) return;
@@ -125,10 +157,6 @@ export async function bootLegacy(container: HTMLElement, onProgress?: (p: number
   };
   try {
     manifest = (await fetchOk(v("manifest.json")).then((r) => r.json())) as Manifest;
-    // 主板模型（约 1 MB）、脚本、样式与页面骨架同时下载
-    glbP = manifest.glb
-      ? fetchGlb(v(manifest.glb), manifest.glbBytes, (f) => report(0.1 + 0.5 * f))
-      : Promise.resolve(null);
     manifest.scripts.forEach(preloadScript);
     [html] = await Promise.all([fetchOk(v("body.html")).then((r) => r.text()), ...manifest.css.map(loadCss)]);
   } catch (e) {
@@ -136,12 +164,11 @@ export async function bootLegacy(container: HTMLElement, onProgress?: (p: number
     bootedInto = null;
     throw e;
   }
+  window.__LEGACY_LOAD__ = (name, onP) => loadGroup(manifest, name, onP);
   container.innerHTML = html;
-  report(0.1);
-  window.MB_GLB_BUF = await glbP;
-  report(0.6);
+  report(0.3);
   const total = manifest.scripts.length;
-  await runScripts(manifest.scripts, (done) => report(0.6 + (0.4 * done) / total));
+  await runScripts(manifest.scripts, (done) => report(0.3 + (0.7 * done) / total));
   window.__LEGACY_BOOTED__ = true;
   window.dispatchEvent(new Event("legacy:ready"));
 }
