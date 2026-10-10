@@ -290,7 +290,7 @@ export default function PcPage() {
                 {removed}/{disN}
               </em>
             </b>
-            <span>{removed > 0 ? LAYERS[selected!]?.[dis.layers[removed - 1]!]?.note : "单指按住向上滑，一层层拆开；向下滑装回。双指旋转、缩放。"}</span>
+            <span>{removed > 0 ? LAYERS[selected!]?.[dis.layers[removed - 1]!]?.note : "单指上下滑：拆开 / 装回；左右滑：绕着它转。双指自由旋转、缩放，松手即停。"}</span>
           </div>
         </div>
       )}

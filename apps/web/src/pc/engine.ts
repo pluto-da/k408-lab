@@ -904,6 +904,28 @@ export class PcEngine {
     // opened part with layers: one finger / left mouse drives the teardown, two fingers / right mouse orbit
     const layered = s === "open" && !!part && !!this.parts.get(part)?.interior?.layers.length;
     const c = this.controls;
+    if (s === "open") {
+      c.enableDamping = false;
+      c.enablePan = false;
+      c.minPolarAngle = 0.05;
+      c.maxPolarAngle = Math.PI - 0.05;
+      if (part === "case") {
+        this.pivot = null;
+        c.minDistance = 0.2;
+        c.maxDistance = 2.2;
+      } else {
+        this.updatePivot();
+        this.applyViewLimits();
+      }
+    } else {
+      c.enableDamping = true;
+      c.enablePan = true;
+      c.minPolarAngle = 0;
+      c.maxPolarAngle = Math.PI * 0.52;
+      c.minDistance = 0.05;
+      c.maxDistance = 2.2;
+      if (s !== "extracting") this.pivot = null;
+    }
     if (layered) {
       c.touches = { ONE: -1 as unknown as THREE.TOUCH, TWO: THREE.TOUCH.DOLLY_ROTATE };
       c.mouseButtons = { LEFT: -1 as unknown as THREE.MOUSE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
@@ -999,7 +1021,12 @@ export class PcEngine {
       it.group.scale.setScalar(1 - grow + grow * k);
     }, undefined, easeOut, "interior");
     const ir = ihi.clone().sub(ilo).length() / 2;
-    this.flyTo(center, new THREE.Vector3(...def.view).normalize(), this.fitDistance(ir * 0.98), 1.1, () => {
+    this.fitR = ir * 0.98;
+    it.group.scale.setScalar(1);
+    this.updatePivot();
+    it.group.scale.setScalar(1 - grow);
+    const focus = this.pivot ? this.pivot.clone() : center;
+    this.flyTo(focus, new THREE.Vector3(...def.view).normalize(), this.fitDistance(ir * 0.98), 1.1, () => {
       if (this.selected !== id) return;
       this.setState("open", id);
       this.showCallouts(id, true);
@@ -1024,7 +1051,8 @@ export class PcEngine {
     if (p.interior && p.interior.group.visible) {
       const lo = v3(p.interior.meta.bbox[0]);
       const hi = v3(p.interior.meta.bbox[1]);
-      const c = lo.clone().add(hi).multiplyScalar(0.5).applyQuaternion(p.interior.group.quaternion).add(p.interior.group.position);
+      this.updatePivot();
+      const c = this.pivot ? this.pivot.clone() : lo.clone().add(hi).multiplyScalar(0.5).applyQuaternion(p.interior.group.quaternion).add(p.interior.group.position);
       this.flyTo(c, new THREE.Vector3(...def.view).normalize(), this.fitDistance((hi.clone().sub(lo).length() / 2) * 0.98), dur);
     }
   }
@@ -1130,10 +1158,34 @@ export class PcEngine {
       const from = this.calloutGate;
       this.tween(0.35, (e) => (this.calloutGate = from + (gate - from) * e), undefined, easeOut, "gate");
     }
+    this.updatePivot();
     this.cb.onDisassembly?.(k, layers.map((L) => L.meta.name));
     this.invalidate();
   }
   private calloutGateTarget = 1;
+  /** live centre / radius of the opened part's visible geometry: the orbit pivot in the part view */
+  private pivot: THREE.Vector3 | null = null;
+  private pivotR = 0.1;
+  private fitR = 0.1;
+  private pivotBox = new THREE.Box3();
+
+  private updatePivot() {
+    const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
+    if (!it || !it.group.visible) return;
+    it.group.updateMatrixWorld(true);
+    this.pivotBox.setFromObject(it.group);
+    if (this.pivotBox.isEmpty()) return;
+    this.pivot = this.pivotBox.getCenter(this.pivot ?? new THREE.Vector3());
+    this.pivotR = Math.max(0.01, this.pivotBox.getSize(new THREE.Vector3()).length() / 2);
+    if (this.state === "open") this.applyViewLimits();
+  }
+
+  /** part view: no inertia, no pan, free pitch, zoom bounded by the part's size */
+  private applyViewLimits() {
+    const c = this.controls;
+    c.minDistance = this.pivotR * 1.6;
+    c.maxDistance = Math.max(c.minDistance * 1.5, this.fitDistance(this.fitR) * 2.5);
+  }
 
   // ---------------------------------------------------------------- animation helpers
   private tween(dur: number, fn: (k: number) => void, done?: () => void, e = ease, key?: string) {
@@ -1461,8 +1513,9 @@ export class PcEngine {
       else t.done?.();
     }
     this.tweens = keep.concat(this.tweens);
-    const moved = this.controls.enabled ? this.controls.update() : false;
-    this.clampTarget();
+    let moved = this.controls.enabled ? this.controls.update() : false;
+    if (this.followPivot(dt)) moved = true;
+    if (this.state !== "open") this.clampTarget();
     this.updateLinks(time, dt);
     // render on demand: a still scene (part opened, nothing moving) costs no GPU time at all
     const animating =
@@ -1483,6 +1536,20 @@ export class PcEngine {
     this.stats.dt = dt;
     this.stats.dpr = this.dpr;
   };
+
+  /** keep the orbit pivot on the part while its layers come apart: target and camera shift together */
+  private followPivot(dt: number) {
+    if (this.state !== "open" || !this.pivot || this.tweens.some((t) => t.key === "camera")) return false;
+    const t = this.controls.target;
+    const d = this.pivot.clone().sub(t);
+    if (d.lengthSq() < 1e-10) return false;
+    const a = d.length() < 1e-4 ? 1 : 1 - Math.exp(-dt / 0.1);
+    d.multiplyScalar(a);
+    t.add(d);
+    this.camera.position.add(d);
+    this.camera.lookAt(t);
+    return true;
+  }
 
   private clampTarget() {
     const t = this.controls.target;
@@ -1530,16 +1597,17 @@ export class PcEngine {
   }
 
   private pointers = new Set<number>();
-  private drag: { id: number; y0: number; k0: number; h: number } | null = null;
+  private drag: { id: number; x0: number; y0: number; lx: number; ly: number; k0: number; h: number; mode: null | "dis" | "orbit" } | null = null;
+  private orbitS = new THREE.Spherical();
 
   private onDown = (e: PointerEvent) => {
     this.down = { x: e.clientX, y: e.clientY, t: performance.now() };
     this.pointers.add(e.pointerId);
     const it = this.selected ? this.parts.get(this.selected)?.interior : undefined;
     if (this.state === "open" && it?.layers.length && this.pointers.size === 1 && (e.pointerType !== "mouse" || e.button === 0)) {
-      this.tweens = this.tweens.filter((t) => t.key !== "dis");
+      // direction decides on the first ~8 px: vertical takes the part apart / puts it back, otherwise orbit around it
       // a full swipe over ~55 % of the screen height takes the part completely apart
-      this.drag = { id: e.pointerId, y0: e.clientY, k0: this.disK, h: Math.max(240, this.renderer.domElement.clientHeight * 0.55) };
+      this.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, k0: this.disK, h: Math.max(240, this.renderer.domElement.clientHeight * 0.55), mode: null };
       this.renderer.domElement.setPointerCapture?.(e.pointerId);
     } else {
       this.drag = null; // second finger: hand over to orbit / zoom
@@ -1572,8 +1640,31 @@ export class PcEngine {
 
   private onMove = (e: PointerEvent) => {
     if (this.drag && e.pointerId === this.drag.id) {
-      const k = clamp01(this.drag.k0 + (this.drag.y0 - e.clientY) / this.drag.h);
-      if (k !== this.disK) this.applyDisassembly(k);
+      const g = this.drag;
+      if (!g.mode) {
+        const dx = e.clientX - g.x0;
+        const dy = e.clientY - g.y0;
+        if (Math.hypot(dx, dy) < 8) return;
+        g.mode = Math.abs(dy) > Math.abs(dx) * 1.2 ? "dis" : "orbit";
+        if (g.mode === "dis") {
+          this.tweens = this.tweens.filter((t) => t.key !== "dis");
+          g.k0 = this.disK;
+          g.y0 = e.clientY;
+        } else {
+          this.tweens = this.tweens.filter((t) => t.key !== "camera");
+        }
+        g.lx = e.clientX;
+        g.ly = e.clientY;
+        if (g.mode === "dis") return;
+      }
+      if (g.mode === "dis") {
+        const k = clamp01(g.k0 + (g.y0 - e.clientY) / g.h);
+        if (k !== this.disK) this.applyDisassembly(k);
+      } else {
+        this.orbitBy(e.clientX - g.lx, e.clientY - g.ly);
+      }
+      g.lx = e.clientX;
+      g.ly = e.clientY;
       return;
     }
     if (e.pointerType !== "mouse" || this.state !== "overview" || e.buttons) return;
@@ -1594,6 +1685,20 @@ export class PcEngine {
       this.invalidate();
     }
   };
+
+  /** one-finger orbit in the part view: exactly follows the finger, no inertia */
+  private orbitBy(dx: number, dy: number) {
+    const c = this.controls;
+    const h = Math.max(1, this.renderer.domElement.clientHeight);
+    const off = this.camera.position.clone().sub(c.target);
+    const s = this.orbitS.setFromVector3(off);
+    s.theta -= ((2 * Math.PI * dx) / h) * c.rotateSpeed;
+    s.phi = THREE.MathUtils.clamp(s.phi - ((2 * Math.PI * dy) / h) * c.rotateSpeed, c.minPolarAngle, c.maxPolarAngle);
+    s.makeSafe();
+    this.camera.position.setFromSpherical(s).add(c.target);
+    this.camera.lookAt(c.target);
+    this.invalidate();
+  }
 
   private onLeave = () => {
     if (this.hovered) {
