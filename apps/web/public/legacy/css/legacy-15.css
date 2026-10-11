@@ -1,0 +1,379 @@
+/* ==========================================================================
+   多设备适配（手机 · 折叠屏 · 平板 · 笔记本 · 大屏）
+   与全站约定一致：断点 480 / 768 / 1024 / 1280 / 1600 / 2200；
+   内容最大宽度 1200（<1600）、1440（1600–2200）、1680（>2200）；
+   左右留白 16 / 24 / 32；粗指针（触屏）可点元素 ≥ 44px；HTML 文字 ≥ 12px（触屏 ≥ 13px）。
+   旧样式全部用 px，大屏的“根字号放大”用 zoom 整体放大实验室内容（3D 画布反向抵消，保证拾取坐标正确）。
+   ========================================================================== */
+
+html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* ---------- 容器与留白 ---------- */
+:root {
+  --x-gut: 16px;
+  --x-max: 1200px;
+  --x-z: 1;
+  --x-padl: calc(var(--x-gut) + env(safe-area-inset-left, 0px));
+  --x-padr: calc(var(--x-gut) + env(safe-area-inset-right, 0px));
+}
+@media (min-width: 768px) { :root { --x-gut: 24px; } }
+@media (min-width: 1280px) { :root { --x-gut: 32px; } }
+@media (min-width: 1600px) { :root { --x-max: 1440px; --x-z: 1.0625; } }
+@media (min-width: 2200px) { :root { --x-max: 1680px; --x-z: 1.125; } }
+
+.page.x-page {
+  max-width: calc(var(--x-max) / var(--x-z) + var(--x-padl) + var(--x-padr));
+  padding-left: var(--x-padl); padding-right: var(--x-padr);
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  overflow-wrap: break-word;
+}
+.x-tool { margin: 0 calc(-1 * var(--x-padr)) 0 calc(-1 * var(--x-padl)); padding-left: var(--x-padl); padding-right: var(--x-padr); }
+
+/* 大屏：整体放大（相当于根字号 17px / 18px），3D 画布与知识图谱反向抵消 */
+@media (min-width: 1600px) {
+  .page.x-page { zoom: 1.0625; }
+  .x-page .x-hero, .x-page .x-3d__load, .x-page .x-graph { zoom: 0.941176; }
+  .x-page .x-toc { max-height: calc(100vh / 1.0625 - var(--x-sticky) - 40px); }
+}
+@media (min-width: 2200px) {
+  .page.x-page { zoom: 1.125; }
+  .x-page .x-hero, .x-page .x-3d__load, .x-page .x-graph { zoom: 0.888889; }
+  .x-page .x-toc { max-height: calc(100vh / 1.125 - var(--x-sticky) - 40px); }
+}
+/* 外框改为 clip：不建立滚动容器，内部的吸顶 / 吸底（控制条、侧栏）才生效 */
+.x-lab, .x-proc, .x-prop, .x-study { overflow: hidden; overflow: clip; }
+
+/* ---------- 工具栏：科目切换行 ---------- */
+.x-chip { min-height: 44px; }
+@media (min-width: 761px) {
+  .x-tool__row { flex: 0 1 auto; }
+  .x-tool__search { flex: 1 1 200px; max-width: 420px; margin-left: auto; }
+}
+
+/* ---------- 横向滚动行：两端渐隐提示（data-l / data-r 由 28-rwd.js 维护） ---------- */
+.x-sx {
+  --fl: 0px; --fr: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+}
+.x-sx[data-l] { --fl: 32px; }
+.x-sx[data-r] { --fr: 40px; }
+.x-sxp { position: relative; }
+.x-swipe {
+  position: absolute; right: 10px; bottom: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 999px; background: rgba(26, 28, 32, .78); color: #fff;
+  font: 500 13px/1.2 var(--x-head); pointer-events: none; transition: opacity .2s;
+}
+.x-swipe::before { content: "↔"; font-size: 14px; }
+.x-swipe[hidden] { display: none; }
+
+/* ---------- 目录：手机底部弹出、平板侧边浮动、≥1280 左侧常驻 ---------- */
+@media (max-width: 1279px) {
+  .x-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .x-tocbtn { display: inline-flex; }
+  .x-toc {
+    position: fixed; z-index: 40; display: none; padding: 8px;
+    background: #fff; border: 1px solid var(--x-line); box-shadow: var(--x-sh-2), 0 0 0 100vmax rgba(20, 22, 26, .28);
+    overscroll-behavior: contain;
+  }
+  .x-toc.is-open { display: block; }
+  .x-toc a { min-height: 44px; }
+  .x-toc__labs a { min-height: 40px; }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .x-toc {
+    left: auto; right: max(12px, env(safe-area-inset-right, 0px)); width: 340px; top: calc(var(--x-tool-bottom, 120px) + 6px);
+    max-height: calc(100vh - var(--x-tool-bottom, 120px) - 24px); max-height: calc(100dvh - var(--x-tool-bottom, 120px) - 24px);
+    border-radius: var(--x-r-lg);
+  }
+}
+@media (max-width: 767px) {
+  .x-toc {
+    left: 0; right: 0; top: auto; bottom: 0; width: auto;
+    max-height: 75vh; max-height: 75dvh;
+    padding: 8px max(8px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+    border-radius: 16px 16px 0 0; border-bottom: 0;
+  }
+  .x-toc::before { content: ""; display: block; width: 40px; height: 4px; margin: 2px auto 8px; border-radius: 2px; background: #d6d6d2; }
+}
+@media (min-width: 1280px) {
+  .x-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+}
+
+/* ---------- 正文排版 ---------- */
+.x-sec__head { max-width: 46em; }
+.x-sec__head p:not(.x-sec__meta) { max-width: 45em; }
+.x-card .x-pts, .x-card .x-trap { max-width: 46em; }
+.x-ch__star { font-size: 12px; }
+.x-trap b span { font-size: 12px; width: 18px; height: 18px; }
+.x-lab__seq, .x-proc__count, .x-prop__count { font-variant-numeric: tabular-nums; }
+
+/* 章节卡片 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .x-study { grid-template-columns: minmax(190px, 230px) minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+   动画实验外壳
+   结构：.x-lab__panel > .x-lab__main（选项 + 画布） + .x-lab__side（控制条 + 输出 + 考点）
+   ========================================================================== */
+.x-lab__note > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; min-height: 32px; }
+.x-lab__note > summary::-webkit-details-marker { display: none; }
+.x-lab__note > summary b { margin: 0 !important; }
+.x-lab__note > summary::after { content: ""; width: 7px; height: 7px; margin-left: 2px; border-right: 1.6px solid var(--x-ink-2); border-bottom: 1.6px solid var(--x-ink-2); transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+.x-lab__note[open] > summary::after { transform: rotate(-135deg) translateY(-2px); }
+.x-lab__note > summary:focus-visible { outline: 2px solid var(--x-primary); outline-offset: 2px; border-radius: 4px; }
+.x-lab__note p { margin-top: 4px !important; }
+.x-lab__stage { min-width: 0; }
+.x-lab__main { position: relative; }
+
+/* 窄屏（<1024）：上下排列，side 的子元素直接排进面板；控制条吸在屏幕底部 */
+@media (max-width: 1023px) {
+  .x-lab__panel { display: flex; flex-direction: column; }
+  .x-lab__side { display: contents; }
+  .x-lab__main { padding: clamp(14px, 3vw, 24px) clamp(14px, 3vw, 24px) 0; }
+  .x-lab__ctrl {
+    position: sticky; bottom: 0; z-index: 5;
+    margin: 12px 0 0; padding: 8px clamp(14px, 3vw, 24px) calc(8px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, .96); border-top: 1px solid var(--x-line);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
+  }
+  .x-lab__ctrl .x-lab__btn { min-width: 0; padding: 0 8px; }
+  .x-lab__ctrl .x-lab__speed { grid-column: 1 / -1; margin: 0; min-height: 36px; }
+  .x-lab__ctrl .x-lab__speed input { flex: 1; width: auto; }
+  .x-lab__out { margin: 0; padding: 12px clamp(14px, 3vw, 24px) clamp(14px, 3vw, 24px); min-width: 0; }
+  .x-lab__note { border-left: 0; border-top: 1px solid var(--x-line); padding: 10px clamp(14px, 3vw, 24px); }
+}
+/* 平板竖屏：控制条单行（三个按钮 + 速度） */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .x-lab__ctrl { grid-template-columns: repeat(3, minmax(0, 120px)) minmax(160px, 1fr); }
+  .x-lab__ctrl .x-lab__speed { grid-column: auto; justify-self: end; width: 100%; max-width: 260px; }
+}
+
+/* 宽屏（≥1024）与横屏手机：左画布约 62%，右侧栏约 38%，侧栏吸顶、内容超出时独立滚动 */
+@media (min-width: 1024px), (orientation: landscape) and (max-height: 520px) and (min-width: 640px) {
+  .x-lab__panel {
+    display: grid; grid-template-columns: minmax(0, 1fr) 38%; align-items: start;
+    background: linear-gradient(to right, #fff 0 62%, var(--x-line) 62% calc(62% + 1px), #fafaf8 calc(62% + 1px) 100%);
+  }
+  .x-lab__panel[hidden] { display: none; }
+  .x-lab__main { padding: clamp(16px, 2vw, 24px); }
+  .x-lab__side {
+    position: sticky; top: calc(var(--x-sticky) + 8px);
+    max-height: calc(100vh - var(--x-sticky) - 16px); max-height: calc(100dvh - var(--x-sticky) - 16px);
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+    display: flex; flex-direction: column; gap: 14px; min-width: 0;
+    padding: clamp(16px, 2vw, 24px) clamp(14px, 1.6vw, 22px);
+  }
+  .x-lab__ctrl {
+    position: static; margin: 0; padding: 0; background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
+  }
+  .x-lab__ctrl .x-lab__btn { min-width: 0; padding: 0 8px; }
+  .x-lab__ctrl .x-lab__speed { grid-column: 1 / -1; justify-self: stretch; max-width: none; margin: 0; min-height: 36px; }
+  .x-lab__ctrl .x-lab__speed input { flex: 1; width: auto; }
+  .x-lab__out { margin: 0; padding: 0; min-width: 0; }
+  .x-lab__note { padding: 12px 0 0; border-left: 0; border-top: 1px solid var(--x-line); background: transparent; }
+  .x-lab__big { font-size: 20px; letter-spacing: .08em; overflow-wrap: anywhere; }
+}
+/* 输出区放不下侧栏的实验（大表格 / 网格，名单由 28-rwd.js 按实际宽度判断）：输出移到画布下方整宽显示，侧栏只留控制条和考点 */
+@media (min-width: 1024px), (orientation: landscape) and (max-height: 520px) and (min-width: 640px) {
+  .x-lab__panel.is-wideout { grid-template-rows: auto 1fr auto; }
+  .x-lab__panel.is-wideout .x-lab__main { grid-column: 1; grid-row: 1 / span 2; }
+  .x-lab__panel.is-wideout .x-lab__side { grid-column: 2; grid-row: 1 / span 2; }
+  .x-lab__panel.is-wideout > .x-lab__out { display: block; grid-column: 1 / -1; grid-row: 3; padding: 16px clamp(16px, 2vw, 24px) clamp(16px, 2vw, 24px); border-top: 1px solid var(--x-line); background: #fff; }
+}
+
+/* 横屏手机：工具栏不吸顶，画布高度不超过一屏，保证画布与“下一步”同屏 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .x-tool { position: relative; top: auto; }
+  html.is-lab { scroll-padding-top: 8px; }
+  .x-sec { scroll-margin-top: 8px; }
+  .x-lab__side, .x-proc.x-proc .x-proc__side { top: 8px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); }
+  .x-lab__stage { max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; }
+  .x-lab__stage > svg { max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); }
+  .x-lab__main { padding: 12px 14px; }
+  .x-lab__side { padding: 12px; gap: 10px; }
+  .x-lab__opts { margin-bottom: 8px; }
+  .x-sec { padding-top: 28px; }
+  .x-hero, .x-3d__load { height: calc(100vh - 24px); height: calc(100dvh - 24px); min-height: 0; }
+  .x-graph { height: calc(100vh - 24px); height: calc(100dvh - 24px); min-height: 0; }
+}
+
+/* 横屏手机：侧栏只放控制条（吸顶，随画布滚动一直可见），输出和考点移到下方整宽 */
+@media (orientation: landscape) and (max-height: 520px) and (min-width: 640px) and (max-width: 1023px) {
+  .x-lab__panel, .x-lab__panel.is-wideout { grid-template-rows: auto auto auto; }
+  .x-lab__panel .x-lab__side, .x-lab__panel.is-wideout .x-lab__side { display: contents; }
+  .x-lab__panel .x-lab__main { grid-column: 1; grid-row: 1; }
+  .x-lab__panel .x-lab__ctrl { grid-column: 2; grid-row: 1; align-self: start; position: sticky; top: 8px; padding: 12px; }
+  .x-lab__panel .x-lab__out, .x-lab__panel.is-wideout > .x-lab__out { grid-column: 1 / -1; grid-row: 2; padding: 12px 14px; border-top: 1px solid var(--x-line); background: #fff; }
+  .x-lab__panel .x-lab__note { grid-column: 1 / -1; grid-row: 3; padding: 10px 14px; background: #fafaf8; }
+}
+
+/* 画布：需要滚动时允许横向滑动（宽表格 / 计算类实验） */
+.x-lab__stage { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+/* SVG 最小宽度：按每个实验最小一号字（多为 12–13px 的下标、刻度）缩放后不小于 8px 计算。
+   ≥768 时画布都不小于 550px，全部按宽度等比缩放；<768 时只给信息密集的实验保留最小宽度，并显示“左右滑动查看”。 */
+.x-lab .x-lab__panel .x-lab__stage > svg { min-width: var(--x-svgmin, 0px) !important; }
+@media (max-width: 767px) {
+  :is(#lab-dijkstra) { --x-svgmin: 360px; }
+  :is(#lab-infix, #lab-cqueue, #lab-kmp, #lab-huffman, #lab-bst, #lab-btree, #lab-ufset, #lab-graphtrav, #lab-mst, #lab-topo, #lab-floyd,
+      #lab-hash, #lab-bsearch, #lab-sort2, #lab-cache, #lab-pipeline, #lab-ieee754, #lab-booth, #lab-gantt,
+      #lab-tcp, #lab-subnet, #lab-tcpconn, #lab-crc, #lab-csmacd, #lab-ipfrag, #lab-encoding, #lab-rip) { --x-svgmin: 440px; }
+  :is(#lab-hamming, #lab-addressing, #lab-disk, #lab-partition, #lab-prodcons, #lab-slidewin, #lab-lpm) { --x-svgmin: 470px; }
+}
+
+/* ==========================================================================
+   过程图解：.x-proc__main（标题 / 模式 / 输入 + 画布） + .x-proc__side（控制条、当前步骤、变量、全部步骤）
+   ========================================================================== */
+.x-proc__side { min-width: 0; padding: 0 clamp(14px, 3vw, 24px) clamp(14px, 3vw, 24px); }
+.x-proc__main { padding-bottom: 0; }
+.x-proc__body { grid-template-columns: minmax(0, 1fr); }
+.x-proc__body.is-split {
+  grid-template-columns: minmax(0, 1fr) var(--x-side, 38%); align-items: start;
+  background: linear-gradient(to left, #fafaf8 0 var(--x-side, 38%), var(--x-line) var(--x-side, 38%) calc(var(--x-side, 38%) + 1px), #fff calc(var(--x-side, 38%) + 1px) 100%);
+}
+.x-proc__body.is-split .x-proc__main { padding-bottom: clamp(14px, 3vw, 24px); }
+.x-proc__body.is-split .x-proc__side {
+  position: sticky; top: calc(var(--x-sticky) + 8px);
+  max-height: calc(100vh - var(--x-sticky) - 16px); max-height: calc(100dvh - var(--x-sticky) - 16px);
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  padding: clamp(14px, 2vw, 24px) clamp(14px, 1.6vw, 22px);
+}
+.x-proc__body.is-split .x-proc__ctrl { margin-top: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.x-proc__body.is-split .x-proc__ctrl .x-lab__btn { min-width: 0; padding: 0 6px; }
+.x-proc__body.is-split .x-proc__ctrl .x-lab__speed { grid-column: 1 / span 3; margin: 0; min-height: 36px; }
+.x-proc__body.is-split .x-proc__ctrl .x-lab__speed input { flex: 1; width: auto; min-width: 0; }
+.x-proc__body.is-split .x-proc__count { justify-self: end; }
+.x-proc__body.is-split .x-proc__card { background: #fff; }
+.x-proc__body.is-split .x-proc__note { grid-column: 1 / -1; }
+.x-proc__head { max-width: 50em; }
+.x-proc__in { font-size: 13px; }
+.x-proc__canvas { position: relative; }
+@media (max-width: 760px) {
+  .x-proc__ctrl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .x-proc__ctrl .x-lab__btn { min-width: 0; padding: 0 4px; }
+  .x-proc__ctrl .x-lab__speed { grid-column: 1 / span 3; min-height: 36px; }
+  .x-proc__ctrl .x-lab__speed input { flex: 1; width: auto; min-width: 0; }
+  .x-proc__count { justify-self: end; }
+}
+
+/* 放大查看（手机 / 平板竖屏上的图解） */
+.x-zoombtn {
+  position: absolute; z-index: 3; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 12px; border: 1px solid var(--x-line-2); border-radius: 999px;
+  background: rgba(255, 255, 255, .94); color: var(--x-ink); font: 500 13px/1 var(--x-head); cursor: pointer;
+}
+.x-zoombtn::before { content: ""; width: 12px; height: 12px; background: linear-gradient(currentColor, currentColor) 0 0 / 5px 1.6px no-repeat, linear-gradient(currentColor, currentColor) 0 0 / 1.6px 5px no-repeat, linear-gradient(currentColor, currentColor) 100% 100% / 5px 1.6px no-repeat, linear-gradient(currentColor, currentColor) 100% 100% / 1.6px 5px no-repeat; }
+.x-zoombtn:focus-visible { outline: 2px solid var(--x-primary); outline-offset: 2px; }
+@media (min-width: 1024px) and (pointer: fine) { .x-zoombtn { display: none; } }
+.x-zoom {
+  position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column;
+  background: #fff; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.x-zoom[hidden] { display: none; }
+.x-zoom__bar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--x-line); background: #fafaf8; }
+.x-zoom__t { flex: 1 1 140px; min-width: 0; font: 600 14px/1.3 var(--x-head); color: var(--x-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x-zoom__bar .x-lab__btn { min-width: 44px; padding: 0 10px; }
+.x-zoom__view { flex: 1 1 auto; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; overscroll-behavior: contain; }
+.x-zoom__view .x-proc__canvas { border: 0; border-radius: 0; overflow: visible; display: inline-block; min-width: 100%; }
+.x-zoom__view .x-proc__svg { min-width: 0 !important; }
+.x-zoom__step { flex: none; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--x-line); font: 400 14px/1.5 var(--x-head); color: var(--x-ink); max-height: 30vh; overflow: auto; }
+.x-zoom__step b { display: block; font-weight: 600; }
+html.x-zoom-open, html.x-zoom-open body { overflow: hidden; }
+
+/* ==========================================================================
+   性质与公式：<1024 顶部横向标签；≥1024 左侧固定宽度分组列表（吸顶、独立滚动）+ 右侧卡片
+   ========================================================================== */
+@media (max-width: 1023px) {
+  .x-prop__wrap { grid-template-columns: minmax(0, 1fr); }
+  .x-prop__list { flex-direction: row; align-items: center; gap: 4px; max-height: none; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; border-right: 0; border-bottom: 1px solid var(--x-line); scroll-snap-type: x proximity; scrollbar-width: none; }
+  .x-prop__list::-webkit-scrollbar { display: none; }
+  .x-prop__gl { flex: none; margin: 0 2px 0 6px; padding: 0; }
+  .x-prop__gl:first-of-type { margin-top: 0; margin-left: 4px; }
+  .x-prop__item { flex: none; width: auto; min-height: 44px; padding: 6px 12px; white-space: nowrap; scroll-snap-align: start; }
+  .x-prop__item[aria-selected="true"]::before { left: 10px; right: 10px; top: auto; bottom: 0; width: auto; height: 3px; }
+  .x-prop__empty { white-space: nowrap; }
+}
+@media (min-width: 1024px) {
+  .x-prop { --lw: 260px; }
+  .x-prop__wrap {
+    grid-template-columns: var(--lw) minmax(0, 1fr); align-items: start;
+    background: linear-gradient(to right, #fafaf8 0 var(--lw), var(--x-line) var(--lw) calc(var(--lw) + 1px), #fff calc(var(--lw) + 1px) 100%);
+  }
+  .x-prop__list {
+    position: sticky; top: calc(var(--x-sticky) + 8px); border-right: 0; background: transparent;
+    max-height: calc(100vh - var(--x-sticky) - 16px); max-height: calc(100dvh - var(--x-sticky) - 16px); overscroll-behavior: contain;
+  }
+  .x-prop__card { padding: clamp(18px, 2.2vw, 32px); }
+  .x-prop__card > :not(.x-prop__demo) { max-width: 52em; }
+}
+@media (min-width: 1600px) { .x-prop { --lw: 280px; } }
+
+/* ==========================================================================
+   字号下限：HTML 文字 ≥ 12px；触屏 ≥ 13px
+   ========================================================================== */
+.x-proc__gl, .x-lab__gl, .x-prop__gl { font-size: 12px; }
+.x-proc__kvi span, .x-proc__meta, .x-lab__badge, .x-ltag, .x-gl { font-size: 12px; }
+
+/* ==========================================================================
+   粗指针（触屏）：点击目标 ≥ 44px，文字 ≥ 13px
+   ========================================================================== */
+@media (pointer: coarse) {
+  .x-chip, .x-lab__tab, .x-proc__tab, .x-prop__sub, .x-prop__item, .x-tocbtn, .x-card__lab, .x-ch button { min-height: 44px; }
+  .x-toc a, .x-toc__labs a { min-height: 44px; }
+  .x-proc__preset { min-height: 44px; padding: 0 14px; }
+  .x-proc__steps button { min-height: 44px; }
+  .x-prop__link, .x-prop__redo, .x-callout a { min-height: 44px; }
+  .x-prop__fold > summary, .x-proc__all summary, .x-lab__note > summary { min-height: 44px; display: flex; align-items: center; }
+  .x-proc__in input, .x-proc__in select { min-height: 44px; }
+  .x-lab__speed { min-height: 44px; }
+  .x-lab__speed input, .x-zoom input[type="range"] { height: 44px; min-width: 120px; }
+  .x-zoombtn { min-height: 44px; }
+  .x-lab__btn, .x-panel__btn, .x-parts button, .x-c__swb { min-width: 44px; }
+  .x-gcard__x { width: 44px; height: 44px; }
+  input[type="checkbox"], input[type="radio"] { min-width: 20px; min-height: 20px; }
+  /* 文字 ≥ 13px */
+  .x-proc__gl, .x-lab__gl, .x-prop__gl, .x-ch__star, .x-proc__kvi span, .x-proc__meta, .x-lab__badge,
+  .x-ltag, .x-gl, .x-prop__src, .x-proc__in, .x-lab__seq, .x-tc-log { font-size: 13px; }
+}
+
+/* 只在支持悬停的设备上显示悬停反馈 */
+@media (hover: none) {
+  .x-lab__tab:hover, .x-proc__tab:hover, .x-prop__sub:hover, .x-prop__item:hover, .x-ch button:hover, .x-toc a:hover { background: transparent; }
+  .x-lab__tab[aria-selected="true"]:hover, .x-proc__tab[aria-selected="true"]:hover, .x-prop__item[aria-selected="true"]:hover, .x-ch button[aria-pressed="true"]:hover { background: #fff; }
+}
+
+/* 键盘焦点 */
+.x-chip:focus-visible, .x-tocbtn:focus-visible, .x-toc a:focus-visible { outline: 2px solid var(--x-primary); outline-offset: 2px; }
+
+/* 减少动态效果 */
+@media (prefers-reduced-motion: reduce) {
+  .x-swipe, .x-lab__note > summary::after { transition: none; }
+  .x-page *, .x-page *::before, .x-page *::after { scroll-behavior: auto !important; }
+}
+
+/* 触屏上的滑块（实验速度、性质验证参数）：触控高度 44px */
+@media (pointer: coarse) {
+  .x-page input[type="range"] { min-height: 44px; }
+}
+@media (pointer: coarse) {
+  .x-trap b span, .x-prop__ol, .x-prop__src { font-size: 13px; }
+  .x-prop__ol { width: 24px; height: 24px; }
+  .x-lc-tip, .x-lc-legend, .x-lc-log, .x-lx-tip, .x-d1-tip, .x-d2-tip, .x-d2-tip code, .x-d3-tip { font-size: 13px; }
+}
+@media (pointer: coarse) {
+  .x-pq__btn, .x-pd .x-lab__btn, .x-pc .x-lab__btn, .x-po .x-lab__btn { min-height: 44px; }
+  .x-pr-grids tbody th, .x-pr-grids sub, .x-pr-grids .x-pr-miss { font-size: 13px; }
+}
+/* 选项区标签文字不折行（“主串 S”），输入框自己收缩 */
+.x-lab__opts .x-lab__lbl { white-space: nowrap; }
+.x-lab__opts .x-lab__lbl > input, .x-lab__opts .x-lab__lbl > select { min-width: 0; }
+/* 极窄屏（≤360，iPhone SE / 折叠屏外屏）：目录按钮只留图标，四门课一行放下 */
+@media (max-width: 360px) {
+  .x-tocbtn { font-size: 0; gap: 0; min-width: 44px; padding: 0; justify-content: center; }
+  .x-chip { padding: 0 4px; }
+  .x-chip::before { margin-right: 4px; }
+  .x-chips { gap: 2px; }
+}

@@ -11,7 +11,7 @@ const RGB_MODES = ["彩虹流动", "单色常亮", "呼吸"];
 const ORDER: PartId[] = ["cpu", "ram", "gpu", "ssd", "hdd", "nic", "psu", "board", "case"];
 
 function useWide() {
-  const q = "(min-width: 900px)";
+  const q = "(min-width: 1024px)";
   const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia(q).matches);
   useEffect(() => {
     const m = window.matchMedia(q);
@@ -47,6 +47,8 @@ export default function PcPage() {
   const [dis, setDis] = useState<{ k: number; layers: string[] }>({ k: 0, layers: [] });
   const fillRef = useRef<HTMLElement>(null);
   const wide = useWide();
+  // 「拖动旋转」提示：第一次触碰 / 点按场景后不再显示
+  const [touched, setTouched] = useState(false);
   const touringNow = state === "journey";
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export default function PcPage() {
 
   return (
     <div className="pc-page">
-      <div ref={stageRef} className="pc-stage" />
+      <div ref={stageRef} className="pc-stage" onPointerDown={() => setTouched(true)} />
       <div ref={overlayRef} className="pc-overlay" aria-hidden="true" />
 
       <header className="pc-head">
@@ -193,6 +195,11 @@ export default function PcPage() {
         </div>
       )}
       {hovered && state === "overview" && <div className="pc-hoverchip">{PART_BY_ID[hovered].name}</div>}
+      {ready && !touched && state === "overview" && (
+        <div className="pc-hint" aria-hidden="true">
+          拖动旋转 · 双指缩放 · 点部件拆开
+        </div>
+      )}
 
       <nav className="pc-parts" aria-label="部件" hidden={touring}>
         {ORDER.map((id) => (

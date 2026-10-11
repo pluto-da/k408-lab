@@ -123,7 +123,7 @@ html.is-pc body { background: #0a0c10; }
 .pc-parts--static button.is-on { background: var(--primary-soft); color: var(--primary-ink); border-color: var(--primary); }
 .pc-panel--static { position: static; width: auto; background: #16191f; }
 
-@media (max-width: 899px) {
+@media (max-width: 1023.98px) {
   .pc-parts { max-width: none; right: 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; bottom: 12px; }
   .pc-parts button { flex: none; }
   .pc-head { max-width: 60vw; }
@@ -169,7 +169,7 @@ html.is-pc body { background: #0a0c10; }
 .pc-jbadge[data-on="1"] { opacity: 1; }
 @keyframes pc-in { from { opacity: 0; transform: translate(var(--tx, 0), 8px); } to { opacity: 1; } }
 .pc-journey { --tx: -50%; }
-@media (max-width: 899px) {
+@media (max-width: 1023.98px) {
   .pc-explode { top: 64px; }
   .pc-explode input { width: 110px; }
   .pc-rgb { top: 106px; flex-wrap: wrap; max-width: calc(100% - 20px); }
@@ -202,7 +202,7 @@ html.is-pc body { background: #0a0c10; }
 .pc-panel h2 { font-size: 18px; }
 .pc-panel__brief { font-size: 13px; }
 .pc-points li { font-size: 12.8px; padding: 6px 0 6px 24px; }
-@media (max-width: 899px) {
+@media (max-width: 1023.98px) {
   .pc-dhud { top: auto; bottom: 64px; transform: none; max-width: calc(100% - 28px); }
   .pc-dhud__rail { min-height: 64px; }
 }
@@ -211,7 +211,7 @@ html.is-pc body { background: #0a0c10; }
 .app--full { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 .app--full > .app-main--full { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .app--full .pc-page { flex: 1 1 auto; height: auto; min-height: 0; }
-@media (max-width: 699px) {
+@media (max-width: 767.98px) {
   .pc-head { top: 10px; left: 12px; right: 12px; max-width: none; }
   .pc-head h1 { font-size: 17px; }
   .pc-head p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -227,4 +227,96 @@ html.is-pc body { background: #0a0c10; }
   .pc-parts::-webkit-scrollbar { display: none; }
   .pc-journey { bottom: calc(58px + env(safe-area-inset-bottom)); }
   .pc-dhud { bottom: calc(60px + env(safe-area-inset-bottom)); }
+}
+
+/* ---- 多设备适配（断点约定见 styles/responsive.css）---- */
+/* 安全区域：横屏时刘海 / 挖孔在左右两侧，底部横条在下方 */
+.pc-head { left: calc(clamp(14px, 3vw, 28px) + env(safe-area-inset-left, 0px)); }
+.pc-tools { right: calc(clamp(10px, 3vw, 28px) + env(safe-area-inset-right, 0px)); }
+.pc-parts { left: calc(clamp(10px, 3vw, 28px) + env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.pc-panel { right: calc(clamp(10px, 2vw, 24px) + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.pc-explode, .pc-rgb { left: calc(clamp(14px, 3vw, 28px) + env(safe-area-inset-left, 0px)); }
+
+/* 首次进入的「拖动旋转」提示：第一次触碰场景后隐藏 */
+.pc-hint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; white-space: nowrap;
+  color: #f2f3f5; background: rgba(14, 17, 22, 0.72); border: 1px solid var(--pc-ctl-line);
+  animation: pc-hint 4.5s ease-out 0.6s both;
+}
+@keyframes pc-hint { 0% { opacity: 0; } 10%, 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 大屏：考点面板和控件随根字号放大 */
+@media (min-width: 1600px) {
+  .pc-panel { width: 20rem; }
+  .pc-panel__brief { font-size: 0.8125rem; }
+  .pc-points li { font-size: 0.8rem; }
+  .pc-head h1 { font-size: 1.25rem; }
+}
+@media (min-width: 2200px) {
+  .pc-panel { width: 22rem; }
+  .pc-parts button, .pc-btn, .pc-seg button, .pc-switch, .pc-explode { font-size: 0.8125rem; }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  /* 平板竖屏 / 横屏手机：标题只占左侧，副标题一行省略，不与右侧工具条重叠 */
+  .pc-head { max-width: calc(100% - 520px); min-width: 120px; }
+  .pc-head p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* 横屏手机（高度 ≤ 500）：标题、工具条压成顶部一行，部件按钮与「拆开看」共用底部一行，3D 场景占屏幕高度一半以上 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .pc-page { min-height: 0; }
+  .pc-head { top: 8px; max-width: none; }
+  .pc-head h1 { font-size: 16px; line-height: 36px; }
+  .pc-head p { display: none; }
+  .pc-tools {
+    top: 6px; left: calc(110px + env(safe-area-inset-left, 0px)); padding: 0; justify-content: flex-end;
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  }
+  .pc-tools::-webkit-scrollbar { display: none; }
+  .pc-tools > * { flex: none; }
+  .pc-parts { left: calc(12px + env(safe-area-inset-left, 0px)); right: calc(196px + env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); flex-wrap: nowrap; overflow-x: auto; max-width: none; }
+  .pc-explode { top: auto; left: auto; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 0 10px; }
+  .pc-explode input { width: 96px; }
+  .pc-rgb { top: 56px; left: auto; right: calc(12px + env(safe-area-inset-right, 0px)); max-width: calc(100% - 24px); flex-wrap: nowrap; overflow-x: auto; }
+  .pc-panel--sheet { left: auto; right: calc(10px + env(safe-area-inset-right, 0px)); top: 54px; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); width: min(320px, 44vw); max-height: none; }
+  .pc-journey { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 10px 14px; width: min(560px, calc(100% - 24px)); }
+  .pc-journey p { font-size: 13px; line-height: 1.5; }
+  .pc-journey__nav { margin-top: 6px; }
+  .pc-dhud { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  .pc-dhud__rail { min-height: 48px; }
+  .pc-opening { bottom: 56px; }
+  .pc-hoverchip { top: 52px; }
+}
+
+/* 触控设备：按钮、开关、链接点击区域 ≥ 44px */
+@media (pointer: coarse) {
+  .pc-parts button, .pc-btn, .pc-switch, .pc-explode { min-height: 44px; }
+  .pc-seg button { min-height: 40px; }
+  .pc-switch input { width: 18px; height: 18px; }
+  .pc-rgb button { min-height: 40px; min-width: 40px; }
+  .pc-rgb .pc-sw { width: 40px; height: 40px; border-width: 3px; background-clip: content-box; padding: 6px; }
+  .pc-chapters a { min-height: 44px; }
+  .pc-journey__nav .pc-btn { min-height: 44px; }
+  .pc-journey__dots { gap: 2px; }
+  .pc-journey__dots button { flex: 1 1 0; max-width: 48px; height: 40px; background: transparent; position: relative; }
+  .pc-journey__dots button::before { content: ""; position: absolute; left: 3px; right: 3px; top: 18px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); transition: background 0.3s; }
+  .pc-journey__dots button.is-done::before { background: rgba(255, 255, 255, 0.45); }
+  .pc-journey__dots button.is-on::before { background: var(--pc-accent); }
+  .pc-journey__dots button.is-done, .pc-journey__dots button.is-on { background: transparent; }
+  .pc-explode input { height: 32px; }
+}
+@media (pointer: coarse) and (max-width: 767.98px) {
+  .pc-tools { top: 54px; }
+  .pc-explode { top: 106px; }
+  .pc-rgb { top: 156px; }
+}
+@media (hover: none) {
+  .pc-legend--links li:hover { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .pc-hint { animation: none; opacity: 1; } }
+/* 宽屏：部件按钮尽量排成一行（避开右侧考点面板），场景少被遮挡 */
+@media (min-width: 1024px) {
+  .pc-parts { max-width: min(960px, calc(100% - 400px)); }
 }

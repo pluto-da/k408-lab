@@ -235,6 +235,17 @@ const QI = new THREE.Quaternion();
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const PRELOAD: PartId[] = ["cpu", "gpu", "ram", "ssd", "hdd", "nic", "psu", "board"];
 
+/** 设备档位：触控小屏算手机（像素比上限 1.5）；CPU ≤ 4 核或内存 ≤ 4 GB 算低端（关掉抗锯齿与后期效果） */
+function deviceProfile(): { phone: boolean; lowEnd: boolean } {
+  const coarse = typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
+  const short = Math.min(window.screen?.width || window.innerWidth, window.screen?.height || window.innerHeight);
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const cores = nav.hardwareConcurrency || 8;
+  const mem = nav.deviceMemory ?? 8;
+  const forced = new URLSearchParams(window.location.search).get("quality");
+  return { phone: coarse && short < 600, lowEnd: forced === "low" || (forced !== "high" && (cores <= 4 || mem <= 4)) };
+}
+
 export class PcEngine {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
@@ -279,6 +290,10 @@ export class PcEngine {
   private callouts: { el: HTMLDivElement; line: SVGPolylineElement; dot: SVGCircleElement; anchor: THREE.Vector3; obj: THREE.Object3D; w: number }[] = [];
   private calloutVis = 0;
   private ro: ResizeObserver;
+  private io: IntersectionObserver | null = null;
+  private lowEnd = false;
+  private inView = true;
+  private looping = true;
   // journey
   private packet!: THREE.Points;
   private packetMat!: THREE.ShaderMaterial;
@@ -303,8 +318,11 @@ export class PcEngine {
     private overlay: HTMLElement,
     private cb: EngineCallbacks = {},
   ) {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-    this.maxDpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dev = deviceProfile();
+    this.lowEnd = dev.lowEnd;
+    this.renderer = new THREE.WebGLRenderer({ antialias: !dev.lowEnd, alpha: false, powerPreference: "high-performance" });
+    // 像素比上限：手机 1.5，平板与电脑 2；低端设备再降到 1.25
+    this.maxDpr = Math.min(window.devicePixelRatio || 1, dev.phone ? 1.5 : 2, dev.lowEnd ? 1.25 : 2);
     // ?dpr=1 caps the pixel ratio (used by automated screenshots / very slow devices)
     const forced = Number(new URLSearchParams(window.location.search).get("dpr"));
     if (forced > 0) this.maxDpr = Math.min(this.maxDpr, forced);
@@ -359,6 +377,12 @@ export class PcEngine {
     this.controls.addEventListener("change", this.invalidate);
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(container);
+    // 横竖屏切换后，等浏览器排好版的下一帧再算一次尺寸
+    window.addEventListener("orientationchange", this.onOrientation);
+    // 不在视口内或页面切到后台时暂停渲染循环，省电
+    this.io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => this.setVisible(es.some((e) => e.isIntersecting))) : null;
+    this.io?.observe(container);
+    document.addEventListener("visibilitychange", this.onVisibility);
     this.resize();
     this.renderer.setAnimationLoop(this.frame);
     (window as unknown as { __pcStats?: unknown }).__pcStats = this.stats;
@@ -507,7 +531,8 @@ export class PcEngine {
     this.lightMode = mode;
     LOOK.uRgbMode.value = rgbMode;
     if (color) LOOK.uRgbColor.value.set(color);
-    if (mode === "rgb" && !this.composer) this.buildComposer();
+    // 低端设备不开后期辉光（RGB 灯效仍有，只是没有泛光）
+    if (mode === "rgb" && !this.composer && !this.lowEnd) this.buildComposer();
     const from = this.rgbMix;
     const to = mode === "rgb" ? 1 : 0;
     this.tween(0.9, (k) => (this.rgbMix = from + (to - from) * k), undefined, ease, "light");
@@ -613,6 +638,9 @@ export class PcEngine {
     if (this.journeyTimer) clearTimeout(this.journeyTimer);
     this.renderer.setAnimationLoop(null);
     this.ro.disconnect();
+    this.io?.disconnect();
+    window.removeEventListener("orientationchange", this.onOrientation);
+    document.removeEventListener("visibilitychange", this.onVisibility);
     const el = this.renderer.domElement;
     el.removeEventListener("pointerdown", this.onDown);
     el.removeEventListener("pointerup", this.onUp);
@@ -1493,6 +1521,27 @@ export class PcEngine {
     }
   }
 
+
+  private onOrientation = () => {
+    requestAnimationFrame(() => this.resize());
+  };
+
+  private onVisibility = () => this.setVisible(this.inView);
+
+  /** 场景离开视口或页面隐藏时停掉 requestAnimationFrame 循环，回来时重新开始并补画一帧 */
+  private setVisible(inView: boolean) {
+    this.inView = inView;
+    const run = inView && !document.hidden && !this.disposed;
+    if (run === this.looping) return;
+    this.looping = run;
+    if (run) {
+      this.clock.getDelta();
+      this.dirty = 3;
+      this.renderer.setAnimationLoop(this.frame);
+    } else {
+      this.renderer.setAnimationLoop(null);
+    }
+  }
 
   /** something changed: draw the next few frames even if nothing is animating */
   private invalidate = () => {

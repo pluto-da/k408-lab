@@ -11,11 +11,14 @@
 
         function build(THREE, OrbitControls) {
           var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          /* 像素比上限：手机 1.5，平板 / 电脑 2；低端设备（≤4 核或 ≤4 GB 内存）关闭阴影 */
+          var isPhone = window.matchMedia && window.matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 600;
+          var lowEnd = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? 1.5 : 2));
           renderer.outputEncoding = THREE.sRGBEncoding;
           renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
           renderer.physicallyCorrectLights = true;
-          renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          renderer.shadowMap.enabled = !lowEnd; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
           renderer.setClearColor(0x000000, 0);
           stage.appendChild(renderer.domElement);
           var scene = new THREE.Scene();
@@ -28,7 +31,7 @@
 
           scene.add(new THREE.HemisphereLight(0xcfd8ea, 0x1a1c20, 0.35));
           var sun = new THREE.DirectionalLight(0xffe2bf, 2.2); sun.position.set(-3.2, 8.5, -7);
-          sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+          sun.castShadow = !lowEnd; sun.shadow.mapSize.set(isPhone ? 1024 : 2048, isPhone ? 1024 : 2048);
           var sc = sun.shadow.camera; sc.left = -4.4; sc.right = 4.4; sc.top = 4.4; sc.bottom = -4.4; sc.near = 2; sc.far = 22;
           sun.shadow.bias = -0.0004; sun.shadow.radius = 4;
           scene.add(sun); scene.add(sun.target);
@@ -411,12 +414,15 @@
             root.position.x = 0; root.position.y = w < 600 ? 0.9 : 0.2;
           }
           window.addEventListener("resize", resize); resize();
+          /* 容器尺寸变化（折叠屏展开、分屏、横竖屏切换）时重新计算 */
+          if (window.ResizeObserver) new ResizeObserver(function () { if (stage.clientWidth && stage.clientHeight) resize(); }).observe(stage);
+          window.addEventListener("orientationchange", function () { requestAnimationFrame(resize); });
 
           var v = new THREE.Vector3(), clock = new THREE.Clock(), visible = true;
           new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(hero);
           function tick() {
             requestAnimationFrame(tick);
-            if (!visible) return;
+            if (!visible || document.hidden) return;
             var t = clock.getElapsedTime(), m = X.reduced ? 0 : 1;
             slabs.forEach(function (g, i) {
               var d = g.userData, target = g === active || focusSet.indexOf(g) >= 0 ? 1 : 0;

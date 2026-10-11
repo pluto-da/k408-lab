@@ -228,8 +228,9 @@
           var body = el("div", { class: "x-proc__body", id: "x-proc-body", role: "tabpanel" },
             '<div class="x-proc__main">' +
             '<div class="x-proc__opts"></div>' +
-            '<div class="x-proc__stage"></div>' +
-            '<div class="x-proc__ctrl">' +
+            '<div class="x-proc__stage"></div></div>' +
+            /* side：控制条、当前步骤、变量、全部步骤。宽屏且图解放得下时与画布并排（.is-split，见 legacy-15.css） */
+            '<div class="x-proc__side"><div class="x-proc__ctrl">' +
             '<button type="button" class="x-lab__btn" data-a="prev" aria-label="上一步">上一步</button>' +
             '<button type="button" class="x-lab__btn x-lab__btn--main" data-a="play" aria-pressed="false">播放</button>' +
             '<button type="button" class="x-lab__btn" data-a="next" aria-label="下一步">下一步</button>' +
@@ -240,6 +241,17 @@
             '<div class="x-proc__kv"></div>' +
             '<details class="x-proc__all" open><summary>全部步骤</summary><ol class="x-proc__steps"></ol></details>' +
             '</div><aside class="x-proc__note"><b>考点</b><ul></ul></aside>');
+          /* 双栏判断：侧栏取剩余宽度（最多 38%），画布不小于图解的最小宽度、侧栏不窄于 280px 时才并排，否则上下排列 */
+          var splitMq = window.matchMedia ? window.matchMedia("(min-width: 1024px)") : null;
+          function fitSplit() {
+            var svg = body.querySelector(".x-proc__stage svg"), mw = svg ? parseFloat(svg.style.minWidth) || 0 : 0, bw = body.clientWidth;
+            var side = Math.min(Math.round(bw * 0.38), bw - mw - 56);
+            var ok = !!(splitMq && splitMq.matches) && side >= 280;
+            if (ok) body.style.setProperty("--x-side", side + "px"); else body.style.removeProperty("--x-side");
+            if (body.classList.contains("is-split") !== ok) body.classList.toggle("is-split", ok);
+          }
+          if (window.ResizeObserver) new ResizeObserver(function () { fitSplit(); }).observe(body);
+          else window.addEventListener("resize", fitSplit);
           root.appendChild(tabs);
           root.appendChild(body);
           var q = function (s) { return body.querySelector(s); };
@@ -316,6 +328,7 @@
               card.hidden = false;
               if (circ.n) { buildList(function (k) { return (circ.go(k, true) || {}).t || ""; }); showStep(keepPos ? pos : circ.start || 0, false); }
               else { all.hidden = true; refreshCirc(); }
+              fitSplit();
               return;
             }
             ctrl.hidden = false;
@@ -330,6 +343,7 @@
             flow = Flow(stage, spec, scrollTo);
             buildList(function (k) { return spec.steps[k].t; });
             showStep(keepPos ? Math.min(pos, flow.n - 1) : 0, false);
+            fitSplit();
           }
           function refreshCirc() {
             var s = circ && circ.info ? circ.info() : {};
@@ -436,7 +450,15 @@
             if (t === "INPUT" || t === "SELECT" || t === "TEXTAREA") return;
             if (e.key === "ArrowRight") { e.preventDefault(); stop(); showStep(pos + 1, true); }
             if (e.key === "ArrowLeft") { e.preventDefault(); stop(); showStep(pos - 1, false); }
+            if ((e.key === " " || e.key === "Spacebar") && t !== "BUTTON" && t !== "SUMMARY" && t !== "A" && !ctrl.hidden) { e.preventDefault(); play.click(); }
           });
+          /* 供键盘快捷键调用（28-rwd.js）：a = "next" | "prev" | "play" | "reset" */
+          window.X_PROC_ACT = function (a) {
+            var b = q('[data-a="' + a + '"]');
+            if (!b || ctrl.hidden || b.disabled) return false;
+            b.click();
+            return true;
+          };
           tabs.addEventListener("keydown", function (e) {
             if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
             e.preventDefault();

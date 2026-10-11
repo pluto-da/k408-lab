@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
-import { CHAPTERS, LABS, SUBJECTS, SUBJECT_NAMES, type Subject } from "@k408/shared";
+import { CHAPTERS, SUBJECTS, SUBJECT_NAMES, type Subject } from "@k408/shared";
 import heroImg from "../assets/home-pc.webp";
+import heroImgSmall from "../assets/home-pc-720.webp";
+import { COMMON_LABS, LAB_COUNT, LABS_BY_SUBJECT, PROC_COUNT, PROP_COUNT } from "../lib/catalog";
 
 /** 每门课的分值、题号与最常考的几处（首页信息卡用） */
 const SUBJECT_INFO: Record<Subject, { score: number; qs: string; hot: string[] }> = {
@@ -9,16 +11,6 @@ const SUBJECT_INFO: Record<Subject, { score: number; qs: string; hot: string[] }
   os: { score: 35, qs: "选择 23–32 · 综合 2 题", hot: ["PV 同步", "页面置换", "文件分配"] },
   cn: { score: 25, qs: "选择 33–40 · 综合 1 题", hot: ["子网划分", "TCP 拥塞控制", "滑动窗口"] },
 };
-
-/** 常用实验：点了直达实验室里对应的演示 */
-const COMMON_LABS: { id: string; d: string }[] = [
-  { id: "sort", d: "5 种排序，一趟一趟看" },
-  { id: "tree", d: "先序、中序、后序、层序" },
-  { id: "dijkstra", d: "每轮选最近顶点、松弛边" },
-  { id: "paging", d: "看 LRU、OPT 每一步怎么换页" },
-  { id: "tcp", d: "慢启动、拥塞避免、快恢复" },
-  { id: "cache", d: "地址怎么切分，命中还是缺失" },
-];
 
 /** 一次数据的旅程：从网线到屏幕和硬盘 */
 const STOPS = [
@@ -31,8 +23,6 @@ const STOPS = [
   { t: "落盘 SSD", d: "文件系统 · 缓冲" },
 ];
 
-const LAB_BY_ID = Object.fromEntries(LABS.map((l) => [l.id, l]));
-
 export default function HomePage() {
   return (
     <div className="home">
@@ -41,7 +31,7 @@ export default function HomePage() {
           <div>
             <h1 id="hm-title">408 四门课，拆开来学</h1>
             <p className="hm-lead">
-              章节考点、{LABS.length} 个能单步看的动画实验，还有一台能拆开的电脑。打开就能复习，不用注册。
+              章节考点、{LAB_COUNT} 个能单步看的动画实验、{PROC_COUNT} 个过程图解、{PROP_COUNT} 条性质与公式，还有一台能拆开的电脑。打开就能复习，不用注册。
             </p>
             <div className="hm-cta">
               <a href="#subjects" className="app-btn app-btn--big">
@@ -56,6 +46,8 @@ export default function HomePage() {
           <figure className="hm-pic">
             <img
               src={heroImg}
+              srcSet={`${heroImgSmall} 720w, ${heroImg} 1180w`}
+              sizes="(min-width: 1600px) 680px, (min-width: 768px) 46vw, 1px"
               alt="一台侧透机箱的台式电脑：CPU 散热器、内存、显卡、电源和硬盘清晰可见"
               width={1180}
               height={820}
@@ -87,7 +79,7 @@ export default function HomePage() {
                     </div>
                     <p className="hm-card__meta">
                       <span>
-                        {CHAPTERS.filter((c) => c.subject === s).length} 章 · {LABS.filter((l) => l.subject === s).length} 个实验
+                        {CHAPTERS.filter((c) => c.subject === s).length} 章 · {LABS_BY_SUBJECT[s]} 个实验
                       </span>
                       <span>{info.qs}</span>
                     </p>
@@ -110,28 +102,24 @@ export default function HomePage() {
           <div className="hm-head">
             <h2 id="hm-labs">常用实验</h2>
             <Link to="/lab#lab" className="hm-more">
-              全部 {LABS.length} 个实验 →
+              全部 {LAB_COUNT} 个实验 →
             </Link>
           </div>
           <ul className="hm-labs">
-            {COMMON_LABS.map(({ id, d }) => {
-              const lab = LAB_BY_ID[id];
-              if (!lab) return null;
-              return (
-                <li key={id}>
-                  <Link to={`/lab#lab-${id}`} className="hm-lab" style={{ ["--c" as string]: `var(--${lab.subject})` }}>
-                    <i className="hm-lab__dot" aria-hidden="true" />
-                    <span>
-                      <b>{lab.title}</b>
-                      <small>{d}</small>
-                    </span>
-                    <span className="hm-lab__arrow" aria-hidden="true">
-                      →
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
+            {COMMON_LABS.map((lab) => (
+              <li key={lab.id}>
+                <Link to={`/lab#lab-${lab.id}`} className="hm-lab" style={{ ["--c" as string]: `var(--${lab.subject})` }}>
+                  <i className="hm-lab__dot" aria-hidden="true" />
+                  <span>
+                    <b>{lab.title}</b>
+                    <small>{lab.d}</small>
+                  </span>
+                  <span className="hm-lab__arrow" aria-hidden="true">
+                    →
+                  </span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </section>

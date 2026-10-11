@@ -17,6 +17,8 @@ export function Contact() {
 export default function LegalDoc({ title, intro, children, other }: { title: string; intro: ReactNode; children: ReactNode; other: "terms" | "privacy" }) {
   const ref = useRef<HTMLElement>(null);
   const [toc, setToc] = useState<{ id: string; t: string }[]>([]);
+  // 目录：平板以上默认展开，手机上默认折叠
+  const [tocOpen, setTocOpen] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches);
   // 目录从正文各节标题生成，章节增删后不用手动同步
   useEffect(() => {
     const secs = ref.current?.querySelectorAll<HTMLElement>("section[id] > h2") ?? [];
@@ -32,16 +34,18 @@ export default function LegalDoc({ title, intro, children, other }: { title: str
         </header>
         <div className="legal__intro">{intro}</div>
         {toc.length > 0 && (
-          <nav className="legal__toc" aria-label="目录">
-            <b>目录</b>
-            <ol>
-              {toc.map((x) => (
-                <li key={x.id}>
-                  <a href={`#${x.id}`}>{x.t.replace(/^[一二三四五六七八九十]+、/, "")}</a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <details className="legal__toc" open={tocOpen} onToggle={(e) => setTocOpen(e.currentTarget.open)}>
+            <summary>目录</summary>
+            <nav aria-label="目录">
+              <ol>
+                {toc.map((x) => (
+                  <li key={x.id}>
+                    <a href={`#${x.id}`}>{x.t.replace(/^[一二三四五六七八九十]+、/, "")}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </details>
         )}
         {children}
         <footer className="legal__foot muted small">

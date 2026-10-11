@@ -69,7 +69,8 @@
 
         function build(P) {
           var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          var isPhone = window.matchMedia && window.matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 600;
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? 1.5 : 2));
           stage.appendChild(renderer.domElement);
           var cv = renderer.domElement;
           cv.style.touchAction = "pan-y";
@@ -161,6 +162,8 @@
             camera.position.setLength(want);
           }
           window.addEventListener("resize", resize); resize();
+          if (window.ResizeObserver) new ResizeObserver(function () { resize(); }).observe(stage);
+          window.addEventListener("orientationchange", function () { requestAnimationFrame(resize); });
 
           var visible = true, v = new THREE.Vector3();
           new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(wrap);

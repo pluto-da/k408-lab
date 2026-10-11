@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { applyRouteMeta } from "../lib/seo";
@@ -17,6 +17,27 @@ export default function Layout() {
   const loc = useLocation();
   const isLab = loc.pathname === "/lab";
   const isFull = loc.pathname === "/pc";
+  // 手机（< 768px）上导航收进菜单：顶栏只留站名、账号和菜单按钮，菜单展开为全宽抽屉
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [loc.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onMq = () => mq.matches && setMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    mq.addEventListener("change", onMq);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      mq.removeEventListener("change", onMq);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!isLab) window.scrollTo(0, 0);
@@ -31,17 +52,31 @@ export default function Layout() {
       <a className="skip-link" href="#main">
         跳到正文
       </a>
-      <div className="app-bar">
+      <div className={menuOpen ? "app-bar is-menu" : "app-bar"}>
         <div className="app-bar__in">
           <Link to="/" className="app-brand">
             考研408<b>动画实验室</b>
           </Link>
-          <nav className="app-nav" aria-label="主导航">
+          <nav id="app-nav" className="app-nav" aria-label="主导航">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? "is-on" : undefined)}>
                 {n.label}
               </NavLink>
             ))}
+            {status === "authed" && user ? (
+              <NavLink to="/profile" className={({ isActive }) => (isActive ? "app-nav__acct is-on" : "app-nav__acct")}>
+                个人中心（{user.nickname}）
+              </NavLink>
+            ) : status === "anon" ? (
+              <>
+                <Link to={`/login?next=${encodeURIComponent(loc.pathname)}`} className="app-nav__acct">
+                  登录
+                </Link>
+                <Link to="/register" className="app-nav__acct">
+                  注册
+                </Link>
+              </>
+            ) : null}
           </nav>
           <div className="app-user">
             {status === "authed" && user ? (
@@ -53,14 +88,25 @@ export default function Layout() {
                 <Link to={`/login?next=${encodeURIComponent(loc.pathname)}`} className="app-btn app-btn--ghost">
                   登录
                 </Link>
-                <Link to="/register" className="app-btn">
+                <Link to="/register" className="app-btn app-user__reg">
                   注册
                 </Link>
               </>
             ) : null}
           </div>
+          <button
+            type="button"
+            className="app-menu"
+            aria-expanded={menuOpen}
+            aria-controls="app-nav"
+            aria-label={menuOpen ? "关闭菜单" : "打开菜单"}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span aria-hidden="true" />
+          </button>
         </div>
       </div>
+      {menuOpen && <div className="app-scrim" aria-hidden="true" onClick={() => setMenuOpen(false)} />}
       <main id="main" tabIndex={-1} className={isLab ? "app-main app-main--lab" : isFull ? "app-main app-main--full" : "app-main"}>
         <Outlet />
       </main>

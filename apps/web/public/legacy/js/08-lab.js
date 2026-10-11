@@ -28,13 +28,17 @@
             }
             grps[gk].appendChild(tab);
             var p = X.el("div", { class: "x-lab__panel", role: "tabpanel", id: "lab-" + d.id, "aria-labelledby": "tab-" + d.id, style: "--c:" + d.color },
-              '<div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div>' +
-              '<div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
+              /* 布局：main（选项 + 画布）与 side（控制条、统计与步骤、考点）。宽屏左右两栏，窄屏 side 展开成画布下方的几行（见 legacy-15.css） */
+              '<div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div></div>' +
+              '<div class="x-lab__side"><div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
               '<button type="button" class="x-lab__btn x-lab__btn--main" data-a="play" aria-pressed="false">播放</button>' +
               '<button type="button" class="x-lab__btn" data-a="step">下一步</button>' +
-              '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5"></label></div>' +
-              '<div class="x-lab__out"></div></div><aside class="x-lab__note"><b>考点</b><p></p></aside>');
+              '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5" aria-label="播放速度"></label></div>' +
+              '<div class="x-lab__out"></div>' +
+              '<details class="x-lab__note" open><summary><b>考点</b></summary><p></p></details></div>');
             p.querySelector(".x-lab__note p").textContent = d.note || "";
+            /* 手机竖屏：考点默认折叠，点开再看 */
+            if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches) p.querySelector(".x-lab__note").removeAttribute("open");
             root.appendChild(p);
             tab.addEventListener("click", function () { show(i, true); });
             items.push({ d: d, p: p, tab: tab });
@@ -60,22 +64,33 @@
           }
           function init(o) {
             var q = function (s) { return o.p.querySelector(s); };
-            var play = q('[data-a="play"]'), speed = q(".x-lab__speed input"), timer = null, demo;
+            var play = q('[data-a="play"]'), speed = q(".x-lab__speed input"), timer = null, demo, n = 0;
             function stop() { clearTimeout(timer); timer = null; play.textContent = "播放"; play.setAttribute("aria-pressed", "false"); }
-            function loop() { timer = demo.step() ? setTimeout(loop, 1100 - speed.value * 100) : (stop(), null); }
+            function loop() { if (demo.step()) { n++; timer = setTimeout(loop, 1100 - speed.value * 100); } else { n++; stop(); } }
             o.stop = stop;
-            var K = { opts: q(".x-lab__opts"), stage: q(".x-lab__stage"), out: q(".x-lab__out"), restart: function () { stop(); demo.reset(); } };
+            var K = { opts: q(".x-lab__opts"), stage: q(".x-lab__stage"), out: q(".x-lab__out"), restart: function () { stop(); n = 0; demo.reset(); } };
             demo = o.d.mount(o.p, K);
-            q('[data-a="step"]').addEventListener("click", function () { stop(); if (demo.done()) demo.reset(); else demo.step(); });
+            q('[data-a="step"]').addEventListener("click", function () { stop(); if (demo.done()) { n = 0; demo.reset(); } else { n++; demo.step(); } });
+            /* 键盘上一步：从头重放到前一帧（实验只提供 step / reset） */
+            o.back = function () { stop(); if (n <= 0) return; var k = n - 1; n = 0; demo.reset(); while (n < k && !demo.done()) { n++; demo.step(); } };
             q('[data-a="reset"]').addEventListener("click", K.restart);
             play.addEventListener("click", function () {
               if (timer) return stop();
-              if (demo.done()) demo.reset();
+              if (demo.done()) { n = 0; demo.reset(); }
               play.textContent = "暂停"; play.setAttribute("aria-pressed", "true");
               timer = setTimeout(loop, 0);
             });
           }
           if (items.length) show(0);
+          /* 供键盘快捷键调用（28-rwd.js）：a = "step" | "play" | "reset" | "back" */
+          window.X_LAB_ACT = function (a) {
+            var o = items.filter(function (x) { return !x.p.hidden; })[0];
+            if (!o) return false;
+            if (a === "back") { if (o.back) o.back(); return true; }
+            var b = o.p.querySelector('[data-a="' + a + '"]');
+            if (b) b.click();
+            return !!b;
+          };
         }
         /* 由 React 页面按顺序加载时，等所有演示注册完（legacy:ready）再搭建 */
         if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", build);
