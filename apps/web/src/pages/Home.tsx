@@ -128,9 +128,14 @@ export default function HomePage() {
         <div className="hm-wrap">
           <div className="hm-head">
             <h2 id="hm-journey">一次数据的旅程</h2>
-            <Link to="/pc?tour=1" className="hm-more">
-              在整机里走一遍 →
-            </Link>
+            <span style={{ display: "inline-flex", flexWrap: "wrap", columnGap: 16 }}>
+              <Link to="/pc?tour=1" className="hm-more">
+                在整机里走一遍 →
+              </Link>
+              <Link to="/pc?ride=access" className="hm-more">
+                化身数据：亲自走一次访存 →
+              </Link>
+            </span>
           </div>
           <ol className="hm-steps">
             {STOPS.map((s) => (

@@ -320,3 +320,4 @@ html.is-pc body { background: #0a0c10; }
 @media (min-width: 1024px) {
   .pc-parts { max-width: min(960px, calc(100% - 400px)); }
 }
+.pc-tools[hidden], .pc-head[hidden] { display: none; }

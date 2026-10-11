@@ -66,7 +66,23 @@ const EXPLODE_VIEW: Partial<Record<PartId, Vec3>> = {
   psu: [-0.22, 0.0, 0.1],
 };
 
-export type EngineState = "loading" | "intro" | "overview" | "extracting" | "open" | "closing" | "journey";
+export type EngineState = "loading" | "intro" | "overview" | "extracting" | "open" | "closing" | "journey" | "ride";
+
+/** 「化身数据」每帧回调：返回要画的场景与相机；返回 null 时画整机场景 */
+export type RideFrame = (dt: number, time: number) => { scene: THREE.Scene; camera: THREE.Camera } | null;
+
+/** 「化身数据」模块拿到的宿主接口：整机场景、相机、锚点；模块按需加载，引擎只负责把画面交给它 */
+export interface RideHost {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  anchor(part: PartId, key: string): THREE.Vector3 | null;
+  overview(): { target: THREE.Vector3; position: THREE.Vector3 };
+  phone: boolean;
+  lowEnd: boolean;
+  setFrame(fn: RideFrame | null): void;
+  focusLink(id: string | null): void;
+}
 export type LightMode = "studio" | "rgb";
 
 export interface EngineCallbacks {
@@ -310,6 +326,8 @@ export class PcEngine {
   private dirty = 3;
   private linksOn = false;
   private preloading = false;
+  private phone = false;
+  private rideFrame: RideFrame | null = null;
   /** lightweight counters for diagnostics (window.__pcStats) */
   readonly stats = { frames: 0, idle: 0, dt: 0, dpr: 1 };
 
@@ -320,6 +338,7 @@ export class PcEngine {
   ) {
     const dev = deviceProfile();
     this.lowEnd = dev.lowEnd;
+    this.phone = dev.phone;
     this.renderer = new THREE.WebGLRenderer({ antialias: !dev.lowEnd, alpha: false, powerPreference: "high-performance" });
     // 像素比上限：手机 1.5，平板与电脑 2；低端设备再降到 1.25
     this.maxDpr = Math.min(window.devicePixelRatio || 1, dev.phone ? 1.5 : 2, dev.lowEnd ? 1.25 : 2);
@@ -429,7 +448,7 @@ export class PcEngine {
   }
 
   select(id: PartId | null) {
-    if (this.state === "loading" || this.state === "journey") return;
+    if (this.state === "loading" || this.state === "journey" || this.state === "ride") return;
     if (id === this.selected) return;
     if (id === null) return this.back();
     if (this.selected) {
@@ -558,7 +577,7 @@ export class PcEngine {
 
   /** 「一次数据的旅程」：从第 i 步开始自动播放 */
   startJourney(i = 0) {
-    if (this.state === "loading" || this.state === "intro") return;
+    if (this.state === "loading" || this.state === "intro" || this.state === "ride") return;
     const go = () => {
       if (this.explodeK > 0) this.setExplode(0, 0.6);
       this.setState("journey", null);
@@ -625,6 +644,65 @@ export class PcEngine {
     this.glassTo(1, 0, 0.8);
     this.cb.onJourney?.(null);
     this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 1.4, () => this.setState("overview", null));
+  }
+
+  /** 进入「化身数据」：收起拆解与旅程，把相机交给第一人称模块 */
+  enterRide(): Promise<RideHost> {
+    return new Promise((resolve, reject) => {
+      if (this.state === "loading" || this.disposed) return reject(new Error("not ready"));
+      const go = () => {
+        if (this.journeyTimer) clearTimeout(this.journeyTimer);
+        this.journeyTimer = null;
+        this.journeyStep = -1;
+        this.packetCurve = null;
+        this.journeyBadge.dataset.on = "0";
+        this.cb.onJourney?.(null);
+        this.tweens = this.tweens.filter((t) => t.key !== "camera" && t.key !== "packet");
+        if (this.explodeK > 0) this.setExplode(0, 0);
+        this.setState("ride", null);
+        this.controls.enabled = false;
+        this.highlightLink = "__none";
+        this.glassTo(0.04, 0, 0.6);
+        resolve(this.rideHost());
+      };
+      if (this.selected) this.back(go);
+      else go();
+    });
+  }
+
+  /** 离开「化身数据」：从当前相机位置拉回整机总览 */
+  exitRide() {
+    if (this.state !== "ride") return;
+    this.rideFrame = null;
+    this.highlightLink = null;
+    const c = this.camera;
+    c.near = 0.004;
+    c.far = 20;
+    c.fov = 32;
+    c.up.set(0, 1, 0);
+    c.updateProjectionMatrix();
+    this.controls.target.copy(c.position).add(c.getWorldDirection(new THREE.Vector3()).multiplyScalar(0.05));
+    this.glassTo(1, 0, 1.0);
+    this.flyTo(CENTER, OVERVIEW_DIR, this.overviewDistance(), 1.5, () => this.setState("overview", null));
+  }
+
+  private rideHost(): RideHost {
+    return {
+      renderer: this.renderer,
+      scene: this.scene,
+      camera: this.camera,
+      anchor: (part, key) => this.worldAnchor(part, key),
+      overview: () => ({ target: CENTER.clone(), position: CENTER.clone().addScaledVector(OVERVIEW_DIR, this.overviewDistance()) }),
+      phone: this.phone,
+      lowEnd: this.lowEnd,
+      setFrame: (fn) => {
+        this.rideFrame = fn;
+        this.dirty = 3;
+      },
+      focusLink: (id) => {
+        this.highlightLink = id ?? "__none";
+      },
+    };
   }
 
   pauseJourney() {
@@ -1404,10 +1482,10 @@ export class PcEngine {
     for (const L of this.links) {
       let target = 0;
       let labelOn = false;
-      if (this.state === "journey") {
+      if (this.state === "journey" || this.state === "ride") {
         const related = this.highlightLink === L.def.id;
-        target = related ? 1 : 0.06;
-        labelOn = related;
+        target = related ? 1 : this.state === "ride" ? 0.18 : 0.06;
+        labelOn = related && this.state === "journey";
       } else if (this.state === "intro" || this.state === "overview") {
         const related = (hov && L.def.parts.includes(hov)) || this.highlightLink === L.def.id;
         target = this.showAll ? (hov || this.highlightLink ? (related ? 1 : 0.25) : 0.85) : related ? 1 : 0;
@@ -1562,14 +1640,14 @@ export class PcEngine {
       else t.done?.();
     }
     this.tweens = keep.concat(this.tweens);
-    let moved = this.controls.enabled ? this.controls.update() : false;
+    let moved = this.controls.enabled && this.state !== "ride" ? this.controls.update() : false;
     if (this.followPivot(dt)) moved = true;
-    if (this.state !== "open") this.clampTarget();
+    if (this.state !== "open" && this.state !== "ride") this.clampTarget();
     this.updateLinks(time, dt);
     // render on demand: a still scene (part opened, nothing moving) costs no GPU time at all
     const animating =
       running.length > 0 || moved || this.dirty > 0 || this.linksOn || this.rgbMix > 0.001 ||
-      this.state === "intro" || this.state === "journey" || this.state === "loading" || this.packetMat.uniforms.uOpacity!.value > 0.001;
+      this.state === "intro" || this.state === "journey" || this.state === "ride" || this.state === "loading" || this.packetMat.uniforms.uOpacity!.value > 0.001;
     if (!animating) {
       this.stats.idle++;
       return;
@@ -1577,10 +1655,12 @@ export class PcEngine {
     if (this.dirty > 0) this.dirty--;
     this.updatePacket(dt);
     this.updateLook(time);
-    if (this.composer && this.rgbMix > 0.001) this.composer.render(dt);
+    const ride = this.state === "ride" && this.rideFrame ? this.rideFrame(dt, time) : null;
+    if (ride) this.renderer.render(ride.scene, ride.camera);
+    else if (this.composer && this.rgbMix > 0.001 && this.state !== "ride") this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
     this.layoutCallouts();
-    if (this.state !== "loading" && (running.length > 0 || moved || this.drag)) this.adaptQuality(dt);
+    if (this.state !== "loading" && (running.length > 0 || moved || this.drag || this.state === "ride")) this.adaptQuality(dt);
     this.stats.frames++;
     this.stats.dt = dt;
     this.stats.dpr = this.dpr;

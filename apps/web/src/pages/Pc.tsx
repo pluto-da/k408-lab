@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LAYERS, LINKS, PART_BY_ID, PARTS, type PartId } from "../pc/parts";
 import type { EngineState, LightMode, PcEngine } from "../pc/engine";
 import { JOURNEY } from "../pc/journey";
 import "../pc/pc.css";
+
+// 「化身数据」第一人称模式：点开时才加载
+const RideMode = lazy(() => import("../pc/ride/RideMode"));
 
 const RGB_SWATCHES = ["#7a5cff", "#22c3ff", "#ff4f8b", "#3fe08a", "#ffb02e"];
 const RGB_MODES = ["彩虹流动", "单色常亮", "呼吸"];
@@ -49,7 +52,8 @@ export default function PcPage() {
   const wide = useWide();
   // 「拖动旋转」提示：第一次触碰 / 点按场景后不再显示
   const [touched, setTouched] = useState(false);
-  const touringNow = state === "journey";
+  const [ride, setRide] = useState<null | { route: string | null }>(null);
+  const touringNow = state === "journey" || !!ride;
 
   useEffect(() => {
     document.documentElement.classList.add("is-pc");
@@ -128,6 +132,15 @@ export default function PcPage() {
     if (selected || state === "journey") setExplode(0);
   }, [selected, state]);
 
+  // /pc?ride=<路线>：整机就绪后直接进入「化身数据」
+  const rideAsked = useRef(new URLSearchParams(window.location.search).get("ride"));
+  useEffect(() => {
+    if (state !== "overview" || !rideAsked.current) return;
+    const r = rideAsked.current;
+    rideAsked.current = null;
+    setRide({ route: r });
+  }, [state]);
+
   // /pc?tour=1（首页「跟着数据走一遍」）：整机就绪后自动开始数据旅程
   const tourAsked = useRef(new URLSearchParams(window.location.search).get("tour") === "1");
   useEffect(() => {
@@ -155,7 +168,7 @@ export default function PcPage() {
 
   const def = selected ? PART_BY_ID[selected] : null;
   const busy = state === "extracting" || state === "closing";
-  const touring = state === "journey";
+  const touring = state === "journey" || !!ride;
   const step = jStep !== null ? JOURNEY[jStep] : null;
   const disN = dis.layers.length;
   const disShow = !!selected && disN > 0 && (state === "open" || state === "extracting");
@@ -168,7 +181,7 @@ export default function PcPage() {
       <div ref={stageRef} className="pc-stage" onPointerDown={() => setTouched(true)} />
       <div ref={overlayRef} className="pc-overlay" aria-hidden="true" />
 
-      <header className="pc-head">
+      <header className="pc-head" hidden={!!ride}>
         <h1>整机拆解</h1>
         <p>{touring ? "一次数据的旅程 · 跟着发光的数据包走一遍" : def ? `${def.name} · ${def.tag}` : "点一下任意部件，把它从机箱里拆出来看看里面"}</p>
       </header>
@@ -195,7 +208,7 @@ export default function PcPage() {
         </div>
       )}
       {hovered && state === "overview" && <div className="pc-hoverchip">{PART_BY_ID[hovered].name}</div>}
-      {ready && !touched && state === "overview" && (
+      {ready && !touched && state === "overview" && !ride && (
         <div className="pc-hint" aria-hidden="true">
           拖动旋转 · 双指缩放 · 点部件拆开
         </div>
@@ -215,10 +228,15 @@ export default function PcPage() {
         ))}
       </nav>
 
-      <div className="pc-tools">
+      <div className="pc-tools" hidden={!!ride}>
         {!selected && !touring && (
           <button type="button" className="pc-btn pc-btn--tour" disabled={!ready || state !== "overview"} onClick={() => engineRef.current?.startJourney(0)}>
             ▶ 数据旅程
+          </button>
+        )}
+        {!selected && !touring && (
+          <button type="button" className="pc-btn pc-btn--tour" disabled={!ready || state !== "overview"} onClick={() => setRide({ route: null })}>
+            化身数据
           </button>
         )}
         <div className="pc-seg" role="group" aria-label="灯光">
@@ -246,7 +264,7 @@ export default function PcPage() {
         </button>
       </div>
 
-      {light === "rgb" && (
+      {light === "rgb" && !ride && (
         <div className="pc-rgb" role="group" aria-label="灯效">
           {RGB_MODES.map((m, i) => (
             <button key={m} type="button" className={rgbMode === i ? "is-on" : undefined} onClick={() => setRgbMode(i)}>
@@ -302,7 +320,7 @@ export default function PcPage() {
         </div>
       )}
 
-      {touring && step && (
+      {state === "journey" && step && (
         <div className="pc-journey" role="status" aria-live="polite">
           <div className="pc-journey__dots">
             {JOURNEY.map((s, i) => (
@@ -331,6 +349,12 @@ export default function PcPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {ride && engineRef.current && (
+        <Suspense fallback={<div className="pc-opening" role="status">正在准备…</div>}>
+          <RideMode engine={engineRef.current} route={ride.route} onExit={() => setRide(null)} />
+        </Suspense>
       )}
 
       {panelOpen && !touring && (
@@ -397,6 +421,7 @@ export default function PcPage() {
                 <li>点部件：先从机箱里滑出来，再打开看内部结构。</li>
                 <li>点空白处或「返回整机」回到全景。</li>
                 <li>「数据旅程」：跟着一个数据包从网卡走到内存、CPU、显卡和硬盘。</li>
+                <li>「化身数据」：变成一个地址，钻进 CPU 和内存里亲自走一遍，还能改参数看路线怎么变。</li>
                 <li>「拆开看」滑块把所有部件一起拉开；「氛围灯」切换机箱灯效。</li>
               </ul>
             </>
