@@ -75,18 +75,22 @@ describe("散列表", () => {
     expect(r.recs.find((x) => x.key === 79)!.pos).toBe(9);
     expect(r.table[0]).toBeNull();
   });
-  it("线性探测 ASL失败：王道口径（空位计 1 次）91/13 = 7，不计空位 78/13 = 6", () => {
-    const wd = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear" });
-    expect(wd.fail2.num).toBe(91);
-    expect(wd.fail2.den).toBe(13);
-    expect(wd.fail2.val).toBe(7);
-    expect(wd.per[0]!.cnt).toBe(1);
-    expect(wd.per[1]!.cnt).toBe(13);
+  it("线性探测 ASL失败：常见约定（空位计 1 次）91/13 = 7，不计空位 78/13 = 6", () => {
+    const std = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear" });
+    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "std" }).fail2.num).toBe(91);
+    /* 旧版本或无法识别的选项值按常见约定处理（向后兼容） */
+    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "legacy" }).fail2.num).toBe(91);
+    expect(U.dsHash({ keys: CLS, p: 13, m: 13, method: "chain", empty: "legacy" }).fail2.num).toBe(12);
+    expect(std.fail2.num).toBe(91);
+    expect(std.fail2.den).toBe(13);
+    expect(std.fail2.val).toBe(7);
+    expect(std.per[0]!.cnt).toBe(1);
+    expect(std.per[1]!.cnt).toBe(13);
     const no = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "no" });
     expect(no.fail2.num).toBe(78);
     expect(no.fail2.val).toBe(6);
   });
-  it("拉链法：ASL成功 = 21/12 = 1.75，ASL失败（王道，不计空指针）= 12/13", () => {
+  it("拉链法：ASL成功 = 21/12 = 1.75，ASL失败（常见约定，不计空指针）= 12/13", () => {
     const r = U.dsHash({ keys: CLS, p: 13, m: 13, method: "chain" });
     expect(r.succ.num).toBe(21);
     expect(r.succ.val).toBe(1.75);
@@ -169,7 +173,7 @@ describe("排序补充", () => {
     }
     return b;
   }
-  it("希尔：默认增量 n/2 逐次减半，严蔚敏例增量 5,3,1 第一趟结果", () => {
+  it("希尔：默认增量 n/2 逐次减半，经典示例增量 5,3,1 第一趟结果", () => {
     expect(U.dsShellIncs(10)).toEqual([5, 2, 1]);
     const r = U.dsShell([49, 38, 65, 97, 76, 13, 27, 49, 55, 4], [5, 3, 1]);
     expect(r.passes[0]!.after).toEqual([13, 27, 49, 55, 4, 49, 38, 65, 97, 76]);

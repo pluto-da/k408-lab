@@ -336,7 +336,7 @@ describe("PROPU.co 纯函数", () => {
       expect(r.S).toBeLessThanOrEqual(k + 1e-12);
     }
   });
-  it("扩展操作码：教材例可行、2017 真题最短 23 位（按字节 24 位）", () => {
+  it("扩展操作码：经典示例可行、2017 真题最短 23 位（按字节 24 位）", () => {
     const r = U.opcodeCheck(16, 4, [{ addr: 3, num: 15 }, { addr: 2, num: 15 }, { addr: 1, num: 15 }, { addr: 0, num: 16 }]);
     expect(r.ok).toBe(true);
     expect(r.steps.map((s) => s.avail)).toEqual([16, 16, 16, 16]);

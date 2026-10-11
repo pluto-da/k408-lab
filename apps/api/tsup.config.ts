@@ -7,7 +7,7 @@ export default defineConfig({
   platform: "node",
   outDir: "dist",
   clean: true,
-  sourcemap: true,
+  sourcemap: false, // 不产出 source map：生产镜像里不带源码映射
   // 共享包是 TS 源码，打进产物；其余依赖保持外部
   noExternal: ["@k408/shared"],
 });

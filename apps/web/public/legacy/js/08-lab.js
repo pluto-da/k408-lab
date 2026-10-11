@@ -61,6 +61,7 @@
               if (!on && o.stop) o.stop();
               if (on && !o.stop) init(o);
             });
+            if (items[k] && typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("x:active", { detail: { kind: "lab", id: items[k].d.id, user: !!user } }));
           }
           function init(o) {
             var q = function (s) { return o.p.querySelector(s); };
@@ -1051,7 +1052,7 @@
             }
             out.hist.innerHTML = "Work 历史：<span>" + hist.join(" → ") + "</span>";
             out.seq.textContent = seq.length ? "安全序列 " + ps(seq) : "安全序列 —";
-            out.tip.textContent = cur === steps.length && S.ok ? "按“每轮选编号最小的可执行进程”得到上面的序列；教材给出的 P1 → P3 → P4 → P0 → P2 等也都成立，找到任意一个安全序列即可。" : "";
+            out.tip.textContent = cur === steps.length && S.ok ? "按“每轮选编号最小的可执行进程”得到上面的序列；换一种挑选顺序（如 P1 → P3 → P4 → P0 → P2）同样成立，找到任意一个安全序列即可。" : "";
           }
           function reset() {
             var need = LAB_BK.need(max, al), bad = [];
@@ -1081,7 +1082,7 @@
           var c = p.cwnd < p.ssth ? Math.min(p.cwnd * 2, p.ssth) : p.cwnd + 1;
           return { r: p.r + 1, cwnd: c, ssth: p.ssth, ph: LAB_TC.phase(c, p.ssth), ev: null, from: p.cwnd, cap: p.cwnd < p.ssth && p.cwnd * 2 > p.ssth };
         },
-        /* "to" = timeout, "dup" = 3 duplicate ACKs (fast recovery, Reno as in 王道) */
+        /* "to" = timeout, "dup" = 3 duplicate ACKs (Reno fast recovery: cwnd = new ssthresh, the usual 408 convention) */
         event: function (p, kind) {
           var s = Math.max(Math.floor(p.cwnd / 2), 2), c = kind === "to" ? 1 : s;
           return { r: p.r + 1, cwnd: c, ssth: s, ph: kind === "to" ? LAB_TC.phase(1, s) : "fr", ev: kind, from: p.cwnd };

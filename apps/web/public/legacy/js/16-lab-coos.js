@@ -691,7 +691,7 @@
         /* ======================= 实验 2：Booth ======================= */
         LAB.push({
           id: "booth", name: "Booth 补码乘法", color: "var(--x-co)",
-          note: "看乘数末两位 YₙYₙ₊₁：00 / 11 只右移，01 加 [X]补后右移，10 加 [−X]补后右移；共 n 次判断，按唐朔飞写法最后一步只加不移。乘数的符号位也参与运算，所以补码乘法不必单独处理符号；部分积用双符号位是为了防止加法溢出导致右移出错（如 [−(−8)]补 在 4 位内放不下）。",
+          note: "看乘数末两位 YₙYₙ₊₁：00 / 11 只右移，01 加 [X]补后右移，10 加 [−X]补后右移；共 n 次判断，最后一步只加不移（补码一位乘的常见约定）。乘数的符号位也参与运算，所以补码乘法不必单独处理符号；部分积用双符号位是为了防止加法溢出导致右移出错（如 [−(−8)]补 在 4 位内放不下）。",
           mount: function (panel, K) {
             var xs = "5", ys = "-3", n = 4, ix, iy;
             ix = field(K.opts, "X =", xs, { inputmode: "text", "aria-label": "被乘数 X" }, function (v) { xs = v; K.restart(); }, true);
@@ -741,7 +741,7 @@
                 else rows.push([x.no, x.cond, esc(x.op), '<span class="x-lx-mono">' + x.a + "</span>", '<span class="x-lx-mono">' + x.q + "</span>", x.q1]);
               }
               o.tb.innerHTML = tbl("Booth 运算过程（答题格式）", ["步骤", "条件 YₙYₙ₊₁", "操作", "部分积", "乘数", "附加位"], rows, cur - 1, "x-lx-wrap");
-              o.tip.textContent = "说明：这里按唐朔飞教材写法，n 次判断、n − 1 次右移，最后一步只加不移；若采用“每步都右移”的写法（n 次加、n 次移），乘积取部分积低 n 位与乘数 n 位拼接，结果相同。";
+              o.tip.textContent = "说明：这里采用补码一位乘最常见的约定：n 次判断、n − 1 次右移，最后一步只加不移；若采用“每步都右移”的写法（n 次加、n 次移），乘积取部分积低 n 位与乘数 n 位拼接，结果相同。";
             }
             P.api.reset();
             return P.api;
@@ -937,7 +937,7 @@
             irg = field(K.opts, "磁道范围", rgS, { "aria-label": "磁道范围，如 0-199" }, function (v) { rgS = v; K.restart(); }, true);
             var dg = btnGroup(K.opts, [["up", "向磁道号增大"], ["down", "向磁道号减小"]], dir, function (v) { dir = v; K.restart(); }, "初始方向");
             br(K);
-            presets(K, [["教材序列（53）", "98, 183, 37, 122, 14, 124, 65, 67", "53", "0-199", "up"], ["王道例题（100）", "55, 58, 39, 18, 90, 160, 150, 38, 184", "100", "0-199", "up"], ["教材序列·向小", "98, 183, 37, 122, 14, 124, 65, 67", "53", "0-199", "down"]].map(function (p) {
+            presets(K, [["经典示例（53）", "98, 183, 37, 122, 14, 124, 65, 67", "53", "0-199", "up"], ["示例二（140·向小）", "86, 147, 91, 177, 94, 150, 102, 175, 130", "140", "0-199", "down"], ["经典示例·向小", "98, 183, 37, 122, 14, 124, 65, 67", "53", "0-199", "down"]].map(function (p) {
               return [p[0], function () { reqS = p[1]; stS = p[2]; rgS = p[3]; dir = p[4]; irq.value = reqS; ist.value = stS; irg.value = rgS; dg.set(dir); K.restart(); }];
             }));
             var o = ui(K);
@@ -1015,7 +1015,7 @@
             br(K);
             isq = field(K.opts, "作业序列", seqS, { "aria-label": "作业序列，如 A 申请 130，B 释放" }, function (v) { seqS = v; K.restart(); });
             br(K);
-            presets(K, [["教材序列", LABU.PART_DEF], ["外部碎片导致失败", "A 申请 200，B 申请 100，C 申请 200，D 申请 100，A 释放，C 释放，E 申请 300"], ["邻近适应对比", "A 申请 100，B 申请 100，C 申请 100，A 释放，D 申请 50，E 申请 80"]].map(function (p) {
+            presets(K, [["默认序列", LABU.PART_DEF], ["外部碎片导致失败", "A 申请 200，B 申请 100，C 申请 200，D 申请 100，A 释放，C 释放，E 申请 300"], ["邻近适应对比", "A 申请 100，B 申请 100，C 申请 100，A 释放，D 申请 50，E 申请 80"]].map(function (p) {
               return [p[0], function () { seqS = p[1]; totS = "640"; osS = "40"; isq.value = seqS; itt.value = totS; ios.value = osS; K.restart(); }];
             }));
             var o = ui(K);
@@ -1096,7 +1096,7 @@
               w.appendChild(b); pbs[p] = b;
             });
             br(K);
-            presets(K, [["教材脚本", function () { seq = (wrong ? LABU.PC_SCRIPT_BAD : LABU.PC_SCRIPT).slice(); K.restart(); }],
+            presets(K, [["默认脚本", function () { seq = (wrong ? LABU.PC_SCRIPT_BAD : LABU.PC_SCRIPT).slice(); K.restart(); }],
               ["随机一组", function () {
                 var s = [], n = parseInt(nS, 10) || 3, r = LABU.pcSim({ n: n, wrong: wrong, seq: [] });
                 if (r.err) { K.restart(); return; }

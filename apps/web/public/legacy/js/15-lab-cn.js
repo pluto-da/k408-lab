@@ -417,7 +417,7 @@
     if (out.length > 8) return E(who + "最多 8 项（演示用）");
     return { rows: out };
   };
-  /* 收到邻居 from 的距离向量 vector 后更新 table（谢希仁 / 王道规则） */
+  /* 收到邻居 from 的距离向量 vector 后更新 table（RIP 距离向量规则：距离 + 1；同一下一跳无条件替换，不同下一跳更短才替换；16 = 不可达） */
   LABU.ripUpdate = function (table, from, vector) {
     var res = table.map(function (r) { return { net: r.net, d: r.d, hop: r.hop }; }), rows = [], inVec = {};
     vector.forEach(function (v) {
@@ -1099,7 +1099,7 @@
         err = S.err || null;
         if (err) { showErr(o, svg, err); return; }
         N = S.n + 2;
-        o.tip.textContent = "约定：站内默认曼彻斯特“位中间由高到低表示 1、由低到高表示 0”（谢希仁教材画法）；IEEE 802.3 标准及部分教材正好相反。做题一律以题目给出的约定为准，可用上方按钮切换。";
+        o.tip.textContent = "约定：站内默认曼彻斯特“位中间由高到低表示 1、由低到高表示 0”（国内教材和真题图示中较常见的画法）；IEEE 802.3 标准的定义正好相反。做题一律以题目给出的约定为准，可用上方按钮切换。";
         render();
       }
       function step() { if (err) return false; if (pos < N - 1) { pos++; render(); } return pos < N - 1; }
@@ -1120,7 +1120,7 @@
       br(K);
       tag(K, "例题");
       function cfg(c, v) { return function () { mode = "upd"; setMode(mode); fc.value = c; fv.value = v; }; }
-      preset(K, "教材例", cfg("N1 3 A; N2 5 B; N3 2 D", "N1 4; N2 2; N4 3"));
+      preset(K, "示例一", cfg("N1 3 A; N2 5 B; N3 2 D", "N1 4; N2 2; N4 3"));
       preset(K, "更短才更新", cfg("N 5 A", "N 3"));
       preset(K, "下一跳是 B：变远也更新", cfg("N 2 B", "N 5"));
       var svg = svgIn(K, 680, 150), o = outs(K, ["st", "msg", "tbl", "tip"]);

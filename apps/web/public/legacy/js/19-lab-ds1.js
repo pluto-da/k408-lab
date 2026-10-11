@@ -1,7 +1,7 @@
       /* 数据结构动画实验（一）：中缀转后缀、循环队列、KMP、哈夫曼树、二叉排序树 / AVL、B 树、并查集。
          纯计算函数挂在 window.LABU 上，统一以 ds 前缀命名（dsInfix / dsCqRun / dsKmpNext / dsKmpNextval / dsKmpMatch / dsNaiveMatch /
          dsHuffman / dsBstInsert / dsBstDelete / dsAvlInsert / dsBstFrames / dsBtree / dsBtreeCheck / dsUnion / dsFind / dsUfRun …），
-         界面通过 LAB.push 注册，顶层不访问 DOM。教材口径：王道 / 严蔚敏。 */
+         界面通过 LAB.push 注册，顶层不访问 DOM。约定：KMP 下标从 1 开始（next[1] = 0）；循环队列 rear 指向队尾元素的下一个位置。 */
       (function () {
         var LAB = window.LAB = window.LAB || [];
         var LABU = window.LABU = window.LABU || {};
@@ -884,7 +884,7 @@
             ow.appendChild(bE); ow.appendChild(bD); ow.appendChild(bC); K.opts.appendChild(ow);
             br(K);
             presets(K, [
-              ["教材脚本", function () { N = 6; iN.value = "6"; ops = LABU.CQ_DEF.slice(); K.restart(); }],
+              ["默认脚本", function () { N = 6; iN.value = "6"; ops = LABU.CQ_DEF.slice(); K.restart(); }],
               ["入满→出队→绕回", function () { N = 5; iN.value = "5"; ops = [["E", "1"], ["E", "2"], ["E", "3"], ["E", "4"], ["E", "5"], ["D"], ["D"], ["D"], ["E", "6"], ["E", "7"], ["E", "8"], ["D"]]; K.restart(); }],
               ["空队出队", function () { ops = [["D"], ["E", "x"], ["D"], ["D"]]; K.restart(); }]
             ]);
@@ -963,7 +963,7 @@
         /* ======================= 实验 3：KMP ======================= */
         LAB.push({
           id: "kmp", name: "KMP 与 next 数组", color: "var(--x-ds)",
-          note: "next[j] = P[1..j−1] 的最长相等前后缀长度 + 1，约定 next[1] = 0、next[2] = 1（下标从 1 开始，王道 / 严蔚敏写法；若下标从 0 开始，next 整体减 1，首位为 −1）。失配时主串指针 i 不回溯，模式串指针 j = next[j]；j = 0 时 i、j 同时后移。nextval：若 P[j] = P[next[j]] 则 nextval[j] = nextval[next[j]]，否则等于 next[j]。KMP 时间复杂度 O(m + n)，朴素匹配最坏 O(mn)；主串与模式串部分匹配多时 KMP 优势才明显。",
+          note: "next[j] = P[1..j−1] 的最长相等前后缀长度 + 1，约定 next[1] = 0、next[2] = 1（下标从 1 开始，国内考题最常见的约定；若下标从 0 开始，next 整体减 1，首位为 −1）。失配时主串指针 i 不回溯，模式串指针 j = next[j]；j = 0 时 i、j 同时后移。nextval：若 P[j] = P[next[j]] 则 nextval[j] = nextval[next[j]]，否则等于 next[j]。KMP 时间复杂度 O(m + n)，朴素匹配最坏 O(mn)；主串与模式串部分匹配多时 KMP 优势才明显。",
           mount: function (panel, K) {
             var S0 = "abaabaabcabaabc", P0 = "abaabc", mode = "next", iS, iP;
             iS = field(K.opts, "主串 S", S0, { "aria-label": "主串" }, function (v) { S0 = v; K.restart(); });
@@ -1098,7 +1098,7 @@
             var txt = "7 5 2 4", inp;
             inp = field(K.opts, "权值", txt, { "aria-label": "权值序列，可写成 a:45 b:13" }, function (v) { txt = v; K.restart(); });
             br(K);
-            presets(K, [["7 5 2 4", "7 5 2 4"], ["2023 真题 3 4 5 6 8 10", "3 4 5 6 8 10"], ["严蔚敏 8 字符", "a:5 b:29 c:7 d:8 e:14 f:23 g:3 h:11"], ["a:45 b:13 c:12 d:16 e:9 f:5", "a:45 b:13 c:12 d:16 e:9 f:5"]].map(function (p) {
+            presets(K, [["7 5 2 4", "7 5 2 4"], ["2023 真题 3 4 5 6 8 10", "3 4 5 6 8 10"], ["经典示例·8 字符", "a:5 b:29 c:7 d:8 e:14 f:23 g:3 h:11"], ["a:45 b:13 c:12 d:16 e:9 f:5", "a:45 b:13 c:12 d:16 e:9 f:5"]].map(function (p) {
               return [p[0], function () { txt = p[1]; inp.value = txt; K.restart(); }];
             }));
             var o = ui(K), tv = treeView();

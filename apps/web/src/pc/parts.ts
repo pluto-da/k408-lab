@@ -32,11 +32,10 @@ export interface PartDef {
   hasInterior: boolean;
 }
 
-const CO3: ChapterLink = { label: "组成原理 · 第 3 章 存储系统", to: "/lab#co" };
-const CO5: ChapterLink = { label: "组成原理 · 第 5 章 中央处理器", to: "/lab#co" };
-const CO6: ChapterLink = { label: "组成原理 · 第 6 章 总线", to: "/lab#co" };
-const CO7: ChapterLink = { label: "组成原理 · 第 7 章 输入/输出系统", to: "/lab#co" };
-const OS5: ChapterLink = { label: "操作系统 · 第 5 章 输入/输出管理", to: "/lab#os" };
+const CO3: ChapterLink = { label: "组成原理 · 第 3 章 存储器层次结构", to: "/lab#co" };
+const CO5: ChapterLink = { label: "组成原理 · 第 5 章 中央处理器（CPU）", to: "/lab#co" };
+const CO6: ChapterLink = { label: "组成原理 · 第 6 章 总线和输入/输出系统", to: "/lab#co" };
+const OS5: ChapterLink = { label: "操作系统 · 第 5 章 输入/输出（I/O）管理", to: "/lab#os" };
 const CN3: ChapterLink = { label: "计算机网络 · 第 3 章 数据链路层", to: "/lab#cn" };
 
 export const PARTS: PartDef[] = [
@@ -165,7 +164,7 @@ export const PARTS: PartDef[] = [
       "CPU 与显卡之间的大块数据常用 DMA 传送，CPU 只在传送开始和结束时介入。",
       "帧缓冲容量 = 分辨率 × 色深；刷新所需带宽 = 帧缓冲容量 × 帧率。",
     ],
-    chapters: [CO7, CO6],
+    chapters: [CO6],
     callouts: [
       { anchor: "die", label: "GPU 核心", color: "#9AA6C8" },
       { anchor: "vram", label: "GDDR6 显存", color: "#7AA7FF" },
@@ -192,7 +191,7 @@ export const PARTS: PartDef[] = [
       "收发数据时网卡用 DMA 把帧在网卡缓冲区和内存之间搬运，再以中断通知 CPU。",
       "网络变压器做电气隔离，RJ45 接双绞线（物理层）。",
     ],
-    chapters: [CN3, CO7],
+    chapters: [CN3, CO6],
     callouts: [
       { anchor: "mac", label: "MAC：成帧 / CRC / 介质访问", color: "#3C6ED2" },
       { anchor: "phy", label: "PHY：编码与收发", color: "#E18232" },
@@ -220,7 +219,7 @@ export const PARTS: PartDef[] = [
       "电源掉电属于不可屏蔽中断（NMI）这一类紧急硬件事件，优先级最高。",
       "开机过程：上电 → 固化在 ROM 中的 BIOS/UEFI 自检 → 引导程序 → 装入操作系统内核。",
     ],
-    chapters: [CO7, { label: "操作系统 · 第 1 章 计算机系统概述", to: "/lab#os" }],
+    chapters: [CO6, { label: "操作系统 · 第 1 章 操作系统基础", to: "/lab#os" }],
     callouts: [
       { anchor: "xfmr", label: "主变压器（隔离 / 降压）", color: "#E2BE46" },
       { anchor: "bulk", label: "滤波大电容" },
@@ -248,7 +247,7 @@ export const PARTS: PartDef[] = [
       "内存与显卡直连 CPU；芯片组（PCH）经 DMI 连接 CPU，再挂接 SATA、USB、网卡等较慢的设备。",
       "中断处理：关中断 → 保存断点 → 识别中断源（向量）→ 保护现场 → 执行服务程序 → 恢复现场 → 开中断返回。",
     ],
-    chapters: [CO6, CO7],
+    chapters: [CO6],
     callouts: [
       { anchor: "cpu", label: "CPU 插槽（LGA）", color: "#D2B446" },
       { anchor: "dimm", label: "内存插槽 · 双通道", color: "#965AC8" },
@@ -277,7 +276,7 @@ export const PARTS: PartDef[] = [
       "性能指标：主频、CPI、MIPS；CPU 执行时间 = 指令条数 × CPI × 时钟周期。",
       "主机 = CPU + 主存；硬盘、网卡、显卡都属于 I/O 设备，经接口挂到总线上。",
     ],
-    chapters: [{ label: "组成原理 · 第 1 章 系统概述", to: "/lab#co" }],
+    chapters: [{ label: "组成原理 · 第 1 章 计算机系统概述", to: "/lab#co" }],
     callouts: [
       { anchor: "front_fans", label: "前置进风 ×3" },
       { anchor: "rear_fan", label: "后置排风" },

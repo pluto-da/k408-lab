@@ -65,7 +65,7 @@
         var SCHEMES = { nrz: { name: "NRZ", per: 1 }, nrzi: { name: "NRZI", per: 1 }, man: { name: "曼彻斯特", per: 2 }, dman: { name: "差分曼彻斯特", per: 2 } };
         function baudOf(bitRate, scheme) { var s = SCHEMES[scheme]; return s ? bitRate * s.per : NaN; }
         /* 波形：返回每半个比特的电平（0 低 1 高），NRZ/NRZI 两半相同；NRZI、差分曼彻斯特假设开始前为低电平；
-           曼彻斯特默认“1 = 高→低”（谢希仁画法），hl=false 时相反 */
+           曼彻斯特默认“1 = 高→低”（国内题目常见画法；IEEE 802.3 相反），hl=false 时相反 */
         function encode(bits, scheme, hl) {
           if (hl == null) hl = true;
           var out = [], lv = 0;
@@ -1056,7 +1056,7 @@
         }
 
         /* ================= 注册 ================= */
-        var C1 = "第 1 章 计算机网络体系结构", C2 = "第 2 章 物理层", C3 = "第 3 章 数据链路层", C4 = "第 4 章 网络层", C5 = "第 5 章 传输层";
+        var C1 = "第 1 章 计算机网络概述", C2 = "第 2 章 物理层", C3 = "第 3 章 数据链路层", C4 = "第 4 章 网络层", C5 = "第 5 章 传输层";
 
         PROP.push({
           id: "cn-nyquist", sub: "cn", ch: C2, name: "奈奎斯特定理",
@@ -1280,7 +1280,7 @@
             "收到 3 个重复 ACK 说明只是个别报文段丢失：立即重传（快重传），并令 ssthresh = cwnd/2、cwnd = ssthresh，直接进入拥塞避免（快恢复）。",
             "示例：cwnd = 16 时超时，ssthresh = 8，之后 4 个 RTT：1 → 2 → 4 → 8 → 9。"
           ],
-          traps: ["超时后 cwnd 回到 1，3 个重复 ACK 后 cwnd 不回到 1（王道口径 cwnd = 新 ssthresh）。", "数 RTT 时注意“第 n 个 RTT 内发送的段都被确认时”的 cwnd 是第 n 次增长之后的值。", "发送窗口 = min(cwnd, rwnd)，接收方缓存满时 cwnd 再大也发不出去。"],
+          traps: ["超时后 cwnd 回到 1，3 个重复 ACK 后 cwnd 不回到 1：Reno 快恢复把 cwnd 设为新的 ssthresh（408 真题的常用约定）。", "数 RTT 时注意“第 n 个 RTT 内发送的段都被确认时”的 cwnd 是第 n 次增长之后的值。", "发送窗口 = min(cwnd, rwnd)，接收方缓存满时 cwnd 再大也发不出去。"],
           ex: { q: "一个 TCP 连接总是以 1 KB 的最大段长发送 TCP 段，发送方有足够多的数据要发送。当拥塞窗口为 16 KB 时发生了超时，如果接下来的 4 个 RTT 内的 TCP 段的传输都是成功的，那么当第 4 个 RTT 内发送的所有 TCP 段都得到肯定应答时，拥塞窗口大小是（ ）。",
             opts: ["7 KB", "8 KB", "9 KB", "16 KB"], a: 2,
             why: "超时后 ssthresh = 8 KB、cwnd = 1 KB；慢开始 3 个 RTT 后为 2、4、8 KB，达到门限转入拥塞避免，第 4 个 RTT 后为 9 KB。",

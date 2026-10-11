@@ -427,6 +427,7 @@
             }
             if (o.user && history.replaceState) history.replaceState(null, "", "#prop-" + it.p.id);
             if (o.scroll) scrollTo(card);
+            if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("x:active", { detail: { kind: "prop", id: it.p.id, user: !!(o.user || o.scroll) } }));
             return true;
           }
 

@@ -112,7 +112,7 @@ export default function Layout() {
       </main>
       {!isLab && !isFull && (
         <footer className="app-foot">
-          <p>考研408动画实验室 · 内容依据 408 统考大纲整理，仅供个人复习</p>
+          <p>考研408动画实验室 · 依据 408 考试大纲与历年公开真题整理，仅供个人学习交流</p>
           <nav className="app-foot__nav" aria-label="页脚导航">
             <Link to="/terms">用户协议</Link>
             <Link to="/privacy">隐私政策</Link>

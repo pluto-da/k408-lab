@@ -160,21 +160,22 @@ describe("输入解析与校验", () => {
   });
 });
 
-describe("DFS / BFS（王道 8 顶点例题，邻接点按编号）", () => {
-  const g = U.dsParseEdges("1-8", "1-2, 1-5, 2-6, 3-4, 3-6, 3-7, 4-7, 4-8, 6-7, 7-8", {});
+describe("DFS / BFS（示例一 · 8 顶点无向图，邻接点按编号）", () => {
+  const g = U.dsParseEdges("1-8", "1-2, 1-3, 1-4, 2-5, 3-5, 3-6, 4-7, 5-8, 6-8, 7-8", {});
   const nm = (a: number[]) => a.map((i) => at(g.V, i)).join(" ");
-  it("访问序列与教材一致", () => {
-    expect(nm(U.dsDfs(g, 0).order)).toBe("1 2 6 3 4 7 8 5");
-    expect(nm(U.dsBfs(g, 0).order)).toBe("1 2 5 6 3 7 4 8");
-    expect(nm(U.dsDfs(g, 2).order)).toBe("3 4 7 6 2 1 5 8");
-    expect(nm(U.dsBfs(g, 2).order)).toBe("3 4 6 7 8 2 1 5");
+  it("访问序列与手算一致，DFS 与 BFS 明显不同", () => {
+    expect(nm(U.dsDfs(g, 0).order)).toBe("1 2 5 3 6 8 7 4");
+    expect(nm(U.dsBfs(g, 0).order)).toBe("1 2 3 4 5 6 7 8");
+    expect(nm(U.dsDfs(g, 2).order)).toBe("3 1 2 5 8 6 7 4");
+    expect(nm(U.dsBfs(g, 2).order)).toBe("3 1 5 6 2 4 8 7");
+    expect(U.dsDfs(g, 0).tree.map(([p, c]) => at(g.V, p) + at(g.V, c)).join(" ")).toBe("12 25 53 36 68 87 74");
   });
   it("生成树有 n−1 条边且都是图中的边", () => {
     for (const r of [U.dsDfs(g, 0), U.dsBfs(g, 0)]) {
       expect(r.tree.length).toBe(7);
       for (const [p, c, k] of r.tree) { const e = at(g.E, k); expect([e.u, e.v].sort()).toEqual([p, c].sort()); }
     }
-    expect(U.dsBfs(g, 0).tree.map(([p, c]) => at(g.V, p) + at(g.V, c)).join(" ")).toBe("12 15 26 63 67 34 78");
+    expect(U.dsBfs(g, 0).tree.map(([p, c]) => at(g.V, p) + at(g.V, c)).join(" ")).toBe("12 13 14 25 36 47 58");
   });
   it("按边表输入顺序建邻接表时序列随之改变", () => {
     const h = U.dsParseEdges("1-4", "1-3, 1-2, 2-4, 3-4", {});
@@ -193,14 +194,15 @@ describe("DFS / BFS（王道 8 顶点例题，邻接点按编号）", () => {
 });
 
 describe("最小生成树", () => {
-  it("王道 6 顶点例题：权值和 15，Prim 与 Kruskal 加边顺序", () => {
-    const g = U.dsParseEdges("1-6", "1-2:6, 1-3:1, 1-4:5, 2-3:5, 2-5:3, 3-4:5, 3-5:6, 3-6:4, 4-6:2, 5-6:6", { weighted: true });
+  it("示例一 · 6 顶点：权值和 14，Prim 与 Kruskal 加边顺序不同，等权边按约定先后", () => {
+    const g = U.dsParseEdges("1-6", "1-2:4, 1-3:2, 2-3:3, 2-4:5, 3-4:6, 3-5:4, 4-5:3, 4-6:2, 5-6:5", { weighted: true });
     const p = U.dsPrim(g, 0), k = U.dsKruskal(g);
     const es = (m: Mst) => m.edges.map(([a, b]) => at(g.V, a) + at(g.V, b)).join(" ");
-    expect(p.total).toBe(15);
-    expect(k.total).toBe(15);
-    expect(es(p)).toBe("13 36 64 32 25");
-    expect(es(k)).toBe("13 46 25 36 23");
+    expect(p.total).toBe(14);
+    expect(k.total).toBe(14);
+    expect(bruteMst(g)).toBe(14);
+    expect(es(p)).toBe("13 32 35 54 46");
+    expect(es(k)).toBe("13 46 23 45 35");
   });
   it("随机连通图：Prim = Kruskal = 穷举最小值", () => {
     const r = rng(408);
@@ -226,14 +228,15 @@ describe("最小生成树", () => {
 
 describe("拓扑排序", () => {
   const respects = (g: Graph, order: number[]) => g.E.every((e) => order.indexOf(e.u) < order.indexOf(e.v));
-  it("王道 AOV：栈与队列都满足所有边的先后关系", () => {
-    const g = U.dsParseEdges("1-5", "1->2, 1->4, 2->3, 2->4, 4->3, 4->5, 3->5", { directed: true });
-    for (const q of [false, true]) {
+  it("示例 AOV（6 顶点，两个入度为 0）：栈与队列得到不同但都合法的拓扑序", () => {
+    const g = U.dsParseEdges("1-6", "1->3, 1->4, 2->4, 2->5, 3->6, 4->6, 5->6", { directed: true });
+    const want = ["2 5 1 4 3 6", "1 2 3 4 5 6"];
+    [false, true].forEach((q, i) => {
       const t = U.dsTopo(g, q);
       expect(t.cycle).toBe(false);
-      expect(t.order.map((i) => at(g.V, i)).join(" ")).toBe("1 2 4 3 5");
+      expect(t.order.map((v) => at(g.V, v)).join(" ")).toBe(want[i]);
       expect(respects(g, t.order)).toBe(true);
-    }
+    });
   });
   it("随机 DAG：输出覆盖全部顶点且满足所有边", () => {
     const r = rng(42);
@@ -273,17 +276,18 @@ describe("关键路径", () => {
     for (const v of topo) for (const e of g.E) if (e.u === v && at(d, v) > -INF) d[e.v] = Math.max(at(d, e.v), at(d, v) + e.w);
     return at(d, t);
   }
-  it("王道 AOE：关键活动 a2、a5、a7，工期 8", () => {
-    const g = U.dsParseEdges("1-6", "1->2:3, 1->3:2, 2->4:2, 2->5:3, 3->4:4, 3->6:3, 4->6:2, 5->6:1", { directed: true, weighted: true });
+  it("示例 AOE（7 事件 9 活动）：工期 11，三条关键路径，a3、a7 余量 3", () => {
+    const g = U.dsParseEdges("1-7", "1->2:3, 1->3:4, 1->4:2, 2->5:4, 3->5:3, 3->6:5, 4->6:4, 5->7:4, 6->7:2", { directed: true, weighted: true });
     const c = U.dsCritical(g);
     expect(c.err).toBeUndefined();
-    expect(c.ve).toEqual([0, 3, 2, 6, 6, 8]);
-    expect(c.vl).toEqual([0, 4, 2, 6, 7, 8]);
-    expect(c.crit.map((k) => "a" + (k + 1))).toEqual(["a2", "a5", "a7"]);
-    expect(c.len).toBe(8);
-    expect(c.paths.map((p) => p.map((i) => at(g.V, i)).join(""))).toEqual(["1346"]);
+    expect(c.ve).toEqual([0, 3, 4, 2, 7, 9, 11]);
+    expect(c.vl).toEqual([0, 3, 4, 5, 7, 9, 11]);
+    expect(c.crit.map((k) => "a" + (k + 1))).toEqual(["a1", "a2", "a4", "a5", "a6", "a8", "a9"]);
+    expect(c.acts.filter((a) => a.d > 0).map((a) => ["a" + (a.k + 1), a.e, a.l, a.d])).toEqual([["a3", 0, 3, 3], ["a7", 2, 5, 3]]);
+    expect(c.len).toBe(11);
+    expect(c.paths.map((p) => p.map((i) => at(g.V, i)).join(""))).toEqual(["1257", "1357", "1367"]);
   });
-  it("严蔚敏 9 事件 11 活动：工期 18，两条关键路径", () => {
+  it("经典 AOE（9 事件 11 活动）：工期 18，两条关键路径", () => {
     const g = U.dsParseEdges("1-9", "1->2:6, 1->3:4, 1->4:5, 2->5:1, 3->5:1, 4->6:2, 5->7:9, 5->8:7, 6->8:4, 7->9:2, 8->9:4", { directed: true, weighted: true });
     const c = U.dsCritical(g);
     expect(c.len).toBe(18);
@@ -321,13 +325,15 @@ describe("关键路径", () => {
 });
 
 describe("Floyd", () => {
-  it("王道 3 顶点例题", () => {
-    const g = U.dsParseEdges("0-2", "0->1:6, 0->2:13, 1->0:10, 1->2:4, 2->0:5", { directed: true, weighted: true });
+  it("示例二 · 4 顶点有向图：多次经中转点缩短", () => {
+    const g = U.dsParseEdges("0-3", "0->1:2, 0->2:9, 1->2:3, 1->3:8, 2->0:4, 2->3:1, 3->0:6", { directed: true, weighted: true });
     const f = U.dsFloyd(g);
-    expect(f.A).toEqual([[0, 6, 10], [9, 0, 4], [5, 11, 0]]);
-    expect(f.path).toEqual([[-1, -1, 1], [2, -1, -1], [-1, 0, -1]]);
-    expect(f.frames.length).toBe(4);
-    expect(U.dsFloydPath(f.A, f.path, 1, 0)).toEqual([1, 2, 0]);
+    expect(f.A).toEqual([[0, 2, 5, 6], [7, 0, 3, 4], [4, 6, 0, 1], [6, 8, 11, 0]]);
+    expect(f.path).toEqual([[-1, -1, 1, 2], [2, -1, -1, 2], [-1, 0, -1, -1], [-1, 0, 1, -1]]);
+    expect(f.frames.length).toBe(5);
+    expect(f.frames.map((fr) => fr.ch.length)).toEqual([0, 3, 3, 3, 0]);
+    expect(U.dsFloydPath(f.A, f.path, 0, 3)).toEqual([0, 1, 2, 3]);
+    expect(U.dsFloydPath(f.A, f.path, 3, 2)).toEqual([3, 0, 1, 2]);
   });
   it("随机图：与每个源点各跑一次 Dijkstra / Bellman-Ford 一致", () => {
     const r = rng(2026);
@@ -425,9 +431,10 @@ describe("界面冒烟（jsdom）", () => {
     const btn = (t: string) => { const b = Array.from(panel.querySelectorAll<HTMLButtonElement>(".x-lab__btn")).find((x) => (x.textContent ?? "").includes(t)); if (!b) throw new Error(t); return b; };
     btn("有回路").click(); runToEnd(demo);
     expect(k.out.textContent).toMatch(/存在回路/);
-    btn("王道 AOE").click(); runToEnd(demo);
-    expect(k.out.textContent).toMatch(/关键路径：1→3→4→6/);
-    expect(k.out.querySelectorAll("tr.x-d2-crow").length).toBe(3);
+    btn("示例 AOE").click(); runToEnd(demo);
+    expect(k.out.textContent).toMatch(/1→2→5→7/);
+    expect(k.out.textContent).toMatch(/1→3→6→7/);
+    expect(k.out.querySelectorAll("tr.x-d2-crow").length).toBe(7);
   });
   it("Floyd 实验：变化格子高亮", () => {
     const l = LAB.find((x) => x.id === "floyd");

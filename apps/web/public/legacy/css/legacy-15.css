@@ -67,8 +67,8 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .x-swipe::before { content: "↔"; font-size: 14px; }
 .x-swipe[hidden] { display: none; }
 
-/* ---------- 目录：手机底部弹出、平板侧边浮动、≥1280 左侧常驻 ---------- */
-@media (max-width: 1279px) {
+/* ---------- 目录：手机底部弹出、竖屏平板侧边浮动、≥1024 左侧常驻（横屏平板也是侧栏） ---------- */
+@media (max-width: 1023px) {
   .x-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .x-tocbtn { display: inline-flex; }
   .x-toc {
@@ -80,7 +80,7 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .x-toc a { min-height: 44px; }
   .x-toc__labs a { min-height: 40px; }
 }
-@media (min-width: 768px) and (max-width: 1279px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .x-toc {
     left: auto; right: max(12px, env(safe-area-inset-right, 0px)); width: 340px; top: calc(var(--x-tool-bottom, 120px) + 6px);
     max-height: calc(100vh - var(--x-tool-bottom, 120px) - 24px); max-height: calc(100dvh - var(--x-tool-bottom, 120px) - 24px);
@@ -96,8 +96,11 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   }
   .x-toc::before { content: ""; display: block; width: 40px; height: 4px; margin: 2px auto 8px; border-radius: 2px; background: #d6d6d2; }
 }
+@media (min-width: 1024px) {
+  .x-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 24px; }
+}
 @media (min-width: 1280px) {
-  .x-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+  .x-layout { gap: 32px; }
 }
 
 /* ---------- 正文排版 ---------- */

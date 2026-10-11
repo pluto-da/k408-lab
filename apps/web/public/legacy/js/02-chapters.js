@@ -22,7 +22,7 @@
         }
         /* 章节 → 实验室里对应的实验（tab id） */
         var LABS_OF = {
-          "ds-5": ["tree"], "ds-6": ["dijkstra"], "ds-8": ["sort"],
+          "ds-4": ["tree"], "ds-5": ["dijkstra"], "ds-7": ["sort"],
           "co-3": ["cache"], "co-5": ["pipeline"],
           "os-2": ["gantt", "banker"], "os-3": ["paging"],
           "cn-4": ["subnet"], "cn-5": ["tcp", "tcpconn"]

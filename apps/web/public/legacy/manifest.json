@@ -14,7 +14,8 @@
     "css/legacy-12.css",
     "css/legacy-13.css",
     "css/legacy-14.css",
-    "css/legacy-15.css"
+    "css/legacy-15.css",
+    "css/legacy-16.css"
   ],
   "scripts": [
     "js/01-x408-data.js",
@@ -39,7 +40,8 @@
     "js/26-prop-os.js",
     "js/27-prop-cn.js",
     "js/09-tool.js",
-    "js/28-rwd.js"
+    "js/28-rwd.js",
+    "js/29-toc.js"
   ],
   "lazy": {
     "three": {

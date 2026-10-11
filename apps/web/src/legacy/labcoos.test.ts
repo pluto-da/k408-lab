@@ -200,7 +200,7 @@ describe("寻址方式", () => {
 describe("磁盘调度", () => {
   const base = { req: [98, 183, 37, 122, 14, 124, 65, 67], start: 53, min: 0, max: 199, dir: "up" };
   const tot = (alg: string, dir = "up") => U.diskSchedule({ ...base, dir, alg }).total;
-  it("教材序列六种算法总寻道长度", () => {
+  it("经典示例六种算法总寻道长度", () => {
     expect(tot("fcfs")).toBe(640);
     expect(tot("sstf")).toBe(236);
     expect(tot("scan")).toBe(331);
@@ -222,6 +222,20 @@ describe("磁盘调度", () => {
     expect(tot("look", "down")).toBe(208);
     expect(tot("cscan", "down")).toBe(386);
     expect(tot("clook", "down")).toBe(326);
+  });
+  it("示例二（磁头 140、向小）：手算六种算法，SSTF 不一定最短", () => {
+    const b2 = { req: [86, 147, 91, 177, 94, 150, 102, 175, 130], start: 140, min: 0, max: 199, dir: "down" };
+    const r = (alg: string) => U.diskSchedule({ ...b2, alg });
+    expect(r("fcfs").total).toBe(562);
+    expect(r("sstf").total).toBe(165);
+    expect(r("sstf").order).toEqual([147, 150, 130, 102, 94, 91, 86, 175, 177]);
+    expect(r("scan").total).toBe(317);
+    expect(r("cscan").total).toBe(391);
+    expect(r("look").total).toBe(145);
+    expect(r("look").order).toEqual([130, 102, 94, 91, 86, 147, 150, 175, 177]);
+    expect(r("clook").total).toBe(175);
+    expect(r("clook").order).toEqual([130, 102, 94, 91, 86, 177, 175, 150, 147]);
+    expect(r("look").total).toBeLessThan(r("sstf").total);
   });
   it("非法输入", () => {
     expect(U.diskSchedule({ ...base, req: [], alg: "fcfs" }).err).toMatch(/为空/);

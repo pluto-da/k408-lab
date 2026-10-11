@@ -194,6 +194,7 @@ function measure({ touch }) {
         const t = m.text();
         if (/Failed to load resource|\/api\/|ERR_CONNECTION|502|ECONNREFUSED/.test(t)) return; // 预览环境没有后端
         if (/WebGL|GPU stall|swiftshader|GL_/i.test(t)) return; // 软件渲染噪声
+        if (/Cross-Origin-Opener-Policy header has been ignored|origin was untrustworthy/i.test(t)) return; // HTTP（未上 HTTPS）下浏览器忽略 COOP 头的提示
         errors.push("console: " + t.slice(0, 160));
       });
       const row = { name, vp: `${w}x${h}`, w, h, touch, route: r };

@@ -120,7 +120,7 @@ describe("注册表", () => {
   });
   it("覆盖第 2、3、4、5 章", () => {
     const chs = new Set(PROP.map((p) => p.ch));
-    expect(chs).toEqual(new Set(["第 2 章 进程与线程", "第 3 章 内存管理", "第 4 章 文件管理", "第 5 章 输入/输出（I/O）管理"]));
+    expect(chs).toEqual(new Set(["第 2 章 进程管理", "第 3 章 内存管理", "第 4 章 文件管理", "第 5 章 输入/输出（I/O）管理"]));
   });
   it("links 引用的实验和图解都存在", () => {
     const { lab, proc } = collectIds();

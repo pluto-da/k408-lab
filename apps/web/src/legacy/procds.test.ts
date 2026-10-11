@@ -241,17 +241,20 @@ describe("过程图解 · 数据结构", () => {
   });
 
   it("堆：建堆、插入、删除后都是小根堆，比较次数按约定累计", () => {
-    const b = DS.buildHeap([53, 17, 78, 9, 45, 65, 87, 32]);
-    expect(b.heap).toEqual([9, 17, 65, 32, 45, 78, 87, 53]);
-    expect(b.cmp).toBe(11);
+    /* 示例一：10 个关键字，i = 5、4、3 各下沉一层，i = 2 下沉两层，i = 1 下沉三层；比较 1 + 2 + 2 + 4 + 5 = 14 次 */
+    const b = DS.buildHeap([46, 79, 56, 38, 40, 84, 25, 61, 12, 33]);
+    expect(b.heap).toEqual([12, 33, 25, 38, 40, 84, 56, 61, 79, 46]);
+    expect(b.cmp).toBe(14);
     const build = mode("heapop", 0);
     expect(segVals(build, "ARR").map(Number)).toEqual(b.heap);
-    expect(lastKv(build)["比较次数"]).toBe("11");
+    expect(lastKv(build)["比较次数"]).toBe("14");
     const ins = segVals(mode("heapop", 1), "ARR").map(Number);
-    expect(ins).toEqual([9, 13, 65, 17, 45, 78, 87, 53, 32]);
+    expect(ins).toEqual([12, 13, 25, 38, 33, 84, 56, 61, 79, 46, 40]);
+    expect(lastKv(mode("heapop", 1))["比较次数"]).toBe("3");
     expect(DS.isMinHeap(ins)).toBe(true);
     const del = segVals(mode("heapop", 2), "ARR").filter((v) => v && v.trim()).map(Number);
-    expect(del).toEqual([17, 32, 65, 53, 45, 78, 87]);
+    expect(del).toEqual([25, 33, 46, 38, 40, 84, 56, 61, 79]);
+    expect(lastKv(mode("heapop", 2))["比较次数"]).toBe("4");
     expect(DS.isMinHeap(del)).toBe(true);
     for (let t = 0; t < 30; t++) {
       const a = Array.from({ length: 2 + (t % 9) }, (_, i) => (i * 37 + t * 11) % 50);
@@ -285,23 +288,23 @@ describe("过程图解 · 数据结构", () => {
   });
 
   it("败者树：冠军是叶子中的最小值，输出序列递增", () => {
-    const leaves = [10, 9, 20, 6, 12];
+    const leaves = [17, 8, 26, 14, 11];
     const L = DS.loser(leaves);
     expect(leaves[L.champion]).toBe(Math.min(...leaves));
     const s = mode("extsort", 1);
     const first = s.steps.find((st) => st.kv?.["冠军"])!;
     expect(Number(first.kv!["冠军"])).toBe(Math.min(...leaves));
     const out = lastKv(s)["已输出"]!.split(" ").map(Number);
-    expect(out).toEqual([6, 9, 10, 12]);
+    expect(out).toEqual([8, 11, 14, 17]);
     for (let t = 0; t < 20; t++) {
       const v = Array.from({ length: 5 }, (_, i) => (i * 31 + t * 7) % 50);
       expect(v[DS.loser(v).champion]).toBe(Math.min(...v));
     }
   });
 
-  it("置换—选择排序：王道例题得到两个初始归并段", () => {
-    expect(DS.replSel([17, 21, 5, 44, 10, 12, 56, 32, 29], 3).runs).toEqual([[5, 17, 21, 44, 56], [10, 12, 29, 32]]);
-    expect(lastKv(mode("extsort", 0))["各段长度"]).toBe("5、4");
+  it("置换—选择排序：默认输入（11 个记录，WA = 3）得到三个初始归并段", () => {
+    expect(DS.replSel([36, 15, 48, 21, 9, 40, 27, 12, 33, 6, 45], 3).runs).toEqual([[15, 21, 36, 40, 48], [9, 12, 27, 33, 45], [6]]);
+    expect(lastKv(mode("extsort", 0))["各段长度"]).toBe("5、5、1");
     for (let t = 0; t < 20; t++) {
       const d = Array.from({ length: 12 }, (_, i) => (i * 17 + t * 5) % 40);
       const runs = DS.replSel(d, 3).runs;

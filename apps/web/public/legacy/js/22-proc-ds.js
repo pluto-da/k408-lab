@@ -1,5 +1,5 @@
       /* 过程图解 · 数据结构：链表插入删除、循环队列、递归调用栈、中序线索化、树森林与二叉树、堆、红黑树插入、外部排序
-         口径：王道考研 / 严蔚敏《数据结构》。结点用矩形，指针用连线；连线一旦画上就一直在，所以“被改掉的原指针”画成虚线，
+         约定见各图解的注释与说明文字。结点用矩形，指针用连线；连线一旦画上就一直在，所以“被改掉的原指针”画成虚线，
          新指针在它被赋值的那一步才点亮（之前是浅灰色）。纯计算函数挂在 window.PROCU.ds 上，便于单元测试。 */
       (function () {
         var PROC = window.PROC = window.PROC || [];
@@ -117,7 +117,7 @@
             S.push({ t: "② p->next->prior = s", d: "p->next 还是 a2，所以这句把 a2 的前驱改成 s，a2 → a1 的原指针（虚线）被覆盖。", on: ["a2", "s", "CODE"], go: ["n2"], set: { s: { segs: dSeg("?", "e", "→a2") }, a2: { segs: g("a2", "←s", null, 1) }, CODE: { hi: 1 } }, kv: { "当前语句": "②" }, tip: "这一句借助 p->next 找到 a2，所以必须在 ④ 修改 p->next 之前执行。若 p 是尾结点（p->next == NULL），要先判断再执行。" });
             S.push({ t: "③ s->prior = p", d: "s 的前驱指向 a1。这句只改 s 自己，放在 ④ 之前的任何位置都可以。", on: ["s", "a1", "CODE"], go: ["n3"], set: { a2: { segs: g("a2", "←s") }, s: { segs: dSeg("←a1", "e", "→a2", 1) }, CODE: { hi: 2 } }, kv: { "当前语句": "③" } });
             S.push({ t: "④ p->next = s", d: "最后让 a1 指向 s，原来的 a1 → a2（虚线）被覆盖。此时 a2 已经能通过 s->next 找到，不会丢失。", on: ["a1", "s", "CODE", "LOST"], go: ["n4"], set: { s: { segs: dSeg("←a1", "e", "→a2") }, a1: { segs: g("a1", null, "→s", 0, 1) }, CODE: { hi: 3 }, LOST: { v: "能：p->next->next" } }, kv: { "当前语句": "④", "表长": "4" }, tip: "①② 必须在 ④ 之前；④ 一旦先执行，p 原来的后继就再也找不到了。" });
-            S.push({ t: "结果：L ⇄ a1 ⇄ s ⇄ a2 ⇄ a3", d: "正向、反向两条链都已接通。双链表插入只改 4 根指针，O(1)。", on: ["L", "a1", "s", "a2", "a3"], go: ["n4", "n1", "n2", "n3"], set: { a1: { segs: g("a1", null, "→s") }, CODE: { hi: -1 } }, tip: "记忆口诀：先搞定 s 的两根和后继的 prior，最后才动 p->next。" });
+            S.push({ t: "结果：L ⇄ a1 ⇄ s ⇄ a2 ⇄ a3", d: "正向、反向两条链都已接通。双链表插入只改 4 根指针，O(1)。", on: ["L", "a1", "s", "a2", "a3"], go: ["n4", "n1", "n2", "n3"], set: { a1: { segs: g("a1", null, "→s") }, CODE: { hi: -1 } }, tip: "顺序要点：p->next 是找到原后继的唯一线索，所以它必须最后改；s 的两个指针和原后继的 prior 都要在它之前处理完。" });
             return { w: 980, h: 560, nodes: nodes, edges: edges, steps: S };
           }
           /* 错误顺序：先执行 p->next = s */
@@ -148,7 +148,7 @@
         });
 
         /* ===================== 2. 循环队列的队空与队满 ===================== */
-        /* 约定（王道）：front 指向队头元素，rear 指向队尾元素的下一个位置；MaxSize = 6 */
+        /* 约定：front 指向队头元素，rear 指向队尾元素的下一个位置；MaxSize = 6 */
         function cqueue(scheme) {
           var M = 6, POS = [[40, 90], [190, 90], [340, 90], [340, 260], [190, 260], [40, 260]];
           var nodes = [{ id: "RING", k: "zone", x: 20, y: 30, w: 440, h: 330, t: "循环队列 Q[0..5]（MaxSize = 6）" }], edges = [], S = [];
@@ -481,7 +481,7 @@
               post.push(k);
               S.push({ t: "后根第 " + (i + 1) + " 个：" + k, d: i === 0 ? "树的后根遍历：先依次后根遍历每棵子树，最后访问根。二叉树中序：左、根、右。两边第一个都是 E。" : "树中访问 " + k + "；二叉树中序遍历此时也恰好访问 " + k + "。", on: ["t" + k, "b" + k], kv: { "树的后根": post.join(" "), "二叉树中序": post.join(" ") } });
             });
-            S.push({ t: "结论二：树的后根 = 二叉树的中序", d: "结点 x 在二叉树中的左子树就是它原来的全部子孙，中序先访问左子树再访问 x，正是“先子树后根”。", on: [], tip: "森林的中序遍历（王道称后序遍历，即依次后根遍历每棵树）= 对应二叉树的中序遍历。树没有“中根遍历”。" });
+            S.push({ t: "结论二：树的后根 = 二叉树的中序", d: "结点 x 在二叉树中的左子树就是它原来的全部子孙，中序先访问左子树再访问 x，正是“先子树后根”。", on: [], tip: "森林的中序遍历（也有资料叫“后序遍历”，即依次对每棵树做后根遍历）= 对应二叉树的中序遍历。树没有“中根遍历”。" });
             return { w: 980, h: 470, nodes: nodes, edges: edges, steps: S };
           }
           if (!forest) {
@@ -539,7 +539,7 @@
         }
         DS.isMinHeap = function (h) { for (var i = 2; i <= h.length; i++) if (h[i - 1] < h[(i >> 1) - 1]) return false; return true; };
         function heapSpec(mode, inp) {
-          var data = nums(inp.heap == null ? "53 17 78 9 45 65 87 32" : inp.heap, 2, 10, "关键字序列");
+          var data = nums(inp.heap == null ? "46 79 56 38 40 84 25 61 12 33" : inp.heap, 2, 10, "关键字序列");
           var key = mode === "ins" ? nums(inp.hkey == null ? "13" : inp.hkey, 1, 1, "插入的关键字")[0] : null;
           var A = [null].concat(mode === "build" ? data : DS.buildHeap(data).heap), n = data.length, cmp = 0;
           var m = mode === "ins" ? n + 1 : n;
@@ -630,13 +630,13 @@
           }
           return { w: 980, h: 510, nodes: nodes, edges: edges, steps: S };
         }
-        var HEAP_IN = { k: "heap", label: "初始关键字序列（2–10 个）", value: "53 17 78 9 45 65 87 32", ph: "空格或逗号分隔" };
+        var HEAP_IN = { k: "heap", label: "初始关键字序列（2–10 个）", value: "46 79 56 38 40 84 25 61 12 33", ph: "空格或逗号分隔" };
         PROC.push({
           id: "heapop", name: "堆的插入与删除", sub: "ds",
           lead: "小根堆：数组和完全二叉树同步画。建堆从 ⌊n/2⌋ 开始向下筛选，插入放末尾再上浮，删除堆顶用末尾元素替换再下沉。",
           note: ["小根堆：A[i] ≤ A[2i] 且 A[i] ≤ A[2i+1]（下标从 1 开始）；大根堆相反。", "建堆从最后一个非叶结点 ⌊n/2⌋ 开始依次向前做下沉，时间复杂度 O(n)。", "插入：放到末尾，与双亲比较，小则交换，一路上浮，O(log n)。", "删除堆顶：末尾元素移到堆顶，与较小的孩子比较，大则交换，一路下沉，O(log n)。", "堆排序不稳定，时间 O(n log n)，空间 O(1)；比较次数是常考计算题，注意下沉时两个孩子之间也要比较一次。"],
           modes: [
-            { name: "建堆（筛选法）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("build", inp); }, presets: [{ label: "王道例题", v: { heap: "53 17 78 9 45 65 87 32" } }, { label: "逆序 8 个", v: { heap: "80 70 60 50 40 30 20 10" } }] },
+            { name: "建堆（筛选法）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("build", inp); }, presets: [{ label: "示例一（10 个，多层下沉）", v: { heap: "46 79 56 38 40 84 25 61 12 33" } }, { label: "逆序 8 个", v: { heap: "80 70 60 50 40 30 20 10" } }] },
             { name: "插入（上浮）", inputs: [HEAP_IN, { k: "hkey", label: "插入关键字", value: "13", num: 1 }], make: function (inp) { return heapSpec("ins", inp); } },
             { name: "删除堆顶（下沉）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("del", inp); } }
           ]
@@ -738,7 +738,7 @@
             nodes.push({ id: "s" + i, k: "box", x: Math.round(cx - 32), y: 40 + d * 100, w: 64, h: 46, t: "" });
             if (i > 1) edges.push({ id: "e" + i, a: "s" + (i >> 1), as: "b", ao: i % 2 ? 12 : -12, b: "s" + i, bs: "t" });
           });
-          nodes.push({ id: "PROP", k: "table", x: 730, y: 40, w: 230, h: 26 + 3 * 24 + 6, rh: 24, t: "红黑性质检查", cols: [0.5], rows: [["根为黑", "—"], ["无红红相连", "—"], ["黑路同", "—"]] });
+          nodes.push({ id: "PROP", k: "table", x: 730, y: 40, w: 230, h: 26 + 3 * 24 + 6, rh: 24, t: "红黑性质检查", cols: [0.5], rows: [["根为黑", "—"], ["红结点不相邻", "—"], ["各路径黑高相等", "—"]] });
           nodes.push({ id: "CASE", k: "box", x: 730, y: 190, w: 230, h: 64, t: "当前情况", v: "—" });
           nodes.push({ id: "BH", k: "box", x: 730, y: 290, w: 230, h: 64, t: "树的黑高 bh（根）", v: "—" });
           nodes.push({ id: "SEQ", k: "fields", unit: 1, x: 20, y: 460, w: Math.min(940, 85 * keys.length), h: 52, t: "插入序列", segs: keys.map(function (k, i) { return { t: String(i + 1), v: String(k), w: 1 }; }) });
@@ -753,7 +753,7 @@
             });
             prevSlots = e.slots;
             var c = DS.rbCheck(e.slots), bad = !c.rootBlack ? 0 : c.redRed.length ? 1 : !c.bhOk ? 2 : -1;
-            set.PROP = { rows: [["根为黑", c.rootBlack ? "是 ✓" : "否 ✗"], ["无红红相连", c.redRed.length ? c.redRed[0] + " ✗" : "是 ✓"], ["黑路同", c.bhOk ? "bh = " + c.bh + " ✓" : "不同 ✗"]], bad: bad, hi: -1 };
+            set.PROP = { rows: [["根为黑", c.rootBlack ? "是 ✓" : "否 ✗"], ["红结点不相邻", c.redRed.length ? c.redRed[0] + " ✗" : "是 ✓"], ["各路径黑高相等", c.bhOk ? "bh = " + c.bh + " ✓" : "不同 ✗"]], bad: bad, hi: -1 };
             set.CASE = { v: e.cs || (c.redRed.length ? "红红相连，需调整" : "无冲突") };
             set.BH = { v: c.bhOk ? String(c.bh) : "—" };
             set.SEQ = { segs: keys.map(function (k, i) { return { t: String(i + 1), v: String(k), w: 1, on: i === ki }; }) };
@@ -765,7 +765,7 @@
             else if (e.kind === "rot" && /^(LL|RR)/.test(e.t)) s.tip = "父红叔黑：旋转方式与 AVL 的 LL/RR/LR/RL 相同，旋转后原来的父（或新结点）成为子树根并染黑，爷染红。";
             else if (e.kind === "rot1") s.tip = "LR / RL 型要旋转两次：第一次把它变成 LL / RR 型，第二次再按 LL / RR 处理。";
             else if (e.kind === "root" && e.key !== keys[0]) s.tip = "只有“父红叔红”一路传到根时，树的黑高才会增加 1。";
-            else if (e.kind === "ins" && ki === 0) s.tip = "新插入的结点总是红色：插红结点不改变黑高，最多只会破坏“不红红”这一条，修复代价小。";
+            else if (e.kind === "ins" && ki === 0) s.tip = "新插入的结点总是红色：插红结点不改变黑高，最多只会破坏“红结点不相邻”这一条，修复代价小。";
             S.push(s);
           });
           var fin = DS.rbCheck(R.slots), clr = {};
@@ -778,7 +778,7 @@
         PROC.push({
           id: "rbtree", name: "红黑树的插入", sub: "ds",
           lead: "新结点染红插入：父黑直接结束；父红叔红就变色并把爷当新结点继续；父红叔黑按 LL / RR / LR / RL 旋转后变色。每一步都检查红黑性质并标出黑高。",
-          note: ["红黑性质：结点非红即黑；根黑；叶结点（NIL）黑；红结点的两个孩子都是黑（不红红）；任一结点到其每个叶结点路径上的黑结点数相同（黑路同）。", "新插入结点为红色（若是根则染黑）；父结点为黑，插入直接结束。", "父红叔红：父、叔染黑，爷染红，爷作为新结点继续向上调整（不旋转）。", "父红叔黑：LL 右单旋、RR 左单旋，LR 先左后右、RL 先右后左；旋转后新子树根染黑、原爷染红。", "黑高 bh：从某结点出发（不含该结点）到叶结点路径上的黑结点数；红黑树高 h ≤ 2log₂(n + 1)，查找、插入、删除都是 O(log n)。"],
+          note: ["红黑性质：结点非红即黑；根黑；叶结点（NIL）黑；红结点的两个孩子都是黑（红结点不相邻）；任一结点到其每个叶结点路径上的黑结点数相同（各路径黑结点数相等）。", "新插入结点为红色（若是根则染黑）；父结点为黑，插入直接结束。", "父红叔红：父、叔染黑，爷染红，爷作为新结点继续向上调整（不旋转）。", "父红叔黑：LL 右单旋、RR 左单旋，LR 先左后右、RL 先右后左；旋转后新子树根染黑、原爷染红。", "黑高 bh：从某结点出发（不含该结点）到叶结点路径上的黑结点数；红黑树高 h ≤ 2log₂(n + 1)，查找、插入、删除都是 O(log n)。"],
           modes: [
             { name: "插入 20,10,5,30,40,57,3,2", inputs: [{ k: "rb", label: "关键字序列（不超过 10 个）", value: "20 10 5 30 40 57 3 2", ph: "空格或逗号分隔" }], make: function (inp) { return rbSpec(nums(inp.rb == null ? "20 10 5 30 40 57 3 2" : inp.rb, 1, 10, "关键字序列")); } },
             { name: "LR / RL 型：10,5,7,15,12", make: function () { return rbSpec([10, 5, 7, 15, 12]); } }
@@ -809,7 +809,7 @@
           return { runs: runs, ev: ev };
         };
         function replSpec(inp) {
-          var data = nums(inp.rs == null ? "17 21 5 44 10 12 56 32 29" : inp.rs, 3, 15, "输入记录"), WA = 3;
+          var data = nums(inp.rs == null ? "36 15 48 21 9 40 27 12 33 6 45" : inp.rs, 3, 15, "输入记录"), WA = 3;
           var R = DS.replSel(data, WA);
           var nodes = [], edges = [], S = [];
           nodes.push({ id: "FI", k: "fields", unit: 1, x: 20, y: 60, w: 940, h: 56, t: "输入文件 FI（按顺序读入）", segs: [] });
@@ -865,7 +865,7 @@
           return { ls: ls, champion: ls[0] };
         };
         function loserSpec() {
-          var K = 5, RUNS = [[10, 15, 16], [9, 18, 20], [20, 22, 40], [6, 15, 25], [12, 37, 48]];
+          var K = 5, RUNS = [[17, 29, 41], [8, 23, 35], [26, 31, 44], [14, 19, 52], [11, 38, 47]];
           var ptr = [0, 0, 0, 0, 0], b = RUNS.map(function (r) { return r[0]; }), ls = [], cmp = 0, out = [];
           var nodes = [], edges = [], S = [];
           var POS = { ls0: [2.5, 0], ls1: [2.5, 1], ls2: [1.5, 2], ls3: [3.5, 2], ls4: [0.5, 3], b0: [2, 3], b1: [3, 3], b2: [4, 3], b3: [0, 4], b4: [1, 4] };
@@ -891,7 +891,7 @@
             return o;
           }
           function kv(o) { o = o || {}; o["比较次数"] = String(cmp); o["已输出"] = out.length ? out.join(" ") : "—"; return o; }
-          S.push({ t: "5 路归并：叶子装入各段的首记录", d: "叶子 b0–b4 分别是 5 个归并段的当前记录 10、9、20、6、12。内部结点 ls[1]–ls[4] 将记录“败者”（较大者）所在的段号，胜者继续向上比，冠军放在 ls[0]。", on: ["b0", "b1", "b2", "b3", "b4", "RUNS"], set: snap({ RUNS: { rows: runRows(), hi: [0, 1, 2, 3, 4] } }), kv: kv() });
+          S.push({ t: "5 路归并：叶子装入各段的首记录", d: "叶子 b0–b4 分别是 5 个归并段的当前记录 " + b.join("、") + "。内部结点 ls[1]–ls[4] 将记录“败者”（较大者）所在的段号，胜者继续向上比，冠军放在 ls[0]。", on: ["b0", "b1", "b2", "b3", "b4", "RUNS"], set: snap({ RUNS: { rows: runRows(), hi: [0, 1, 2, 3, 4] } }), kv: kv() });
           /* 建树：按 ls[4]、ls[2]、ls[3]、ls[1] 的次序自底向上比赛 */
           var W = {};
           function play(t) {
@@ -987,9 +987,9 @@
         PROC.push({
           id: "extsort", name: "外部排序：置换—选择、败者树、最佳归并树", sub: "ds",
           lead: "外部排序 = 生成初始归并段 + 多路归并。置换—选择排序让初始段更长，败者树让 k 路归并的比较次数与 k 无关，最佳归并树让读写次数最少。",
-          note: ["外部排序时间 = 内部排序时间 + 外存读写时间 + 内部归并时间，其中读写外存占主要部分。", "r 个初始归并段做 k 路平衡归并，归并趟数 = ⌈log_k r⌉；增大 k 或减少 r 都能减少趟数。", "败者树：内部结点记败者，冠军在 ls[0]；每输出一个记录只需比较 ⌈log₂k⌉ 次，与 k 无关。", "置换—选择排序：每次输出 WA 中不小于 MINIMAX 的最小记录；得到的初始归并段长度不等，平均约为 WA 大小的 2 倍。", "最佳归并树：k 叉哈夫曼树，(n − 1) % (k − 1) ≠ 0 时补 (k − 1) − (n − 1) % (k − 1) 个虚段；读写次数 = 2 × WPL。"],
+          note: ["外部排序的耗时由三块组成：生成初始段时的内部排序、反复读写外存、归并时的内部比较；真正的瓶颈是读写外存，所以优化都围绕减少 I/O 次数。", "r 个初始归并段做 k 路平衡归并，归并趟数 = ⌈log_k r⌉；增大 k 或减少 r 都能减少趟数。", "败者树：内部结点记败者，冠军在 ls[0]；每输出一个记录只需比较 ⌈log₂k⌉ 次，与 k 无关。", "置换—选择排序：每次输出 WA 中不小于 MINIMAX 的最小记录；得到的初始归并段长度不等，平均约为 WA 大小的 2 倍。", "最佳归并树：k 叉哈夫曼树，(n − 1) % (k − 1) ≠ 0 时补 (k − 1) − (n − 1) % (k − 1) 个虚段；读写次数 = 2 × WPL。"],
           modes: [
-            { name: "置换—选择排序（WA = 3）", inputs: [{ k: "rs", label: "输入文件 FI 的记录（3–15 个）", value: "17 21 5 44 10 12 56 32 29", ph: "空格或逗号分隔" }], make: replSpec },
+            { name: "置换—选择排序（WA = 3）", inputs: [{ k: "rs", label: "输入文件 FI 的记录（3–15 个）", value: "36 15 48 21 9 40 27 12 33 6 45", ph: "空格或逗号分隔" }], make: replSpec },
             { name: "败者树（k = 5）", make: loserSpec },
             { name: "最佳归并树（补虚段）", inputs: [{ k: "bl", label: "各归并段长度（2–12 个）", value: "2 3 6 9 12 17 18 24", ph: "空格或逗号分隔" }, { k: "bk", label: "归并路数 k", type: "select", value: "3", opts: [["2", "2 路"], ["3", "3 路"], ["4", "4 路"]] }], make: bestSpec, presets: [{ label: "8 段 3 路（补 1 个）", v: { bl: "2 3 6 9 12 17 18 24", bk: "3" } }, { label: "9 段 3 路（不补）", v: { bl: "9 12 18 3 17 2 6 30 24", bk: "3" } }, { label: "8 段 4 路（补 2 个）", v: { bl: "5 8 12 3 20 7 15 10", bk: "4" } }] }
           ]

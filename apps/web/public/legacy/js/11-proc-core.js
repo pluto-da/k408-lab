@@ -428,6 +428,7 @@
             buildOpts();
             load();
             if (user && history.replaceState) history.replaceState(null, "", "#proc-" + cur.id);
+            if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("x:active", { detail: { kind: "proc", id: cur.id, user: !!user } }));
           }
           q('[data-a="next"]').addEventListener("click", function () { stop(); showStep(pos + 1, true); });
           q('[data-a="prev"]').addEventListener("click", function () { stop(); showStep(pos - 1, false); });

@@ -44,7 +44,8 @@
 
         /* ======================= 散列表 ======================= */
         LABU.HASH_METHODS = [["linear", "线性探测"], ["quad", "平方探测"], ["chain", "拉链法"]];
-        LABU.HASH_EMPTY = [["wd", "王道口径"], ["yes", "空位计 1 次"], ["no", "空位不计"]];
+        /* 失败比较次数的约定：std = 常见约定（开放定址与空位置的比较计 1 次，拉链法空指针不计）；无法识别的值按 std 处理 */
+        LABU.HASH_EMPTY = [["std", "常见约定"], ["yes", "空位计 1 次"], ["no", "空位不计"]];
         /* 开放定址第 i 次探测的增量 d_i；返回 null 表示探测序列已用完 */
         function hashInc(meth, i, m) {
           if (meth === "linear") return i < m ? i : null;
@@ -61,7 +62,8 @@
         }
         LABU.dsHash = function (o) {
           o = o || {};
-          var keys = o.keys || [], p = o.p, m = o.m, meth = o.method || "linear", em = o.empty || "wd", n = keys.length, i, j;
+          var keys = o.keys || [], p = o.p, m = o.m, meth = o.method || "linear", em = o.empty || "std", n = keys.length, i, j;
+          if (["std", "yes", "no"].indexOf(em) < 0) em = "std"; /* 未知或旧版本的选项值一律按常见约定处理 */
           if (["linear", "quad", "chain"].indexOf(meth) < 0) return { err: "未知的冲突处理方法" };
           if (!n) return { err: "请至少输入 1 个关键字" };
           if (n > 15) return { err: "关键字最多 15 个（当前 " + n + " 个）" };
@@ -74,7 +76,7 @@
           if (m > 20) return { err: "表长最多 20（当前 " + m + "）" };
           if (p > m) return { err: "p = " + p + " 大于表长 m = " + m + "，H(key) = key % p 会超出表的地址范围；p 应取不大于 m 的最大素数" };
           if (meth !== "chain" && m < n) return { err: "表长 m = " + m + " 小于关键字个数 n = " + n + "，开放定址法放不下所有关键字" };
-          var cntEmpty = em === "yes" || (em === "wd" && meth !== "chain");
+          var cntEmpty = em === "yes" || (em === "std" && meth !== "chain");
           var frames = [], recs = [], T = fill(m, null), C = [], fail = "";
           for (i = 0; i < m; i++) C.push([]);
           function snap(f) {
@@ -147,7 +149,7 @@
           var fl = LABU.dsFrac(fn, p);
           fl.expr = "(" + per.map(function (x) { return x.cnt; }).join(" + ") + ")/" + p;
           fl.full = "ASL失败 = " + fl.expr + " = " + fl.text;
-          fl.rule = meth === "chain" ? (cntEmpty ? "与空指针的比较计 1 次" : "只计与关键字的比较，空指针不计（王道）") : (cntEmpty ? "与空位置的比较计 1 次（王道）" : "与空位置的比较不计");
+          fl.rule = meth === "chain" ? (cntEmpty ? "与空指针的比较计 1 次" : "只计与关键字的比较，空指针不计（常见约定）") : (cntEmpty ? "与空位置的比较计 1 次（真题常用）" : "与空位置的比较不计");
           per.forEach(function (x) {
             var why;
             if (meth === "chain") why = "地址 " + x.a + "：链表有 " + (x.probes.length ? x.probes.length + " 个结点（" + x.probes.join(" → ") + "）" : "0 个结点") + "，查找失败要比较 " + x.cnt + " 次" + (cntEmpty ? "（含与空指针的 1 次）" : "") + "。";
@@ -214,7 +216,7 @@
           var a = items(arr), passes = [], cmps = 0, moves = 0;
           incs.forEach(function (d) {
             var before = a.slice(), pc = 0;
-            /* 王道写法：i 从 d 开始，把 a[i] 插入所在组的有序前缀（各组交替进行） */
+            /* 约定：i 从 d 开始，把 a[i] 插入所在组的有序前缀（各组交替进行） */
             for (i = d; i < n; i++) {
               pc++;
               if (a[i].v < a[i - d].v) {
@@ -360,9 +362,9 @@
         /* ======================= 实验 1：散列表 ======================= */
         LAB.push({
           id: "hash", name: "散列表", color: "var(--x-ds)",
-          note: "① 散列函数常用除留余数法 H(key) = key % p，p 取不大于表长 m 的最大素数。② 线性探测会产生“堆积”（聚集），使同义词与非同义词争夺地址；平方探测可减少堆积，但不一定能探测到所有单元，表长须为 4j + 3 形式的素数。③ ASL 成功按每个关键字的比较次数平均；ASL 失败按 H 的取值 0 ~ p−1 平均（不是表长 m），开放定址法比较到空位置为止。④ 本实验默认口径（王道）：开放定址法与空位置的比较计 1 次，拉链法空指针不计；严蔚敏教材及部分题目不计空位置，结果相差 1，题目有约定时以题目为准。⑤ 开放定址法不能随便物理删除元素（会截断探测序列），只能做删除标记；装填因子 α = n/m 越大，冲突越多，ASL 与 α 有关而与 n 无直接关系。",
+          note: "① 散列函数常用除留余数法 H(key) = key % p，p 取不大于表长 m 的最大素数。② 线性探测会产生“堆积”（聚集），使同义词与非同义词争夺地址；平方探测可减少堆积，但不一定能探测到所有单元，表长须为 4j + 3 形式的素数。③ ASL 成功按每个关键字的比较次数平均；ASL 失败按 H 的取值 0 ~ p−1 平均（不是表长 m），开放定址法比较到空位置为止。④ 本实验默认用常见约定：开放定址法探测到空位置也算 1 次比较（近年真题多按此计），拉链法只数与关键字的比较、空指针不算；也有题目规定不计空位置，这时每条以空位置结束的探测少算 1 次（线性探测时 ASL失败正好小 1），题目写明约定时照题目算。⑤ 开放定址法不能随便物理删除元素（会截断探测序列），只能做删除标记；装填因子 α = n/m 越大，冲突越多，ASL 与 α 有关而与 n 无直接关系。",
           mount: function (panel, K) {
-            var keyS = "19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79", pS = "13", mS = "16", meth = "linear", em = "wd";
+            var keyS = "19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79", pS = "13", mS = "16", meth = "linear", em = "std";
             var mg = btnGroup(K.opts, LABU.HASH_METHODS, meth, function (v) { meth = v; K.restart(); }, "冲突处理");
             var eg = btnGroup(K.opts, LABU.HASH_EMPTY, em, function (v) { em = v; K.restart(); }, "失败口径");
             br(K);
@@ -450,7 +452,7 @@
                 }), LABU.HASH_METHODS.map(function (x) { return x[0]; }).indexOf(r.method));
               }
               o.tb.innerHTML = h;
-              o.tip.textContent = "ASL失败按散列函数可能取到的地址 0 ~ p−1 共 " + p + " 个计算。当前口径：" + (r.method === "chain" ? (r.cntEmpty ? "空指针计 1 次" : "空指针不计（王道）") : (r.cntEmpty ? "与空位置的比较计 1 次（王道）" : "与空位置的比较不计（部分教材）")) + "；切换“失败口径”可对比，两种口径结果相差 1。";
+              o.tip.textContent = "ASL失败按散列函数可能取到的地址 0 ~ p−1 共 " + p + " 个计算。当前口径：" + (r.method === "chain" ? (r.cntEmpty ? "空指针计 1 次" : "空指针不计（常见约定）") : (r.cntEmpty ? "与空位置的比较计 1 次（真题常用）" : "与空位置的比较不计（另一种约定）")) + "；切换“失败口径”可对比，两种口径结果相差 1。";
             }
             P.api.reset();
             return P.api;
@@ -466,7 +468,7 @@
             var ia = field(K.opts, "有序表", arrS, { inputmode: "numeric", "aria-label": "有序表，逗号分隔" }, function (v) { arrS = v; K.restart(); });
             var ik = field(K.opts, "查找", keyS, { inputmode: "numeric", "aria-label": "要查找的关键字" }, function (v) { keyS = v; K.restart(); }, true);
             br(K);
-            presets(K, [["严蔚敏例：查 21", "5, 13, 19, 21, 37, 56, 64, 75, 80, 88, 92", "21"], ["同表：查 85（失败）", "5, 13, 19, 21, 37, 56, 64, 75, 80, 88, 92", "85"], ["15 个元素·满二叉树", "3, 8, 12, 17, 24, 30, 36, 41, 47, 52, 58, 63, 69, 75, 80", "52"], ["无序输入（自动排序）", "48, 9, 33, 71, 15, 62, 27", "15"]].map(function (p) {
+            presets(K, [["经典示例：查 21", "5, 13, 19, 21, 37, 56, 64, 75, 80, 88, 92", "21"], ["同表：查 85（失败）", "5, 13, 19, 21, 37, 56, 64, 75, 80, 88, 92", "85"], ["15 个元素·满二叉树", "3, 8, 12, 17, 24, 30, 36, 41, 47, 52, 58, 63, 69, 75, 80", "52"], ["无序输入（自动排序）", "48, 9, 33, 71, 15, 62, 27", "15"]].map(function (p) {
               return [p[0], function () { arrS = p[1]; keyS = p[2]; ia.value = arrS; ik.value = keyS; K.restart(); }];
             }));
             var o = ui(K);
@@ -551,7 +553,7 @@
               o.tb.innerHTML = tbl("查找过程", ["次数", "low", "high", "mid", "比较", "结果"], rows, rows.length - 1) +
                 tbl("判定树各层（ASL成功）", ["层", "结点数", "层号 × 结点数"], lv, -1) +
                 '<p class="x-d3-asl">' + esc(t.succ.full) + "<br>" + esc(t.fail.full) + "</p>";
-              o.tip.textContent = (r.sorted ? "" : "注意：输入已自动排序。") + "失败结点的比较次数按其父结点层号计（不把方框本身算一次），这是王道与严蔚敏的共同口径。";
+              o.tip.textContent = (r.sorted ? "" : "注意：输入已自动排序。") + "失败结点的比较次数按其父结点层号计（不把方框本身算一次），这是最常见的约定；若题目另有规定，以题目为准。";
             }
             P.api.reset();
             return P.api;
@@ -576,7 +578,7 @@
             var ia = field(K.opts, "序列", arrS, { inputmode: "numeric", "aria-label": "待排序序列，逗号分隔" }, function (v) { arrS = v; K.restart(); });
             var ii = field(K.opts, "希尔增量", incS, { inputmode: "numeric", placeholder: "默认 n/2 减半", "aria-label": "希尔增量序列，如 5, 3, 1，留空为 n/2 逐次减半" }, function (v) { incS = v; K.restart(); }, true);
             br(K);
-            presets(K, [["严蔚敏例·希尔", DEF, "shell", ""], ["严蔚敏例·增量 5,3,1", DEF, "shell", "5, 3, 1"], ["选择不稳定", "5, 8, 5, 2, 9", "select", ""], ["折半插入", "20, 30, 10, 30, 50, 40, 10", "bins", ""], ["基数排序经典例", RDX, "radix", ""]].map(function (p) {
+            presets(K, [["经典示例·希尔", DEF, "shell", ""], ["经典示例·增量 5,3,1", DEF, "shell", "5, 3, 1"], ["选择不稳定", "5, 8, 5, 2, 9", "select", ""], ["折半插入", "20, 30, 10, 30, 50, 40, 10", "bins", ""], ["基数排序经典例", RDX, "radix", ""]].map(function (p) {
               return [p[0], function () { arrS = p[1]; alg = p[2]; incS = p[3]; ia.value = arrS; ii.value = incS; ag.set(alg); K.restart(); }];
             }));
             var o = ui(K);

@@ -19,9 +19,12 @@
         function setToc(open) {
           toc.classList.toggle("is-open", open);
           tocBtn.setAttribute("aria-expanded", open ? "true" : "false");
+          root.classList.toggle("x-toc-lock", open); /* 面板打开时锁定背景滚动（样式见 legacy-16.css，仅 <1024） */
           if (open) {
             root.style.setProperty("--x-tool-bottom", Math.max(0, tool.getBoundingClientRect().bottom) + "px");
-            var first = toc.querySelector("a"); if (first) first.focus();
+            if (window.X_TOC) X_TOC.reveal(); /* 折叠目录（29-toc.js）：当前条目滚到面板可见处 */
+            var first = toc.querySelector(".x-toc__root a[aria-current=\"true\"]") || toc.querySelector(".x-toc__root a") || toc.querySelector("a");
+            if (first) first.focus({ preventScroll: true });
           }
         }
         tocBtn.addEventListener("click", function () { setToc(!toc.classList.contains("is-open")); });
@@ -39,6 +42,8 @@
           if (pr && window.X_OPEN_PROC) { e.preventDefault(); window.X_OPEN_PROC(pr); if (window.X) X.go("proc"); }
           var pp = a.getAttribute("data-prop");
           if (pp && window.X_OPEN_PROP) { e.preventDefault(); window.X_OPEN_PROP(pp); if (window.X) X.go("prop"); }
+          var ch = a.getAttribute("data-ch");
+          if (ch && window.X_OPEN_CHAPTER) { e.preventDefault(); var cp = ch.split(":"); window.X_OPEN_CHAPTER(cp[0], +cp[1]); }
           setToc(false);
         });
 
@@ -47,7 +52,8 @@
         var secs = IDS.map(function (id) { return $(id); });
         var cur = null;
         function spy() {
-          var line = stickyH() + 48, k = null;
+          /* 判定线：工具栏下沿往下 120px——锚点跳转后区块顶部落在工具栏下方不远处（异步内容撑高后常见）也算进入该区块 */
+          var line = Math.max(stickyH(), tool.getBoundingClientRect().bottom) + 120, k = null;
           secs.forEach(function (s, i) { if (s && !s.hidden && s.getBoundingClientRect().top <= line) k = IDS[i]; });
           if (!k) k = "overview";
           if (k === cur) return;
@@ -55,6 +61,8 @@
           Array.prototype.forEach.call(document.querySelectorAll(".x-chip, .x-toc > ol > li > a"), function (a) {
             if (a.getAttribute("href") === "#" + k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
           });
+          /* 折叠目录（29-toc.js）据此展开当前区块的组 */
+          document.dispatchEvent(new CustomEvent("x:section", { detail: { id: k } }));
         }
         var ticking = false;
         window.addEventListener("scroll", function () {
@@ -215,31 +223,5 @@
           io.observe(links);
         } else askGraph();
 
-        /* ---------- 实验标签页搭好后：目录里列出全部实验 ---------- */
-        function fillToc() {
-          var ol = $("x-toc-labs"); if (!ol || ol.children.length) return;
-          Array.prototype.forEach.call(document.querySelectorAll("#x-lab .x-lab__tab"), function (t) {
-            var li = document.createElement("li"), a = document.createElement("a");
-            a.href = "#lab"; a.textContent = t.textContent; a.setAttribute("data-lab", t.id.replace(/^tab-/, ""));
-            li.appendChild(a); ol.appendChild(li);
-          });
-        }
-        function fillProcToc() {
-          var ol = $("x-toc-procs"); if (!ol || ol.children.length) return;
-          Array.prototype.forEach.call(document.querySelectorAll("#x-proc .x-proc__tab"), function (t) {
-            var li = document.createElement("li"), a = document.createElement("a");
-            a.href = "#proc"; a.textContent = t.textContent; a.setAttribute("data-proc", t.id.replace(/^ptab-/, ""));
-            li.appendChild(a); ol.appendChild(li);
-          });
-        }
-        function fillPropToc() {
-          var ol = $("x-toc-props"); if (!ol || ol.children.length) return;
-          Array.prototype.forEach.call(document.querySelectorAll("#x-prop .x-prop__item"), function (t) {
-            var li = document.createElement("li"), a = document.createElement("a");
-            a.href = "#prop-" + t.getAttribute("data-id"); a.textContent = t.textContent; a.setAttribute("data-prop", t.getAttribute("data-id"));
-            li.appendChild(a); ol.appendChild(li);
-          });
-        }
-        if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", function () { setTimeout(function () { fillToc(); fillProcToc(); fillPropToc(); }, 0); });
-        else setTimeout(function () { fillToc(); fillProcToc(); fillPropToc(); }, 0);
+        /* ---------- 目录子项（章节、实验、图解、性质）：由 29-toc.js 在各模块搭好后按课程生成可折叠分组 ---------- */
       })();
