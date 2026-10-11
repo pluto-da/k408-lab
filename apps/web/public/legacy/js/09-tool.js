@@ -37,11 +37,13 @@
           if (lab && window.X_OPEN_LAB) { e.preventDefault(); window.X_OPEN_LAB(lab); }
           var pr = a.getAttribute("data-proc");
           if (pr && window.X_OPEN_PROC) { e.preventDefault(); window.X_OPEN_PROC(pr); if (window.X) X.go("proc"); }
+          var pp = a.getAttribute("data-prop");
+          if (pp && window.X_OPEN_PROP) { e.preventDefault(); window.X_OPEN_PROP(pp); if (window.X) X.go("prop"); }
           setToc(false);
         });
 
         /* ---------- 当前所在区块：工具栏与目录同步高亮 ---------- */
-        var IDS = ["overview", "ds", "co", "os", "cn", "lab", "proc", "board", "links"];
+        var IDS = ["overview", "ds", "co", "os", "cn", "lab", "proc", "prop", "board", "links"];
         var secs = IDS.map(function (id) { return $(id); });
         var cur = null;
         function spy() {
@@ -70,7 +72,7 @@
           });
         });
         function filter() {
-          var term = q.value.trim().toLowerCase(), nCh = 0, nLab = 0, nLink = 0, nProc = 0;
+          var term = q.value.trim().toLowerCase(), nCh = 0, nLab = 0, nLink = 0, nProc = 0, nProp = 0;
           root.classList.toggle("is-searching", !!term);
           /* 章节 */
           Array.prototype.forEach.call(document.querySelectorAll(".x-subj"), function (sec) {
@@ -112,6 +114,11 @@
           Array.prototype.forEach.call(document.querySelectorAll("#x-proc .x-proc__grp"), function (g) { g.hidden = !g.querySelector(".x-proc__tab:not([hidden])"); });
           if (pSelHidden && firstP) firstP.click();
           if ($("proc")) $("proc").hidden = !!term && !firstP;
+          /* 性质与公式：按名称、章节、结论、定义匹配（上下标数字与空格不敏感） */
+          if (window.X_PROP) {
+            nProp = window.X_PROP.setGlobal(q.value.trim());
+            if ($("prop")) $("prop").hidden = !!term && !nProp;
+          }
           /* 跨科连线（文字版） */
           Array.prototype.forEach.call(document.querySelectorAll("#x-links .x-lgrp"), function (g) {
             var any = 0;
@@ -122,7 +129,7 @@
             g.hidden = !any; nLink += any;
           });
           $("links").hidden = !!term && !nLink;
-          sum.textContent = term ? (nCh + nLab + nLink + nProc ? "找到 " + nCh + " 个章节 · " + (labNone ? 0 : nLab) + " 个实验 · " + nProc + " 个图解 · " + nLink + " 条连线" : "没有找到“" + q.value.trim() + "”，换个关键词试试") : "";
+          sum.textContent = term ? (nCh + nLab + nLink + nProc + nProp ? "找到 " + nCh + " 个章节 · " + (labNone ? 0 : nLab) + " 个实验 · " + nProc + " 个图解 · " + (term ? nProp : 0) + " 条性质 · " + nLink + " 条连线" : "没有找到“" + q.value.trim() + "”，换个关键词试试") : "";
           spy();
         }
         var ft = null;
@@ -130,7 +137,7 @@
         q.addEventListener("keydown", function (e) {
           if (e.key === "Enter") {
             e.preventDefault(); filter();
-            var t = Array.prototype.filter.call(document.querySelectorAll(".x-subj, #lab, #proc, #links"), function (s) { return !s.hidden; })[0];
+            var t = Array.prototype.filter.call(document.querySelectorAll(".x-subj, #lab, #proc, #prop, #links"), function (s) { return !s.hidden; })[0];
             if (t && window.X) X.go(t.id);
           }
         });
@@ -225,6 +232,14 @@
             li.appendChild(a); ol.appendChild(li);
           });
         }
-        if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", function () { setTimeout(function () { fillToc(); fillProcToc(); }, 0); });
-        else setTimeout(function () { fillToc(); fillProcToc(); }, 0);
+        function fillPropToc() {
+          var ol = $("x-toc-props"); if (!ol || ol.children.length) return;
+          Array.prototype.forEach.call(document.querySelectorAll("#x-prop .x-prop__item"), function (t) {
+            var li = document.createElement("li"), a = document.createElement("a");
+            a.href = "#prop-" + t.getAttribute("data-id"); a.textContent = t.textContent; a.setAttribute("data-prop", t.getAttribute("data-id"));
+            li.appendChild(a); ol.appendChild(li);
+          });
+        }
+        if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", function () { setTimeout(function () { fillToc(); fillProcToc(); fillPropToc(); }, 0); });
+        else setTimeout(function () { fillToc(); fillProcToc(); fillPropToc(); }, 0);
       })();

@@ -1,0 +1,82 @@
+/* 性质与公式 · 计算机网络（27-prop-cn.js）的验证动画。前缀 x-pq-（x-pn__ 已被过程图解引擎占用） */
+.x-pq { --c: var(--x-cn, #4766b3); --c-ink: var(--x-cn-ink, #3a58a2); display: grid; gap: 10px; min-width: 0; }
+.x-pq__ctrl { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.x-pq__line, .x-pq__grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.x-pq__grp { gap: 6px; }
+.x-pq__f { flex-wrap: wrap; min-width: 0; }
+.x-pq__in { width: 96px; min-width: 0; }
+.x-pq__in--w { width: 180px; }
+.x-pq__u { font: 400 13px/1 var(--x-head); color: var(--x-ink-2); }
+.x-pq__f--r { gap: 8px; }
+.x-pq__range { width: 150px; accent-color: var(--c); }
+.x-pq__rv { min-width: 2.2em; font: 600 14px/1 var(--x-mono); color: var(--x-ink); font-variant-numeric: tabular-nums; }
+.x-pq__f--ta { flex-direction: column; align-items: stretch; width: 100%; }
+.x-pq__ta { width: 100%; box-sizing: border-box; min-height: 96px; padding: 8px 10px; border: 1px solid var(--x-line-2); border-radius: var(--x-r); font: 400 14px/1.5 var(--x-mono); color: var(--x-ink); background: #fff; resize: vertical; }
+.x-pq__ta:focus-visible { outline: none; border-color: var(--x-primary); box-shadow: 0 0 0 3px rgba(47, 91, 234, .18); }
+.x-pq__btn { min-height: 40px; }
+
+.x-pq__stage { min-width: 0; }
+.x-pq__svg { display: block; width: 100%; height: auto; border: 1px solid var(--x-line); border-radius: var(--x-r); background: #fff; }
+
+.x-pq__out { min-width: 0; }
+.x-pq__rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.x-pq__kv { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--x-line); border-radius: var(--x-r); background: #fafaf8; min-width: 0; }
+.x-pq__kv.is-hl { border-color: var(--c); background: #f1f4fb; }
+.x-pq__k { font: 400 13px/1.4 var(--x-head); color: var(--x-ink-2); overflow-wrap: anywhere; }
+.x-pq__v { font: 600 15px/1.35 var(--x-mono); color: var(--x-ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.x-pq__kv.is-hl .x-pq__v { color: var(--c-ink); }
+.x-pq__note { margin: 8px 0 0; font: 400 13px/1.6 var(--x-head); color: var(--x-ink-2); }
+.x-pq__err { margin: 0; padding: 8px 10px; border-radius: var(--x-r); background: #fcf1f0; font: 500 14px/1.5 var(--x-head); }
+.x-pq__tblw { overflow-x: auto; }
+.x-pq__tbl { border-collapse: collapse; min-width: 100%; font: 400 14px/1.4 var(--x-mono); }
+.x-pq__tbl th, .x-pq__tbl td { padding: 6px 10px; border-bottom: 1px solid var(--x-line); text-align: right; white-space: nowrap; }
+.x-pq__tbl th { font: 600 13px/1.3 var(--x-head); color: var(--x-ink-2); background: #fafaf8; }
+
+/* SVG 图元 */
+.x-pq-t { font-family: var(--x-head); fill: var(--x-ink); }
+.x-pq-t--m { font-family: var(--x-mono); }
+.x-pq-t--s { fill: var(--x-ink-2); }
+.x-pq-t--hl { fill: var(--c-ink); font-weight: 600; }
+.x-pq-t--ok { fill: #1f7a4d; font-weight: 600; }
+.x-pq-t--bad { fill: var(--x-bad); font-weight: 600; }
+.x-pq-t--in { fill: var(--x-ink); font-family: var(--x-mono); }
+.x-pq-ax { stroke: var(--x-ink); stroke-width: 1.2; }
+.x-pq-grid { stroke: rgba(0, 0, 0, .14); stroke-width: 1; stroke-dasharray: 3 4; }
+.x-pq-grid--h { stroke: rgba(71, 102, 179, .35); }
+.x-pq-wave { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; }
+.x-pq-line { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; }
+.x-pq-thr { fill: none; stroke: #c0603e; stroke-width: 2; stroke-dasharray: 6 5; }
+.x-pq-dot { fill: var(--c); stroke: #fff; stroke-width: 2; }
+.x-pq-dot.is-bad { fill: var(--x-bad); }
+.x-pq-dot.is-warn { fill: #c49431; }
+.x-pq-bar { fill: #c9d3ec; }
+.x-pq-bar.is-min { fill: var(--c); }
+.x-pq-node { fill: #fff; stroke: var(--x-ink); stroke-width: 1.5; }
+.x-pq-node--hub { fill: #f6efe0; }
+.x-pq-node--switch { fill: #e7eefa; }
+.x-pq-node--router { fill: #e8f3ee; }
+.x-pq-pipe { fill: #f1f2f4; stroke: rgba(0, 0, 0, .2); }
+.x-pq-bits { fill: var(--c); opacity: .85; }
+.x-pq-track { fill: #eef0f3; }
+.x-pq-prog { fill: var(--c); }
+.x-pq-busy { fill: var(--c); }
+.x-pq-cell { fill: #fff; stroke: rgba(0, 0, 0, .25); }
+.x-pq-cell.is-on { fill: #f6e3da; stroke: #c0603e; }
+.x-pq-cell.is-on2 { fill: #dde5f6; stroke: var(--c); }
+.x-pq-cell.is-bad { fill: #f6d4d1; stroke: var(--x-bad); stroke-width: 2.5; }
+.x-pq-bit { fill: #fff; stroke: rgba(0, 0, 0, .2); }
+.x-pq-bit.is-net { fill: #dde5f6; stroke: var(--c); }
+.x-pq-bit.is-hit { fill: #f6e3da; stroke: #c0603e; }
+.x-pq-bit.is-agg { fill: #d7ece2; stroke: #3a8475; }
+.x-pq-frag { fill: #dde5f6; stroke: var(--c); }
+.x-pq-frag.is-last { fill: #d7ece2; stroke: #3a8475; }
+.x-pq-arrow { stroke: var(--x-ink-2); stroke-width: 1.5; }
+.x-pq-arrow.is-cur { stroke: var(--c); stroke-width: 2.5; }
+.x-pq-ah { fill: var(--x-ink-2); }
+
+@media (max-width: 640px) {
+  .x-pq__in, .x-pq__in--w { width: 100%; flex: 1 1 120px; }
+  .x-pq__f { flex: 1 1 100%; }
+  .x-pq__range { flex: 1 1 120px; width: auto; }
+  .x-pq__rows { grid-template-columns: 1fr 1fr; }
+}

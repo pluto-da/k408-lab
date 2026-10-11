@@ -1,0 +1,94 @@
+/* 性质与公式 · 操作系统验证动画（类名前缀 x-po-） */
+.x-po { --c: var(--x-os, #c49431); --ci: var(--x-os-ink, #7d5f17); display: grid; gap: 10px; min-width: 0; }
+.x-po-row { margin-bottom: 0; gap: 8px 10px; }
+.x-po-seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.x-po-f { display: inline-flex; flex-direction: column; gap: 4px; min-width: 0; font: 400 13px/1.3 var(--x-head); color: var(--x-ink-2, #5b606b); }
+.x-po-f--wide { flex: 1 1 260px; }
+.x-po-fl { font: 500 13px/1.3 var(--x-head); color: var(--x-ink-2, #5b606b); }
+.x-po-in { flex: 0 0 auto; }
+.x-po-in--s { width: 120px; flex: 0 0 auto; }
+.x-po-f--wide .x-po-in { width: 100%; }
+.x-po-area { min-height: 92px; padding: 8px 10px; line-height: 1.5; resize: vertical; width: 100%; min-width: 180px; box-sizing: border-box; }
+.x-po-in:disabled { opacity: .5; background: #f4f4f2; }
+.x-po-range { width: 180px; min-height: 32px; accent-color: var(--c); }
+.x-po-f--wide .x-po-range { width: 100%; }
+.x-po-stage { min-width: 0; }
+.x-po-stage svg { display: block; width: 100%; height: auto; max-width: 720px; border: 1px solid var(--x-line, rgba(0,0,0,.1)); border-radius: var(--x-r, 10px); background: #fff; }
+.x-po-err { padding: 8px 12px; border-radius: var(--x-r, 10px); background: #fcf1f0; color: var(--x-bad, #b3261e); font: 500 14px/1.5 var(--x-head); }
+.x-po-err:empty, .x-po-err[hidden] { display: none; }
+.x-po-out { font: 400 14px/1.7 var(--x-head); color: var(--x-ink, #1a1c20); }
+.x-po-line { margin: 2px 0; overflow-wrap: anywhere; }
+.x-po-k { color: var(--x-ink-2, #5b606b); }
+.x-po-v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.x-po-line.is-ok .x-po-v { color: #1f7a4d; }
+.x-po-line.is-bad .x-po-v { color: var(--x-bad, #b3261e); }
+.x-po-mono { font-family: var(--x-mono); font-variant-numeric: tabular-nums; }
+.x-po-tablewrap { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.x-po-table { border-collapse: collapse; font: 400 14px/1.4 var(--x-head); min-width: 100%; }
+.x-po-table th, .x-po-table td { padding: 6px 10px; border: 1px solid var(--x-line, rgba(0,0,0,.1)); text-align: center; white-space: nowrap; }
+.x-po-table th { background: #fafaf8; font-weight: 600; color: var(--x-ink-2, #5b606b); }
+.x-po-table tr.is-cur td { background: #fdf6e6; box-shadow: inset 0 0 0 1px var(--c); }
+.x-po-table tr.is-done td { background: #eef6f1; color: #1f5c3d; }
+.x-po-table--trace td, .x-po-table--trace th { padding: 4px 7px; min-width: 22px; }
+.x-po-table td.is-in { background: #fdf0d5; font-weight: 700; }
+.x-po-table td.is-fault { color: var(--x-bad, #b3261e); font-weight: 700; }
+
+/* SVG */
+.x-po-svg text, .x-po-t { fill: var(--x-ink, #1a1c20); font-family: var(--x-head); }
+.x-po-t--h { font-weight: 600; }
+.x-po-t--big { font-family: var(--x-mono); font-weight: 700; }
+.x-po-t--note { fill: var(--x-ink-2, #5b606b); }
+.x-po-t--in { fill: #fff; font-weight: 600; }
+.x-po-svg .is-ok.x-po-t, .x-po-t.is-ok { fill: #1f7a4d; }
+.x-po-svg .is-bad.x-po-t, .x-po-t.is-bad { fill: var(--x-bad, #b3261e); }
+.x-po-cell { fill: #fff; stroke: var(--x-ink-2, #5b606b); stroke-width: 1.2; }
+.x-po-cell.is-on { fill: var(--c); stroke: var(--ci); }
+.x-po-cell.is-done { fill: #2f8a5b; stroke: #1f5c3d; }
+.x-po-cell.is-need { stroke-dasharray: 4 3; stroke: var(--x-bad, #b3261e); }
+.x-po-cell.is-idx { fill: #fdf0d5; stroke: var(--ci); }
+.x-po-tok { fill: var(--c); stroke: var(--ci); stroke-width: 1.2; }
+.x-po-box { fill: #fafaf8; stroke: var(--x-ink-2, #5b606b); stroke-width: 1.2; }
+.x-po-box.is-bad { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); }
+.x-po-box.is-ok { fill: #eef6f1; stroke: #2f8a5b; }
+.x-po-box.is-wait { fill: #fdf0d5; stroke: var(--ci); }
+.x-po-bar { fill: #d9dbe0; }
+.x-po-bar.is-on { fill: var(--c); }
+.x-po-axis { stroke: var(--x-ink, #1a1c20); stroke-width: 1.2; }
+.x-po-grid { stroke: rgba(0,0,0,.08); stroke-width: 1; }
+.x-po-gseg { stroke: #fff; stroke-width: 1.5; }
+.x-po-gseg.is-idle { fill: #eceae4; }
+.x-po-gseg.c0, .x-po-seg2.c0 { fill: #c49431; } .x-po-gseg.c1, .x-po-seg2.c1 { fill: #3a8475; }
+.x-po-gseg.c2, .x-po-seg2.c2 { fill: #4766b3; } .x-po-gseg.c3, .x-po-seg2.c3 { fill: #c0603e; }
+.x-po-gseg.c4, .x-po-seg2.c4 { fill: #7d5f17; } .x-po-gseg.c5, .x-po-seg2.c5 { fill: #6a5aa8; }
+.x-po-seg2 { stroke: #fff; stroke-width: 1.5; }
+.x-po-seg2.is-off { fill: #e4e2dc; }
+.x-po-lg.c0 { fill: #7d5f17; } .x-po-lg.c1 { fill: #2b6d60; } .x-po-lg.c2 { fill: #3a58a2; }
+.x-po-line2 { fill: none; stroke-width: 2; }
+.x-po-line2.is-fifo { stroke: var(--c); stroke-width: 3; }
+.x-po-line2.is-lru { stroke: #3a8475; stroke-dasharray: 6 4; }
+.x-po-line2.is-opt { stroke: #4766b3; stroke-dasharray: 2 4; }
+.x-po-line2.is-sel { stroke-width: 4; }
+.x-po-dot.is-fifo { fill: var(--c); } .x-po-dot.is-lru { fill: #3a8475; } .x-po-dot.is-opt { fill: #4766b3; }
+.x-po-lg.is-fifo { fill: var(--ci); font-weight: 700; } .x-po-lg.is-lru { fill: #2b6d60; } .x-po-lg.is-opt { fill: #3a58a2; }
+.x-po-ring { fill: none; stroke: var(--x-bad, #b3261e); stroke-width: 2.5; }
+.x-po-mem { stroke: var(--x-ink-2, #5b606b); stroke-width: 1; }
+.x-po-mem.is-used { fill: #b9b6ae; }
+.x-po-mem.is-free { fill: #fff; }
+.x-po-mem.is-fit { fill: #eef6f1; stroke: #2f8a5b; }
+.x-po-mem.is-waste { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-dasharray: 4 3; }
+.x-po-arrow { stroke: var(--x-ink-2, #5b606b); stroke-width: 1.5; }
+.x-po-edge { stroke: var(--x-ink-2, #5b606b); stroke-width: 2; }
+.x-po-edge.is-ok { stroke: #2f8a5b; stroke-width: 4; }
+.x-po-edge.is-bad { stroke: var(--x-bad, #b3261e); stroke-width: 3; stroke-dasharray: 7 5; }
+.x-po-head { fill: var(--x-ink-2, #5b606b); }
+.x-po-head.is-ok { fill: #2f8a5b; }
+.x-po-node { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1.5; }
+.x-po-node.is-from { fill: #fdf0d5; stroke: var(--ci); stroke-width: 3; }
+.x-po-node.is-to { fill: #e8eefc; stroke: #3a58a2; stroke-width: 3; }
+
+@media (max-width: 560px) {
+  .x-po-in--s { width: 100px; }
+  .x-po-range { width: 140px; }
+  .x-po-table { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { .x-po * { transition: none !important; } }

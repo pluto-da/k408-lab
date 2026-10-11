@@ -8,7 +8,12 @@
     "css/legacy-06.css",
     "css/legacy-07.css",
     "css/legacy-08.css",
-    "css/legacy-09.css"
+    "css/legacy-09.css",
+    "css/legacy-10.css",
+    "css/legacy-11.css",
+    "css/legacy-12.css",
+    "css/legacy-13.css",
+    "css/legacy-14.css"
   ],
   "scripts": [
     "js/01-x408-data.js",
@@ -27,6 +32,11 @@
     "js/20-lab-ds2.js",
     "js/21-lab-ds3.js",
     "js/22-proc-ds.js",
+    "js/23-prop-core.js",
+    "js/24-prop-ds.js",
+    "js/25-prop-co.js",
+    "js/26-prop-os.js",
+    "js/27-prop-cn.js",
     "js/09-tool.js"
   ],
   "lazy": {

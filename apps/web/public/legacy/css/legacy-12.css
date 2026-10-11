@@ -1,0 +1,40 @@
+/* 性质与公式 · 计算机组成原理的验证动画（25-prop-co.js），类名前缀 x-pc- */
+.x-pc { display: flex; flex-direction: column; gap: 10px; min-width: 0; font: 400 14px/1.6 var(--x-head); color: var(--x-ink); }
+.x-pc__ctrl { display: flex; flex-direction: column; gap: 8px; }
+.x-pc__row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.x-pc__row:empty { display: none; }
+.x-pc__lbl { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 400 13px/1.3 var(--x-head); color: var(--x-ink-2); }
+.x-pc__num { width: 96px; min-height: 44px; padding: 0 10px; border: 1px solid var(--x-line-2); border-radius: var(--x-r); background: #fff; color: var(--x-ink); font: 400 14px/1 var(--x-mono); }
+.x-pc__num:focus-visible { outline: none; border-color: var(--x-primary); box-shadow: 0 0 0 3px rgba(47, 91, 234, .18); }
+.x-pc__num:disabled { background: #f4f2ee; color: var(--x-ink-2); }
+.x-pc__range { width: 150px; accent-color: var(--x-co, #C0603E); }
+.x-pc__val { min-width: 2.6em; font: 600 14px/1 var(--x-mono); color: var(--x-ink); font-variant-numeric: tabular-nums; }
+.x-pc__seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.x-pc__seglbl { font: 400 13px/1.3 var(--x-head); color: var(--x-ink-2); margin-right: 2px; }
+.x-pc__err { margin: 0; min-height: 0; font: 600 13px/1.5 var(--x-head); color: var(--x-bad); }
+.x-pc__err:empty { display: none; }
+.x-pc__stage { min-width: 0; }
+.x-pc__stage:empty { display: none; }
+.x-pc__svg { display: block; width: 100%; height: auto; max-width: 720px; border: 1px solid var(--x-line); border-radius: var(--x-r); background: #fff; }
+.x-pc__out { min-width: 0; }
+.x-pc__kv { display: grid; gap: 4px; margin: 0; }
+.x-pc__item { display: grid; grid-template-columns: minmax(96px, 9.5em) minmax(0, 1fr); gap: 10px; padding: 5px 10px; border-radius: var(--x-r); background: #fafaf8; }
+.x-pc__item.is-hl { background: #f6e3da; }
+.x-pc__item dt { margin: 0; font: 600 13px/1.5 var(--x-head); color: var(--x-ink-2); }
+.x-pc__item dd { margin: 0; min-width: 0; font: 400 13px/1.55 var(--x-mono); color: var(--x-ink); overflow-wrap: anywhere; }
+.x-pc__item.is-ok .x-pc__mark { color: #1f7a4d; font-weight: 700; }
+.x-pc__item.is-bad .x-pc__mark { color: var(--x-bad); font-weight: 700; }
+.x-pc__note { margin: 8px 0 0; padding: 6px 10px; border-left: 3px solid var(--x-line-2); font: 400 13px/1.6 var(--x-head); color: var(--x-ink-2); }
+.x-pc__note.is-ok { border-left-color: #1f7a4d; color: #1f7a4d; }
+.x-pc__note.is-bad { border-left-color: var(--x-bad); color: var(--x-bad); }
+.x-pc__tblwrap { margin-top: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.x-pc__tbl { width: 100%; border-collapse: collapse; font: 400 13px/1.5 var(--x-mono); }
+.x-pc__tbl th, .x-pc__tbl td { padding: 5px 8px; border-bottom: 1px solid var(--x-line); text-align: left; white-space: nowrap; }
+.x-pc__tbl th { font: 600 13px/1.4 var(--x-head); color: var(--x-ink-2); background: #fafaf8; }
+.x-pc__tbl tr.is-hl td { background: #f6e3da; font-weight: 600; }
+.x-pc.is-err .x-pc__out:empty { display: none; }
+@media (max-width: 560px) {
+  .x-pc__item { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .x-pc__range { width: 120px; }
+  .x-pc__num { width: 84px; }
+}
