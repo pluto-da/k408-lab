@@ -68,8 +68,8 @@ const EXPLODE_VIEW: Partial<Record<PartId, Vec3>> = {
 
 export type EngineState = "loading" | "intro" | "overview" | "extracting" | "open" | "closing" | "journey" | "ride";
 
-/** 「化身数据」每帧回调：返回要画的场景与相机；返回 null 时画整机场景 */
-export type RideFrame = (dt: number, time: number) => { scene: THREE.Scene; camera: THREE.Camera } | null;
+/** 「化身数据」每帧回调：返回要画的场景与相机；返回 null 时画整机场景。给出 render 时由模块自己画（只画观察窗口） */
+export type RideFrame = (dt: number, time: number) => { scene: THREE.Scene; camera: THREE.Camera; render?: () => void } | null;
 
 /** 「化身数据」模块拿到的宿主接口：整机场景、相机、锚点；模块按需加载，引擎只负责把画面交给它 */
 export interface RideHost {
@@ -1656,7 +1656,10 @@ export class PcEngine {
     this.updatePacket(dt);
     this.updateLook(time);
     const ride = this.state === "ride" && this.rideFrame ? this.rideFrame(dt, time) : null;
-    if (ride) this.renderer.render(ride.scene, ride.camera);
+    if (ride) {
+      if (ride.render) ride.render();
+      else this.renderer.render(ride.scene, ride.camera);
+    }
     else if (this.composer && this.rgbMix > 0.001 && this.state !== "ride") this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
     this.layoutCallouts();

@@ -9,7 +9,7 @@ export const CHIP = {
   start: V(0, 2.8, 11),
   core: { pos: V(0, 2.0, 7.6), look: V(0, 2.2, 0) },
   reg: { pos: V(-0.6, 2.0, 6.4), look: V(-2.0, 2.8, 0) },
-  tlb: { pos: V(0, 1.85, -6.4), look: V(0, 3.3, -14) },
+  tlb: { pos: V(0.8, 1.9, -6.6), look: V(3.0, 3.0, -13.2) },
   tlbGates: { miss: V(-2.3, 0, -18.2), hit: V(2.3, 0, -18.2) },
   mmu: { pos: V(1.7, 1.8, -20.4), look: V(2.6, 2.5, -25.6) },
   mmuPlate: V(2.6, 2.6, -25.6),

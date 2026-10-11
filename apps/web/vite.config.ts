@@ -36,6 +36,8 @@ export default defineConfig({
   assetsInclude: ["**/*.sog"],
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
+    // 化身数据的自动检查接口：只在 RIDE_AUDIT=1 的测试构建里打开，生产构建中整段代码被摇树删除
+    __RIDE_AUDIT__: JSON.stringify(process.env.RIDE_AUDIT === "1"),
   },
   server: {
     port: 5173,

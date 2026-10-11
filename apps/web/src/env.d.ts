@@ -1,4 +1,6 @@
 declare const __BUILD_ID__: string;
+/** 测试构建（RIDE_AUDIT=1）才为 true：化身数据的检查接口只在测试构建里存在 */
+declare const __RIDE_AUDIT__: boolean;
 
 interface Window {
   LAB_EMIT?: (type: string, detail?: Record<string, unknown>) => void;

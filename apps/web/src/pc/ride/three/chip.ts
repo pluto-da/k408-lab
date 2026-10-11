@@ -2,11 +2,17 @@
 import * as THREE from "three";
 import type { LineCue, RideStation, SceneCue, TlbCueEntry } from "../types";
 import { CHIP } from "./layout";
-import { C, Gate, MONO, TextPlate, disposeTree, dust, glowBox, gridFloor, lane, panelBg, rr, text } from "./kit";
+import { C, Gate, MONO, TextPlate, disposeTree, dust, glowBox, gridFloor, lane, panelBg, rr, text, worldFont, planeCorners, type FocusSpec, type SceneLabel } from "./kit";
 
 type Cue<K extends SceneCue["kind"]> = Extract<SceneCue, { kind: K }>;
 
 const CMP_STEP = 0.32;
+const V3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+/** 快表文字板：放在寄存器组的右前方，略微转向主通道，与寄存器组在镜头方向上错开 */
+const TLB_POS = V3(3.0, 3.0, -13.2);
+const TLB_YAW = -0.24;
+/** 文字板上必须看清的最小字（逻辑像素）：完整版 / 小屏简化版 */
+const MIN_FONT = { full: 30, compact: 44 };
 
 export class ChipWorld {
   readonly scene = new THREE.Scene();
@@ -14,7 +20,6 @@ export class ChipWorld {
   private regs: { box: THREE.Group; plate: TextPlate }[] = [];
   private alu: THREE.Group;
   private aluPlate: TextPlate;
-  private vaPlate: TextPlate;
   private tlbPlate: TextPlate;
   private mmuPlate: TextPlate;
   private cacheBack: TextPlate;
@@ -24,7 +29,10 @@ export class ChipWorld {
   readonly gates: Record<string, Record<string, Gate>> = {};
   private portals: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[] = [];
   private plates: TextPlate[] = [];
+  readonly labels: SceneLabel[] = [];
   private q: number;
+  private compact = false;
+  private lastTlb: Cue<"tlb"> | null = null;
 
   constructor(opts: { phone: boolean; low: boolean }) {
     this.q = opts.low || opts.phone ? 0.75 : 1;
@@ -67,37 +75,37 @@ export class ChipWorld {
       s.add(box);
       this.regs.push({ box, plate });
     }
-    this.sign("通用寄存器组", new THREE.Vector3(0, 3.75, 0), C.cu, 3.2);
-    this.alu = glowBox(2.4, 1.1, 1.2, C.alu, 0.12);
-    this.alu.position.set(0, 0.6, -0.6);
+    this.label("通用寄存器组", V3(0, 3.62, 0), C.cu, "reg");
+    // ALU 紧贴在寄存器组下方：第 1 站的基址寄存器和地址加法器可以同框
+    this.alu = glowBox(2.4, 0.9, 1.2, C.alu, 0.12);
+    this.alu.position.set(0, 1.75, -0.6);
     s.add(this.alu);
     this.aluPlate = this.plate(420, 120, 2.0);
-    this.aluPlate.mesh.position.set(0, 0.62, 0.02);
-    this.vaPlate = this.plate(760, 150, 3.4);
-    this.vaPlate.mesh.position.set(0, 1.85, 0.6);
+    this.aluPlate.mesh.position.set(0, 1.75, 0.02);
     const cu = glowBox(1.6, 1.4, 1.0, C.cu, 0.1);
     cu.position.set(-5, 0.7, -0.4);
     s.add(cu);
-    this.sign("CU 控制器", new THREE.Vector3(-5, 1.75, -0.4), C.cu, 1.8);
-    this.sign("ALU 运算器", new THREE.Vector3(2.6, 0.9, 0), C.alu, 1.8);
+    this.label("CU 控制器", V3(-5, 1.7, -0.4), C.cu);
+    this.label("ALU 运算器", V3(1.95, 1.2, 0), C.alu, "core");
     // 控制信号线：CU → 寄存器 / ALU
     const ctl = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-4.2, 1.2, -0.4), new THREE.Vector3(-3.5, 2.7, 0),
-      new THREE.Vector3(-4.2, 0.8, -0.4), new THREE.Vector3(-1.2, 0.8, -0.6),
+      new THREE.Vector3(-4.2, 0.9, -0.4), new THREE.Vector3(-1.2, 1.6, -0.6),
     ]);
     s.add(new THREE.LineSegments(ctl, new THREE.LineBasicMaterial({ color: C.cu, transparent: true, opacity: 0.6 })));
 
     // ---- MMU / TLB（z = -14）
-    this.tlbPlate = this.plate(1100, 620, 6.0);
-    this.tlbPlate.mesh.position.set(0, 3.3, -14);
-    this.sign("MMU · 快表 TLB", new THREE.Vector3(0, 5.25, -14), C.membus, 3.2);
+    this.tlbPlate = this.plate(1200, 680, 6.0);
+    this.tlbPlate.mesh.position.copy(TLB_POS);
+    this.tlbPlate.mesh.rotation.y = TLB_YAW;
+    this.label("MMU · 快表 TLB", TLB_POS.clone().add(V3(0, 2.05, 0)), C.membus, "tlb");
     this.addGates("tlb", CHIP.tlbGates, { miss: ["缺失 → 去主存查页表", C.bad], hit: ["命中 → 直接得到页框号", C.ok] });
     this.mmuPlate = this.plate(900, 420, 4.2);
     this.mmuPlate.mesh.position.copy(CHIP.mmuPlate);
     this.mmuPlate.mesh.lookAt(CHIP.mmu.pos.x, CHIP.mmuPlate.y, CHIP.mmu.pos.z);
 
     // ---- L1（z = -34）
-    this.cacheBack = this.plate(1200, 780, 7.4);
+    this.cacheBack = this.plate(1200, 780, 5.0);
     this.cacheBack.mesh.position.set(0, 3.6, -34.35);
     for (let i = 0; i < 8; i++) {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.42, 0.16), new THREE.MeshBasicMaterial({ color: C.l1, transparent: true, opacity: 0.16, toneMapped: false, depthWrite: false }));
@@ -116,15 +124,15 @@ export class ChipWorld {
       s.add(mesh);
       this.incoming = { mesh, plate };
     }
-    this.sign("L1 数据 Cache", new THREE.Vector3(0, 6.1, -34.3), C.l1, 3.2);
+    this.label("L1 数据 Cache", V3(0, 6.15, -34.3), C.l1, "l1");
     this.addGates("l1", CHIP.l1Gates, { miss: ["缺失 → 去 L2 找", C.bad], hit: ["命中 → 直接取数", C.ok] });
 
     // ---- L2 / L3
     const mkLower = (level: 2 | 3, z: number, color: string, label: string) => {
-      const box = glowBox(level === 2 ? 5.2 : 7.2, 2.2, 1.6, color, 0.08);
+      const box = glowBox(level === 2 ? 5.2 : 5.8, 2.2, 1.6, color, 0.08);
       box.position.set(0, 3.8, z);
       s.add(box);
-      const plate = this.plate(900, 220, level === 2 ? 4.8 : 6.4);
+      const plate = this.plate(900, 220, level === 2 ? 4.8 : 5.4);
       plate.mesh.position.set(0, 3.8, z + 0.82);
       const block = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, 0.42), new THREE.MeshBasicMaterial({ color: C.ok, transparent: true, opacity: 0, toneMapped: false }));
       block.position.set(0, 2.5, z + 0.9);
@@ -152,15 +160,13 @@ export class ChipWorld {
       if (p === CHIP.portal) ring.rotation.y = Math.PI / 2 - 0.3;
       s.add(ring);
       this.portals.push(ring);
-      const sg = this.sign(label, p.clone().add(new THREE.Vector3(0, 1.75, 0)), C.membus, 3.0);
-      if (p === CHIP.portal) sg.rotation.y = Math.PI / 2 - 0.3;
+      this.label(label, p.clone().add(V3(0, 1.75, 0)), C.membus);
     }
-    this.sign("回程通道 → 寄存器", new THREE.Vector3(L, 3.3, -12), C.nic, 3).rotation.y = Math.PI;
+    this.label("回程通道 → 寄存器", V3(L, 3.3, -12), C.nic);
 
     this.layoutSlabs(4);
     this.drawRegs(-1, "");
     this.drawAlu("", 0);
-    this.vaPlate.mesh.visible = false;
   }
 
   private plate(w: number, h: number, worldW: number) {
@@ -170,18 +176,8 @@ export class ChipWorld {
     return p;
   }
 
-  private sign(label: string, pos: THREE.Vector3, color: string, worldW: number) {
-    const p = this.plate(640, 92, worldW);
-    p.mesh.position.copy(pos);
-    p.draw(label, (g, w, h) => {
-      rr(g, 2, 2, w - 4, h - 4, 14);
-      g.fillStyle = "rgba(10,12,16,0.72)";
-      g.fill();
-      g.fillStyle = color;
-      g.fillRect(14, h / 2 - 12, 8, 24);
-      text(g, label, 40, h / 2 + 1, 40, C.ink, 600);
-    });
-    return p.mesh;
+  private label(text0: string, pos: THREE.Vector3, color: string, tag?: string) {
+    this.labels.push({ text: text0, pos, color, tag });
   }
 
   private addGates(id: string, at: { miss: THREE.Vector3; hit: THREE.Vector3 }, labels: { miss: [string, string]; hit: [string, string] }) {
@@ -201,9 +197,12 @@ export class ChipWorld {
       const on = i === hi;
       const name = `R${i}`;
       const v = on ? value : "";
+      // 小屏只留 R1 ~ R3
+      const show = !this.compact || (i >= 1 && i <= 3);
+      r.box.visible = r.plate.mesh.visible = show;
       r.plate.draw(`${name}|${on}|${v}`, (g, w) => {
         text(g, name, w / 2, 40, 40, on ? "#fff" : C.dim, 600, "center");
-        if (v) text(g, v.replace(/^0x/, ""), w / 2, 98, 30, C.power, 500, "center", MONO);
+        if (v) text(g, v.replace(/^0x/, "").replace(/\s/g, ""), w / 2, 100, 36, C.power, 600, "center", MONO);
       });
       (r.box.userData.fill as THREE.MeshBasicMaterial).opacity = on ? 0.45 : 0.1;
     });
@@ -216,80 +215,91 @@ export class ChipWorld {
     (this.alu.userData.fill as THREE.MeshBasicMaterial).opacity = 0.12 + 0.35 * k;
   }
 
-  private drawVa(value: string, segs: { a: string; b: string } | null) {
-    this.vaPlate.draw(`${value}|${segs?.a}`, (g, w, h) => {
-      rr(g, 4, 4, w - 8, h - 8, 20);
-      g.fillStyle = "rgba(12,14,20,0.9)";
+  private drawTlb(c: Cue<"tlb">, cmp: number, result: "pending" | "hit" | "miss" | "none") {
+    const compact = this.compact;
+    const key = `${compact}|${c.set}|${c.tag}|${cmp}|${result}|${c.entries.map((e) => e.tag).join()}`;
+    if (compact) this.tlbPlate.resize(1000, 640);
+    else this.tlbPlate.resize(1200, 680);
+    const cell = (g: CanvasRenderingContext2D, k: number, x: number, y: number, w: number, h: number) => {
+      const lit = cmp > k;
+      const isHit = result === "hit" && c.hitWay === k;
+      rr(g, x, y, w, h, 10);
+      g.fillStyle = isHit ? "rgba(76,227,138,0.3)" : result === "miss" && lit ? "rgba(255,90,90,0.16)" : lit ? "rgba(176,124,255,0.22)" : "rgba(255,255,255,0.07)";
       g.fill();
-      g.lineWidth = 3;
-      g.strokeStyle = C.membus;
+      g.lineWidth = isHit || cmp === k + 1 ? 3 : 1.5;
+      g.strokeStyle = isHit ? C.ok : cmp === k + 1 ? C.membus : "rgba(255,255,255,0.18)";
       g.stroke();
-      if (!segs) {
-        text(g, value, w / 2, h / 2, 64, "#fff", 600, "center", MONO);
+    };
+    this.tlbPlate.draw(key, (g, w, h) => {
+      panelBg(g, w, h, C.membus, 0.9);
+      if (compact) {
+        // 小屏：只画当前组的 4 项
+        text(g, `TLB 第 ${c.set} 组 · 4 路`, 36, 52, 46, C.ink, 600);
+        text(g, `标记 ${c.tag}`, w - 36, 52, 46, C.power, 600, "right", MONO);
+        const cols = [36, 170, 400, 700];
+        ["路", "有效位", "标记", "页框号"].forEach((t, i) => text(g, t, cols[i]! + 8, 124, 44, C.dim, 500));
+        for (let k = 0; k < 4; k++) {
+          const e: TlbCueEntry = c.entries[k]!;
+          const y = 156 + k * 108;
+          cell(g, k, 24, y, w - 48, 98);
+          text(g, String(k), cols[0]! + 18, y + 49, 46, "rgba(233,234,238,0.8)", 600, "left", MONO);
+          text(g, `V=${e.valid ? 1 : 0}`, cols[1]! + 8, y + 49, 46, e.valid ? C.ink : C.bad, 600, "left", MONO);
+          text(g, e.tag, cols[2]! + 8, y + 49, 48, "#fff", 600, "left", MONO);
+          text(g, e.valid ? e.frame : "—", cols[3]! + 8, y + 49, 48, "#fff", 500, "left", MONO);
+        }
+        text(g, "其余 7 组已折叠", w / 2, h - 30, 44, "rgba(233,234,238,0.55)", 500, "center");
         return;
       }
-      g.fillStyle = "rgba(176,124,255,0.22)";
-      g.fillRect(10, 10, w * 0.6 - 10, h - 20);
-      g.fillStyle = "rgba(70,210,255,0.2)";
-      g.fillRect(w * 0.6 + 4, 10, w * 0.4 - 14, h - 20);
-      text(g, "虚页号", 30, 34, 26, C.membus, 600);
-      text(g, segs.a, w * 0.3, h / 2 + 14, 54, "#fff", 600, "center", MONO);
-      text(g, "页内偏移", w * 0.6 + 24, 34, 26, "#46D2FF", 600);
-      text(g, segs.b, w * 0.8, h / 2 + 14, 54, "#fff", 600, "center", MONO);
-    });
-  }
-
-  private drawTlb(c: Cue<"tlb">, cmp: number, result: "pending" | "hit" | "miss" | "none") {
-    const key = `${c.set}|${c.tag}|${cmp}|${result}|${c.entries.map((e) => e.tag).join()}`;
-    this.tlbPlate.draw(key, (g, w, h) => {
-      panelBg(g, w, h, C.membus);
-      text(g, "TLB · 4 路组相联 · 8 组", 40, 44, 34, C.ink, 600);
-      text(g, `查找标记 ${c.tag}`, w - 40, 44, 30, C.power, 600, "right", MONO);
-      const top = 92;
-      const rowH = (h - top - 26) / 8;
-      const colX = 150;
-      const colW = (w - colX - 30) / 4;
-      for (let s = 0; s < 8; s++) {
-        const y = top + s * rowH;
-        const cur = s === c.set;
-        text(g, `组 ${s}`, 40, y + rowH / 2, 26, cur ? "#fff" : "rgba(233,234,238,0.4)", cur ? 600 : 500);
-        for (let k = 0; k < 4; k++) {
-          const x = colX + k * colW;
-          rr(g, x + 4, y + 4, colW - 8, rowH - 8, 8);
-          if (!cur) {
-            g.fillStyle = "rgba(255,255,255,0.04)";
-            g.fill();
-            continue;
-          }
-          const e: TlbCueEntry = c.entries[k]!;
-          const lit = cmp > k;
-          const isHit = result === "hit" && c.hitWay === k;
-          g.fillStyle = isHit ? "rgba(76,227,138,0.32)" : result === "miss" && lit ? "rgba(255,90,90,0.16)" : lit ? "rgba(176,124,255,0.22)" : "rgba(255,255,255,0.08)";
-          g.fill();
-          g.lineWidth = isHit || cmp === k + 1 ? 3 : 1.5;
-          g.strokeStyle = isHit ? C.ok : cmp === k + 1 ? C.membus : "rgba(255,255,255,0.18)";
+      text(g, "TLB · 4 路组相联 · 8 组", 40, 50, 36, C.ink, 600);
+      text(g, `查找标记 ${c.tag}`, w - 40, 50, 34, C.power, 600, "right", MONO);
+      // 左侧：8 组的缩略条，当前组高亮
+      const top = 98;
+      const barH = (h - top - 24) / 8;
+      for (let s0 = 0; s0 < 8; s0++) {
+        const y = top + s0 * barH;
+        const cur = s0 === c.set;
+        rr(g, 32, y + 5, 170, barH - 10, 8);
+        g.fillStyle = cur ? "rgba(176,124,255,0.4)" : "rgba(255,255,255,0.06)";
+        g.fill();
+        if (cur) {
+          g.lineWidth = 2;
+          g.strokeStyle = C.membus;
           g.stroke();
-          text(g, `V${e.valid ? 1 : 0}`, x + 18, y + rowH / 2, 22, e.valid ? C.ink : C.bad, 600, "left", MONO);
-          text(g, e.tag, x + colW / 2 + 8, y + rowH / 2, 23, "#fff", 500, "center", MONO);
+          text(g, `第 ${c.set} 组`, 117, y + barH / 2, 32, "#fff", 600, "center");
         }
+      }
+      // 当前组的 4 项：有效位 · 标记 · 页框号
+      const x0 = 236;
+      const cols = [x0, x0 + 150, x0 + 330, x0 + 640];
+      ["路", "有效位", "标记", "页框号"].forEach((t, i) => text(g, t, cols[i]! + 14, 126, 30, C.dim, 500));
+      for (let k = 0; k < 4; k++) {
+        const e: TlbCueEntry = c.entries[k]!;
+        const y = 152 + k * 126;
+        cell(g, k, x0, y, w - x0 - 32, 114);
+        text(g, `第 ${k} 路`, cols[0]! + 14, y + 57, 32, "rgba(233,234,238,0.8)", 500);
+        text(g, `V=${e.valid ? 1 : 0}`, cols[1]! + 14, y + 57, 40, e.valid ? C.ink : C.bad, 600, "left", MONO);
+        text(g, e.tag, cols[2]! + 14, y + 57, 42, "#fff", 600, "left", MONO);
+        text(g, e.valid ? e.frame : "—", cols[3]! + 14, y + 57, 42, "#fff", 500, "left", MONO);
       }
     });
   }
 
   private drawMmu(c: Cue<"mmu">, k: number) {
-    this.mmuPlate.draw(`${c.pa}|${c.fillWay}|${k > 0.5}`, (g, w, h) => {
-      panelBg(g, w, h, C.alu);
-      text(g, "MMU · 拼出物理地址", 40, 46, 32, C.ink, 600);
+    const cp = this.compact;
+    const f = cp ? 40 : 30;
+    this.mmuPlate.draw(`${cp}|${c.pa}|${c.fillWay}|${k > 0.5}`, (g, w, h) => {
+      panelBg(g, w, h, C.alu, 0.9);
+      text(g, "MMU · 拼出物理地址", 40, 50, cp ? 44 : 34, C.ink, 600);
       if (c.fillWay >= 0) {
         const e = c.entries[c.fillWay]!;
-        text(g, `写入 TLB 第 ${c.set} 组 · 第 ${c.fillWay} 路`, 40, 112, 28, C.membus, 600);
-        text(g, `标记 ${e.tag} → 页框 ${e.frame}`, 40, 156, 28, C.ink, 500, "left", MONO);
+        text(g, `写入 TLB 第 ${c.set} 组 · 第 ${c.fillWay} 路`, 40, 124, f, C.membus, 600);
+        text(g, `标记 ${e.tag} → 页框 ${e.frame}`, 40, 184, f, C.ink, 500, "left", MONO);
       } else {
-        text(g, "TLB 命中，页框号直接可用", 40, 130, 28, C.ok, 600);
+        text(g, "TLB 命中，页框号直接可用", 40, 150, f, C.ok, 600);
       }
       if (k > 0.5) {
-        text(g, "物理地址", 40, 250, 28, C.dim, 500);
-        text(g, c.pa, 40, 320, 76, "#fff", 600, "left", MONO);
+        text(g, "物理地址", 40, 262, f, C.dim, 500);
+        text(g, c.pa, 40, 342, 76, "#fff", 600, "left", MONO);
       }
     });
   }
@@ -312,7 +322,8 @@ export class ChipWorld {
   }
 
   private drawLine(p: TextPlate, i: number, L: LineCue, state: "idle" | "cmp" | "hit" | "miss" | "new" | "victim", block: string) {
-    p.draw(`${i}|${L.tag}|${L.valid}|${L.dirty}|${state}`, (g, w, h) => {
+    const cp = this.compact;
+    p.draw(`${cp}|${i}|${L.tag}|${L.valid}|${L.dirty}|${state}`, (g, w, h) => {
       rr(g, 2, 2, w - 4, h - 4, 10);
       g.fillStyle = "rgba(14,17,23,0.96)";
       g.fill();
@@ -321,21 +332,32 @@ export class ChipWorld {
       g.lineWidth = state === "idle" ? 1.5 : 3;
       g.strokeStyle = state === "hit" || state === "new" ? C.ok : state === "miss" || state === "victim" ? C.bad : state === "cmp" ? C.l1 : "rgba(255,255,255,0.18)";
       g.stroke();
-      text(g, `第 ${i} 路`, 20, h / 2, 30, "rgba(233,234,238,0.75)", 500);
+      if (cp) {
+        text(g, `路${i}`, 22, h / 2, 40, "rgba(233,234,238,0.8)", 600);
+        text(g, `V${L.valid ? 1 : 0}`, 150, h / 2, 44, L.valid ? C.ink : C.bad, 600, "left", MONO);
+        text(g, `D${L.dirty ? 1 : 0}`, 262, h / 2, 44, L.dirty ? C.power : C.ink, 600, "left", MONO);
+        text(g, L.valid ? L.tag : "—", 390, h / 2, 46, "#fff", 600, "left", MONO);
+        return;
+      }
+      text(g, `第 ${i} 路`, 20, h / 2, 30, "rgba(233,234,238,0.8)", 500);
       text(g, `V ${L.valid ? 1 : 0}`, 150, h / 2, 32, L.valid ? C.ink : C.bad, 600, "left", MONO);
       text(g, `D ${L.dirty ? 1 : 0}`, 250, h / 2, 32, L.dirty ? C.power : C.ink, 600, "left", MONO);
-      text(g, "标记", 352, h / 2, 28, "rgba(233,234,238,0.75)", 500);
+      text(g, "标记", 352, h / 2, 28, "rgba(233,234,238,0.8)", 500);
       text(g, L.valid ? L.tag : "—", 422, h / 2, 38, "#fff", 600, "left", MONO);
-      text(g, block, w - 20, h / 2, 24, "rgba(233,234,238,0.6)", 500, "right");
+      text(g, block, w - 20, h / 2, 26, "rgba(233,234,238,0.65)", 500, "right");
     });
   }
 
   private drawCacheBack(c: Cue<"cache">) {
-    this.cacheBack.draw(`${c.set}|${c.sets}|${c.ways}|${c.tag}`, (g, w, h) => {
+    const cp = this.compact;
+    this.cacheBack.draw(`${cp}|${c.set}|${c.sets}|${c.ways}|${c.tag}`, (g, w, h) => {
       panelBg(g, w, h, C.l1, 0.88);
       const direct = c.ways === 1;
-      text(g, `${direct ? "直接映射" : c.ways + " 路组相联"} · 共 ${c.sets} ${direct ? "行" : "组"}`, 40, 46, 32, C.ink, 600);
-      text(g, `标记 ${c.tag}`, w - 40, 46, 30, C.power, 600, "right", MONO);
+      // 小屏：画面只够放下当前组，组号和标记写在讲解区，背板上不再写会被裁掉的字
+      if (!cp) {
+        text(g, `${direct ? "直接映射" : c.ways + " 路组相联"} · 共 ${c.sets} ${direct ? "行" : "组"} · 第 ${c.set} ${direct ? "行" : "组"}`, 40, 46, 32, C.ink, 600);
+        text(g, `标记 ${c.tag}`, w - 40, 46, 30, C.power, 600, "right", MONO);
+      }
       const nb = (d: number, y: number) => {
         const s = c.set + d;
         if (s < 0 || s >= c.sets) return;
@@ -348,8 +370,6 @@ export class ChipWorld {
       nb(-1, 150);
       nb(1, h - 120);
       nb(2, h - 74);
-      g.fillStyle = C.l1;
-      text(g, `第 ${c.set} ${direct ? "行" : "组"}`, 40, h / 2, 34, C.l1, 600);
     });
   }
 
@@ -388,16 +408,11 @@ export class ChipWorld {
   }
 
   private cueCore(c: Cue<"core">, k: number) {
-    this.vaPlate.mesh.visible = c.phase === "issue";
     if (c.phase === "issue") {
       const t = Math.max(0, k);
       this.drawRegs(2, c.base);
       this.drawAlu(t > 0.6 ? "R2 + 8" : "", t > 0.6 ? 1 : 0);
-      const split = t > 2.0;
-      this.drawVa(c.value, split ? { a: c.split[0], b: c.split[1] } : null);
-      this.vaPlate.mesh.position.y = 0.9 + Math.min(1, Math.max(0, (t - 0.9) / 0.8)) * 1.05;
-      this.vaPlate.mesh.material.opacity = Math.min(1, Math.max(0, (t - 0.8) / 0.4));
-      return t > 2.4;
+      return t > 2.0;
     }
     this.drawAlu("", 0);
     this.drawRegs(k >= 0 ? 1 : -1, c.value);
@@ -405,6 +420,7 @@ export class ChipWorld {
   }
 
   private cueTlb(c: Cue<"tlb">, k: number, reveal: boolean) {
+    this.lastTlb = c;
     const t = Math.max(0, k - 0.3);
     const cmp = Math.min(4, Math.floor(t / CMP_STEP) + (k >= 0.3 ? 1 : 0));
     const done = k >= 0.3 + 4 * CMP_STEP;
@@ -489,6 +505,74 @@ export class ChipWorld {
     L.block.material.opacity = c.hit ? Math.min(1, (t - 1) / 0.4) : 0;
     L.block.position.y = 2.5 - Math.min(1, (t - 1) / 0.6) * 0.4;
     return true;
+  }
+
+  /** 小屏简化：文字板换成大字少列的版本 */
+  get isCompact() {
+    return this.compact;
+  }
+
+  setCompact(c: boolean) {
+    if (c === this.compact) return;
+    this.compact = c;
+    if (!c) this.regs.forEach((r) => (r.box.visible = r.plate.mesh.visible = true));
+  }
+
+  /** 本站的焦点对象（没有焦点的站返回 null） */
+  focus(st: RideStation): FocusSpec | null {
+    const c = st.cue;
+    const mf = this.compact ? MIN_FONT.compact : MIN_FONT.full;
+    const fwd = V3(0, -0.06, -1).normalize();
+    this.scene.updateMatrixWorld(true);
+    const boxOf = (...o: THREE.Object3D[]) => {
+      const b = new THREE.Box3();
+      for (const x of o) b.expandByObject(x);
+      return b;
+    };
+    switch (c.kind) {
+      case "core": {
+        const r = this.regs[c.phase === "issue" ? 2 : 1]!;
+        if (c.phase === "issue") {
+          if (this.compact) this.drawRegs(2, c.base);
+          return { objects: [r.box, r.plate.mesh, this.alu, this.aluPlate.mesh], box: boxOf(r.box, this.alu), font: { size: worldFont(r.plate, 36), at: r.plate.mesh.position.clone() }, dir: fwd, plates: [r.plate, this.aluPlate] };
+        }
+        return { objects: [r.box, r.plate.mesh], box: boxOf(r.box), font: { size: worldFont(r.plate, 36), at: r.plate.mesh.position.clone() }, dir: fwd, plates: [r.plate], maxArea: 0.32 };
+      }
+      case "tlb": {
+        if (this.lastTlb !== c) this.drawTlb(c, 0, "none");
+        else if (this.compact) this.tlbPlate.resize(1000, 640);
+        else this.tlbPlate.resize(1200, 680);
+        this.scene.updateMatrixWorld(true);
+        const m = this.tlbPlate.mesh;
+        const dir = V3(-Math.sin(TLB_YAW), -0.06, -Math.cos(TLB_YAW)).normalize();
+        return { objects: [m], box: boxOf(m), pts: planeCorners(m), font: { size: worldFont(this.tlbPlate, mf), at: m.position.clone() }, dir, plates: [this.tlbPlate] };
+      }
+      case "mmu": {
+        const m = this.mmuPlate.mesh;
+        const dir = m.position.clone().sub(CHIP.mmu.pos).setY(0).normalize().add(V3(0, -0.06, 0)).normalize();
+        return { objects: [m], box: boxOf(m), pts: planeCorners(m), font: { size: worldFont(this.mmuPlate, this.compact ? 40 : 30), at: m.position.clone() }, dir, plates: [this.mmuPlate] };
+      }
+      case "cache": {
+        this.layoutSlabs(c.ways);
+        const b = new THREE.Box3();
+        const objs: THREE.Object3D[] = [];
+        for (let i = 0; i < c.ways; i++) {
+          const sl = this.slabs[i]!;
+          b.expandByPoint(sl.home.clone().add(V3(-1.65, -0.21, -0.08)));
+          b.expandByPoint(sl.home.clone().add(V3(1.65, 0.21, 0.08)));
+          objs.push(sl.mesh);
+        }
+        if (c.phase === "fill") objs.push(this.incoming.mesh);
+        const p0 = this.slabs[0]!.plate;
+        return { objects: objs, box: b, font: { size: worldFont(p0, this.compact ? 40 : 26), at: this.slabs[0]!.home.clone() }, dir: fwd, plates: this.slabs.slice(0, c.ways).map((x) => x.plate).concat(c.phase === "fill" ? [this.incoming.plate] : []) };
+      }
+      case "lower": {
+        const L = this.lower[c.level];
+        return { objects: [L.box, L.plate.mesh, L.block], box: boxOf(L.box), font: { size: worldFont(L.plate, 54), at: L.plate.mesh.position.clone() }, dir: V3(0, -0.1, -1).normalize(), plates: [L.plate] };
+      }
+      default:
+        return null;
+    }
   }
 
   dispose() {

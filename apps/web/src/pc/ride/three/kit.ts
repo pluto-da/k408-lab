@@ -36,29 +36,73 @@ export const TONE: Record<string, string> = {
 export const FONT = `"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","WenQuanYi Micro Hei",system-ui,sans-serif`;
 export const MONO = `"Geist Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,${FONT}`;
 
-/** 画字的平面：canvas 贴图，内容变化时重画 */
+/** 画字的平面：canvas 贴图，内容变化时重画。焦点文字板可提高分辨率（setRes），小屏可换尺寸（resize） */
 export class TextPlate {
-  readonly canvas: HTMLCanvasElement;
-  readonly ctx: CanvasRenderingContext2D;
-  readonly tex: THREE.CanvasTexture;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  tex: THREE.CanvasTexture;
   readonly mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
-  readonly w: number;
-  readonly h: number;
+  w: number;
+  h: number;
+  worldW: number;
+  /** 当前分辨率倍数 */
+  res: number;
+  readonly baseRes: number;
   private key = "";
 
   constructor(pxW: number, pxH: number, worldW: number, scale = 1) {
     this.w = pxW;
     this.h = pxH;
+    this.worldW = worldW;
+    this.res = scale;
+    this.baseRes = scale;
     this.canvas = document.createElement("canvas");
-    this.canvas.width = Math.round(pxW * scale);
-    this.canvas.height = Math.round(pxH * scale);
     this.ctx = this.canvas.getContext("2d")!;
-    this.ctx.scale(scale, scale);
-    this.tex = new THREE.CanvasTexture(this.canvas);
-    this.tex.colorSpace = THREE.SRGBColorSpace;
-    this.tex.anisotropy = 4;
+    this.tex = this.makeTex(scale);
     const mat = new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, depthWrite: false, toneMapped: false, side: THREE.FrontSide });
     this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(worldW, (worldW * pxH) / pxW), mat);
+  }
+
+  private makeTex(scale: number) {
+    this.canvas.width = Math.max(2, Math.round(this.w * scale));
+    this.canvas.height = Math.max(2, Math.round(this.h * scale));
+    this.ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    const tex = new THREE.CanvasTexture(this.canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    return tex;
+  }
+
+  /** 世界里的高度 */
+  get worldH() {
+    return (this.worldW * this.h) / this.w;
+  }
+
+  /** 换分辨率倍数（下次 draw 时重画） */
+  setRes(scale: number) {
+    const s = Math.round(Math.max(0.5, Math.min(3, scale)) * 4) / 4;
+    if (s === this.res) return;
+    this.res = s;
+    this.tex.dispose();
+    this.tex = this.makeTex(s);
+    this.mesh.material.map = this.tex;
+    this.mesh.material.needsUpdate = true;
+    this.key = "";
+  }
+
+  /** 换画布尺寸（逻辑像素），世界宽度不变或指定新宽度 */
+  resize(pxW: number, pxH: number, worldW = this.worldW) {
+    if (pxW === this.w && pxH === this.h && worldW === this.worldW) return;
+    this.w = pxW;
+    this.h = pxH;
+    this.worldW = worldW;
+    this.tex.dispose();
+    this.tex = this.makeTex(this.res);
+    this.mesh.material.map = this.tex;
+    this.mesh.material.needsUpdate = true;
+    this.mesh.geometry.dispose();
+    this.mesh.geometry = new THREE.PlaneGeometry(worldW, (worldW * pxH) / pxW);
+    this.key = "";
   }
 
   /** key 相同则跳过重画 */
@@ -76,6 +120,17 @@ export class TextPlate {
     this.mesh.geometry.dispose();
     this.mesh.material.dispose();
   }
+}
+
+/** 画面里的文字标签（屏幕空间，固定字号）：由 RideScene 投影到观察窗口，互相遮挡时隐藏次要的 */
+export interface SceneLabel {
+  text: string;
+  pos: THREE.Vector3;
+  color: string;
+  /** 不显示（例如所在楼层没启用） */
+  hidden?: boolean;
+  /** 属于哪一站的焦点：站点 place 或 cue 名 */
+  tag?: string;
 }
 
 export function rr(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -265,4 +320,39 @@ export function disposeTree(o: THREE.Object3D) {
     if (Array.isArray(mat)) mat.forEach((y) => y.dispose());
     else mat?.dispose();
   });
+}
+
+/** 一站的焦点：取景、全亮绘制、字号检查都以它为准 */
+export interface FocusSpec {
+  /** 焦点物体（压暗背景后再全亮画一遍） */
+  objects: THREE.Object3D[];
+  /** 取景用的世界包围盒 */
+  box: THREE.Box3;
+  /** 取景与遮挡检查用的轮廓点（文字板用四个角，比包围盒更贴合）；不给时用包围盒的 8 个角 */
+  pts?: THREE.Vector3[];
+  /** 焦点上必须看清的最小字：世界高度与所在位置 */
+  font: { size: number; at: THREE.Vector3 } | null;
+  /** 首选观察方向（从相机指向焦点） */
+  dir: THREE.Vector3;
+  /** 焦点文字板（按屏幕像素提高分辨率） */
+  plates: TextPlate[];
+  /** 焦点在观察窗口里最多占的面积比例（小物体放大太多会显得笨重） */
+  maxArea?: number;
+}
+
+/** 文字板上某个逻辑字号对应的世界高度 */
+export const worldFont = (p: TextPlate, px: number) => (px * p.worldW) / p.w;
+
+/** 平面文字板在世界里的四个角 */
+export function planeCorners(m: THREE.Mesh): THREE.Vector3[] {
+  m.updateMatrixWorld(true);
+  const g = m.geometry as THREE.PlaneGeometry;
+  const w = g.parameters.width / 2;
+  const h = g.parameters.height / 2;
+  return [
+    [-w, -h],
+    [w, -h],
+    [w, h],
+    [-w, h],
+  ].map(([x, y]) => m.localToWorld(new THREE.Vector3(x, y, 0)));
 }

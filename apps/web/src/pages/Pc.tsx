@@ -54,6 +54,12 @@ export default function PcPage() {
   const [touched, setTouched] = useState(false);
   const [ride, setRide] = useState<null | { route: string | null }>(null);
   const touringNow = state === "journey" || !!ride;
+  // 化身数据进行中：矮横屏收起站点顶栏，把高度留给画面和讲解
+  useEffect(() => {
+    if (!ride) return;
+    document.documentElement.classList.add("is-ride");
+    return () => document.documentElement.classList.remove("is-ride");
+  }, [ride]);
 
   useEffect(() => {
     document.documentElement.classList.add("is-pc");
