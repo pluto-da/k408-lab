@@ -45,7 +45,7 @@ function load() {
 }
 
 const { U, LAB } = load();
-const CLS = [19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79];
+const CLS = [25, 8, 41, 17, 30, 64, 3, 52, 77, 16, 49, 36];
 const sortedCopy = (a: number[]) => a.slice().sort((x, y) => x - y);
 function rnd(n: number, max: number, seed: number) {
   let s = seed;
@@ -64,37 +64,35 @@ describe("实验注册", () => {
 });
 
 describe("散列表", () => {
-  it("经典数据线性探测：比较次数之和 30，ASL成功 = 30/12 = 2.5", () => {
+  it("示例一线性探测：比较次数之和 20，ASL成功 = 20/12 = 5/3", () => {
     const r = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear" });
     expect(r.err).toBeUndefined();
-    expect(r.total).toBe(30);
-    expect(r.succ.val).toBe(2.5);
-    expect(r.succ.full).toContain("30/12 = 2.5");
-    expect(r.recs.map((x) => x.cmp)).toEqual([1, 1, 1, 2, 1, 1, 3, 4, 3, 1, 3, 9]);
-    expect(r.recs.find((x) => x.key === 84)!.probes).toEqual([6, 7, 8]);
-    expect(r.recs.find((x) => x.key === 79)!.pos).toBe(9);
-    expect(r.table[0]).toBeNull();
+    expect(r.total).toBe(20);
+    expect(r.succ.full).toContain("20/12 = 5/3");
+    expect(r.recs.map((x) => x.cmp)).toEqual([1, 1, 1, 1, 2, 2, 1, 1, 3, 4, 1, 2]);
+    expect(r.recs.find((x) => x.key === 16)!.probes).toEqual([3, 4, 5, 6]);
+    expect(r.recs.find((x) => x.key === 16)!.pos).toBe(6);
+    expect(r.table[1]).toBeNull();
   });
-  it("线性探测 ASL失败：常见约定（空位计 1 次）91/13 = 7，不计空位 78/13 = 6", () => {
+  it("线性探测 ASL失败：常见约定（空位计 1 次）42/13，不计空位 29/13", () => {
     const std = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear" });
-    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "std" }).fail2.num).toBe(91);
+    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "std" }).fail2.num).toBe(42);
     /* 旧版本或无法识别的选项值按常见约定处理（向后兼容） */
-    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "legacy" }).fail2.num).toBe(91);
+    expect(U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "legacy" }).fail2.num).toBe(42);
     expect(U.dsHash({ keys: CLS, p: 13, m: 13, method: "chain", empty: "legacy" }).fail2.num).toBe(12);
-    expect(std.fail2.num).toBe(91);
+    expect(std.fail2.num).toBe(42);
     expect(std.fail2.den).toBe(13);
-    expect(std.fail2.val).toBe(7);
-    expect(std.per[0]!.cnt).toBe(1);
-    expect(std.per[1]!.cnt).toBe(13);
+    expect(std.per[0]!.cnt).toBe(2);
+    expect(std.per[1]!.cnt).toBe(1);
     const no = U.dsHash({ keys: CLS, p: 13, m: 16, method: "linear", empty: "no" });
-    expect(no.fail2.num).toBe(78);
-    expect(no.fail2.val).toBe(6);
+    expect(no.fail2.num).toBe(29);
+    expect(no.fail2.num).toBe(std.fail2.num - 13);
   });
-  it("拉链法：ASL成功 = 21/12 = 1.75，ASL失败（常见约定，不计空指针）= 12/13", () => {
+  it("拉链法：ASL成功 = 18/12 = 1.5，ASL失败（常见约定，不计空指针）= 12/13", () => {
     const r = U.dsHash({ keys: CLS, p: 13, m: 13, method: "chain" });
-    expect(r.succ.num).toBe(21);
-    expect(r.succ.val).toBe(1.75);
-    expect(r.chains[1]).toEqual([14, 1, 27, 79]);
+    expect(r.succ.num).toBe(18);
+    expect(r.succ.val).toBe(1.5);
+    expect(r.chains[12]).toEqual([25, 64, 77]);
     expect(r.fail2.num).toBe(12);
     expect(r.fail2.den).toBe(13);
     const y = U.dsHash({ keys: CLS, p: 13, m: 13, method: "chain", empty: "yes" });
@@ -104,8 +102,8 @@ describe("散列表", () => {
     const r = U.dsHash({ keys: CLS, p: 13, m: 16, method: "quad" });
     expect(r.err).toBeUndefined();
     expect(r.fail).toBeUndefined();
-    expect(r.recs.find((x) => x.key === 1)!.probes).toEqual([1, 2]);
-    expect(r.recs.find((x) => x.key === 27)!.probes).toEqual([1, 2, 0]);
+    expect(r.recs.find((x) => x.key === 64)!.probes).toEqual([12, 13]);
+    expect(r.recs.find((x) => x.key === 77)!.probes).toEqual([12, 13, 11]);
     const placed = r.table.filter((v) => v !== null);
     expect(sortedCopy(placed as number[])).toEqual(sortedCopy(CLS));
     expect(r.recs.reduce((s, x) => s + x.cmp, 0)).toBe(r.succ.num);
@@ -126,7 +124,7 @@ describe("散列表", () => {
 });
 
 describe("折半查找与判定树", () => {
-  const A = [5, 13, 19, 21, 37, 56, 64, 75, 80, 88, 92];
+  const A = [7, 15, 22, 29, 34, 48, 53, 61, 70, 83, 96];
   it("n = 11：ASL成功 = 33/11 = 3，树深 4，各层 1/2/4/4", () => {
     const t = U.dsBsTree(11);
     expect(t.succ.num).toBe(33);
@@ -139,15 +137,15 @@ describe("折半查找与判定树", () => {
     expect(t.fail.num).toBe(44);
     expect(t.fail.den).toBe(12);
   });
-  it("查找过程：查 21 成功（6 → 3 → 4），查 85 失败", () => {
-    const s = U.dsBsearch(A, 21);
+  it("查找过程：查 29 成功（6 → 3 → 4），查 85 失败", () => {
+    const s = U.dsBsearch(A, 29);
     expect(s.found).toBe(true);
     expect(s.path).toEqual([6, 3, 4]);
     expect(s.pos).toBe(4);
     const f = U.dsBsearch(A, 85);
     expect(f.found).toBe(false);
-    expect(f.path).toEqual([6, 9, 10]);
-    expect(f.cmps).toBe(3);
+    expect(f.path).toEqual([6, 9, 10, 11]);
+    expect(f.cmps).toBe(4);
   });
   it("任意 n：判定树结点在每层上的比较次数之和 = 各元素查找的比较次数之和", () => {
     for (let n = 1; n <= 15; n++) {
@@ -173,12 +171,12 @@ describe("排序补充", () => {
     }
     return b;
   }
-  it("希尔：默认增量 n/2 逐次减半，经典示例增量 5,3,1 第一趟结果", () => {
+  it("希尔：默认增量 n/2 逐次减半，示例一增量 5,3,1 每趟结果", () => {
     expect(U.dsShellIncs(10)).toEqual([5, 2, 1]);
-    const r = U.dsShell([49, 38, 65, 97, 76, 13, 27, 49, 55, 4], [5, 3, 1]);
-    expect(r.passes[0]!.after).toEqual([13, 27, 49, 55, 4, 49, 38, 65, 97, 76]);
-    expect(r.passes[1]!.after).toEqual([13, 4, 49, 38, 27, 49, 55, 65, 97, 76]);
-    expect(r.result).toEqual([4, 13, 27, 38, 49, 49, 55, 65, 76, 97]);
+    const r = U.dsShell([52, 17, 83, 36, 9, 64, 41, 28, 75, 17], [5, 3, 1]);
+    expect(r.passes[0]!.after).toEqual([52, 17, 28, 36, 9, 64, 41, 83, 75, 17]);
+    expect(r.passes[1]!.after).toEqual([17, 9, 28, 36, 17, 64, 41, 83, 75, 52]);
+    expect(r.result).toEqual([9, 17, 17, 28, 36, 41, 52, 64, 75, 83]);
     expect(U.dsShell([3, 2, 1], [2, 2, 1]).err).toContain("递减");
     expect(U.dsShell([3, 2, 1], [2]).err).toContain("1");
   });
@@ -214,12 +212,12 @@ describe("排序补充", () => {
     const r = U.dsSelect([5, 8, 5, 2, 9]);
     expect(r.resultIds.indexOf(2)).toBeLessThan(r.resultIds.indexOf(0));
   });
-  it("基数排序：经典例第一趟按个位收集，每趟按对应位稳定分配收集", () => {
-    const r = U.dsRadix([278, 109, 63, 930, 589, 184, 505, 269, 8, 83]);
+  it("基数排序：示例第一趟按个位收集，每趟按对应位稳定分配收集", () => {
+    const r = U.dsRadix([312, 47, 908, 165, 523, 790, 236, 81, 654, 409]);
     expect(r.d).toBe(3);
-    expect(r.passes[0]!.after).toEqual([930, 63, 83, 184, 505, 278, 8, 109, 589, 269]);
-    expect(r.passes[1]!.after).toEqual([505, 8, 109, 930, 63, 269, 278, 83, 184, 589]);
-    expect(r.result).toEqual([8, 63, 83, 109, 184, 269, 278, 505, 589, 930]);
+    expect(r.passes[0]!.after).toEqual([790, 81, 312, 523, 654, 165, 236, 47, 908, 409]);
+    expect(r.passes[1]!.after).toEqual([908, 409, 312, 523, 236, 47, 654, 165, 81, 790]);
+    expect(r.result).toEqual([47, 81, 165, 236, 312, 409, 523, 654, 790, 908]);
     for (let s = 1; s <= 30; s++) {
       const a = rnd(2 + (s % 14), 1000, s * 13);
       const rr = U.dsRadix(a);

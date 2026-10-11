@@ -1,7 +1,7 @@
       /* 多设备适配的交互补充（样式在 legacy-15.css）：
          1. 横向滚动行（科目切换、实验 / 图解标签、性质列表、宽画布）两端渐隐 + “左右滑动查看”提示，首次进入轻推一下；
          2. 实验输出区在侧栏里放不下（大表格）时移到画布下方整宽显示；
-         3. 键盘：← → 单步、空格播放 / 暂停（焦点在页面空白处时作用于视口中的实验或图解）；
+         3. 键盘：← → 单步、空格播放 / 暂停、R 重置（焦点在页面空白处时作用于视口中的实验或图解；到头时只提示，不重置）；
          4. 过程图解“放大查看”：全屏、双指缩放、拖动，可在全屏里单步。 */
       (function () {
         if (typeof document === "undefined" || !document.getElementById || !document.getElementById("x-tool")) return;
@@ -101,14 +101,110 @@
           p.classList.remove("is-wideout");
           if (out && side && out.parentNode !== side) side.insertBefore(out, note && note.parentNode === side ? note : null);
         }
+        /* 平板竖屏（768–1023）：画布下方分两列；输出表格较宽的实验（WIDE 名单或实际放不下）输出区仍整宽 */
+        var tabMq = mm("(min-width: 768px) and (max-width: 1023px)");
+        function tabCheck(p) {
+          var on = tabMq.matches && !wideMq.matches;
+          var id = p.id.replace(/^lab-/, "");
+          p.classList.toggle("is-tab2", on);
+          if (!on) { p.classList.remove("is-wide2"); return; }
+          if (WIDE.indexOf(id) >= 0) p.classList.add("is-wide2");
+          else if (!p.classList.contains("is-wide2") && tooWide(p.querySelector(".x-lab__out"))) p.classList.add("is-wide2");
+        }
         function wideCheck() {
           var p = visPanel(); if (!p) return;
+          tabCheck(p);
+          compactCheck(p);
           if (!wideMq.matches) { if (p.classList.contains("is-wideout")) unwide(p); return; }
           if (p.classList.contains("is-wideout")) return;
           var out = p.querySelector(".x-lab__side .x-lab__out");
           if (WIDE.indexOf(p.id.replace(/^lab-/, "")) >= 0 || tooWide(out)) { p.classList.add("is-wideout"); p.appendChild(out); }
         }
-        function resetWide() { Array.prototype.forEach.call(document.querySelectorAll("#x-lab .x-lab__panel.is-wideout"), unwide); wideCheck(); }
+        function resetWide() {
+          Array.prototype.forEach.call(document.querySelectorAll("#x-lab .x-lab__panel.is-wideout"), unwide);
+          Array.prototype.forEach.call(document.querySelectorAll("#x-lab .x-lab__panel.is-wide2"), function (p) { p.classList.remove("is-wide2"); });
+          wideCheck();
+        }
+        if (tabMq.addEventListener) tabMq.addEventListener("change", resetWide);
+
+        /* ---------- 2b. 横屏手机：实验选项收进“设置”按钮，点开从右侧滑出浮层 ---------- */
+        var landMq = mm("(orientation: landscape) and (max-height: 500px)");
+        var sheet = null;
+        function sheetUi() {
+          if (sheet) return sheet;
+          var mask = document.createElement("div");
+          mask.className = "x-sheet__mask"; mask.hidden = true;
+          var box = document.createElement("div");
+          box.className = "x-sheet"; box.hidden = true;
+          box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "x-sheet-t");
+          box.innerHTML = '<div class="x-sheet__head"><h3 class="x-sheet__t" id="x-sheet-t">实验设置</h3>' +
+            '<button type="button" class="x-lab__btn x-lab__btn--ghost" data-s="close" aria-label="关闭">关闭</button></div>' +
+            '<div class="x-sheet__body"></div>' +
+            '<div class="x-sheet__foot"><button type="button" class="x-lab__btn x-lab__btn--main" data-s="apply">应用</button></div>';
+          var host = document.getElementById("top") || document.body;
+          host.appendChild(mask); host.appendChild(box);
+          sheet = { box: box, mask: mask, body: box.querySelector(".x-sheet__body"), panel: null, opts: null, back: null };
+          mask.addEventListener("click", function () { sheetClose(false); });
+          box.addEventListener("click", function (e) {
+            var b = e.target.closest("[data-s]"); if (!b) return;
+            sheetClose(b.getAttribute("data-s") === "apply");
+          });
+          box.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); sheetClose(false); return; }
+            if (e.key !== "Tab") return;
+            var f = Array.prototype.filter.call(box.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])'), function (x) { return !x.disabled && x.offsetParent !== null; });
+            if (!f.length) return;
+            var first = f[0], last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          });
+          return sheet;
+        }
+        function sheetOpen(p, btn) {
+          var S = sheetUi(), opts = p.querySelector(".x-lab__main > .x-lab__opts");
+          if (!opts) return;
+          var tab = document.getElementById(p.id.replace(/^lab-/, "tab-"));
+          S.box.querySelector(".x-sheet__t").textContent = (tab ? tab.textContent : "实验") + " · 设置";
+          S.panel = p; S.opts = opts; S.back = btn; S.home = opts.nextSibling;
+          S.body.appendChild(opts);
+          S.mask.hidden = false; S.box.hidden = false;
+          document.documentElement.classList.add("x-sheet-open");
+          void S.box.offsetWidth;
+          S.box.classList.add("is-open"); S.mask.classList.add("is-open");
+          var f = S.body.querySelector("input, select, textarea, button") || S.box.querySelector("[data-s=apply]");
+          if (f) f.focus();
+        }
+        function sheetClose(apply) {
+          var S = sheet; if (!S || S.box.hidden) return;
+          var main = S.panel && S.panel.querySelector(".x-lab__main");
+          if (main && S.opts) main.insertBefore(S.opts, main.firstChild);
+          S.box.classList.remove("is-open"); S.mask.classList.remove("is-open");
+          S.box.hidden = true; S.mask.hidden = true;
+          document.documentElement.classList.remove("x-sheet-open");
+          /* 输入框的修改多在 change 时生效；“应用”再重新生成一次动画 */
+          if (apply && window.X_LAB_ACT) window.X_LAB_ACT("reset");
+          if (S.back && S.back.isConnected) S.back.focus();
+          S.panel = S.opts = null;
+          soon();
+        }
+        function compactCheck(p) {
+          var on = landMq.matches;
+          var main = p.querySelector(".x-lab__main"); if (!main) return;
+          var btn = main.querySelector(":scope > .x-setbtn");
+          p.classList.toggle("is-compact", on);
+          if (!on) { if (sheet && !sheet.box.hidden) sheetClose(false); if (btn) btn.hidden = true; return; }
+          var opts = main.querySelector(":scope > .x-lab__opts");
+          var has = opts && opts.children.length;
+          if (!btn) {
+            btn = document.createElement("button");
+            btn.type = "button"; btn.className = "x-lab__btn x-setbtn"; btn.textContent = "设置";
+            btn.setAttribute("aria-haspopup", "dialog");
+            btn.addEventListener("click", function () { sheetOpen(p, btn); });
+            main.appendChild(btn);
+          }
+          btn.hidden = !has;
+        }
+        if (landMq.addEventListener) landMq.addEventListener("change", function () { wideCheck(); });
         if (wideMq.addEventListener) wideMq.addEventListener("change", resetWide);
         var lastW = window.innerWidth;
         window.addEventListener("resize", function () {
@@ -125,8 +221,8 @@
         document.addEventListener("keydown", function (e) {
           if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
           var k = e.key, t = e.target || document.body, tag = t.tagName;
-          var isSp = k === " " || k === "Spacebar";
-          if (k !== "ArrowRight" && k !== "ArrowLeft" && !isSp) return;
+          var isSp = k === " " || k === "Spacebar", isR = k === "r" || k === "R";
+          if (k !== "ArrowRight" && k !== "ArrowLeft" && !isSp && !isR) return;
           if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || t.isContentEditable) return;
           if (document.documentElement.classList.contains("x-zoom-open")) return;
           var interactive = tag === "BUTTON" || tag === "A" || tag === "SUMMARY" || tag === "LABEL";
@@ -145,8 +241,8 @@
           if (!ctx) return;
           if (isSp && interactive) return; /* 空格在按钮上保持原生“点击” */
           var ok = false;
-          if (ctx === "lab" && window.X_LAB_ACT) ok = X_LAB_ACT(k === "ArrowRight" ? "step" : k === "ArrowLeft" ? "back" : "play");
-          if (ctx === "proc" && window.X_PROC_ACT) ok = X_PROC_ACT(k === "ArrowRight" ? "next" : k === "ArrowLeft" ? "prev" : "play");
+          if (ctx === "lab" && window.X_LAB_ACT) ok = X_LAB_ACT(isR ? "reset" : k === "ArrowRight" ? "step" : k === "ArrowLeft" ? "back" : "play");
+          if (ctx === "proc" && window.X_PROC_ACT) ok = X_PROC_ACT(isR ? "reset" : k === "ArrowRight" ? "next" : k === "ArrowLeft" ? "prev" : "play");
           if (ok) e.preventDefault();
         });
 

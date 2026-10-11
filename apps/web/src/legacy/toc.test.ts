@@ -136,7 +136,7 @@ function page() {
     }
     for (let i = 0; i < COUNTS.prop[si]!; i++) {
       const id = `${s}-q${i}`;
-      w.PROP!.push({ id, name: `性质 ${id}`, sub: s });
+      w.PROP!.push({ id, name: s === "ds" && i === 1 ? "叶子结点数 n₀ = n₂ + 1" : `性质 ${id}`, sub: s });
       propItems += `<button class="x-prop__item" data-id="${id}"><span class="x-prop__in">${s === "ds" && i === 1 ? "叶子结点数 n₀ = n₂ + 1" : "性质 " + id}</span></button>`;
     }
   });

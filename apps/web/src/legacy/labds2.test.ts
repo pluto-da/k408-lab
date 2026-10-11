@@ -287,11 +287,11 @@ describe("关键路径", () => {
     expect(c.len).toBe(11);
     expect(c.paths.map((p) => p.map((i) => at(g.V, i)).join(""))).toEqual(["1257", "1357", "1367"]);
   });
-  it("经典 AOE（9 事件 11 活动）：工期 18，两条关键路径", () => {
-    const g = U.dsParseEdges("1-9", "1->2:6, 1->3:4, 1->4:5, 2->5:1, 3->5:1, 4->6:2, 5->7:9, 5->8:7, 6->8:4, 7->9:2, 8->9:4", { directed: true, weighted: true });
+  it("示例二 AOE（9 事件 11 活动，本站自拟）：工期 20，两条关键路径", () => {
+    const g = U.dsParseEdges("1-9", "1->2:6, 1->3:3, 1->4:6, 2->5:2, 3->5:4, 4->6:3, 5->7:7, 5->8:7, 6->8:6, 7->9:3, 8->9:5", { directed: true, weighted: true });
     const c = U.dsCritical(g);
-    expect(c.len).toBe(18);
-    expect(c.crit.map((k) => "a" + (k + 1))).toEqual(["a1", "a4", "a7", "a8", "a10", "a11"]);
+    expect(c.len).toBe(20);
+    expect(c.crit.map((k) => "a" + (k + 1))).toEqual(["a1", "a3", "a4", "a6", "a8", "a9", "a11"]);
     expect(c.paths.length).toBe(2);
   });
   it("随机 AOE：关键活动 l − e = 0，ve(汇点) = 最长路径", () => {
@@ -325,6 +325,15 @@ describe("关键路径", () => {
 });
 
 describe("Floyd", () => {
+  it("默认示例一（本站自拟）：每一轮都有更新，结果与手算一致", () => {
+    const g = U.dsParseEdges("0-3", "0->1:5, 0->2:2, 1->0:6, 1->3:1, 2->1:2, 2->3:7, 3->0:3, 3->2:4", { directed: true, weighted: true });
+    const f = U.dsFloyd(g);
+    expect(f.A).toEqual([[0, 4, 2, 5], [4, 0, 5, 1], [6, 2, 0, 3], [3, 6, 4, 0]]);
+    expect(f.frames.filter((x) => x.ch.length > 0).length).toBeGreaterThanOrEqual(4);
+    expect(U.dsFloydPath(f.A, f.path, 0, 3)).toEqual([0, 2, 1, 3]);
+    expect(U.dsFloydPath(f.A, f.path, 2, 0)).toEqual([2, 1, 3, 0]);
+    expect(U.dsFloydPath(f.A, f.path, 3, 1)).toEqual([3, 2, 1]);
+  });
   it("示例二 · 4 顶点有向图：多次经中转点缩短", () => {
     const g = U.dsParseEdges("0-3", "0->1:2, 0->2:9, 1->2:3, 1->3:8, 2->0:4, 2->3:1, 3->0:6", { directed: true, weighted: true });
     const f = U.dsFloyd(g);

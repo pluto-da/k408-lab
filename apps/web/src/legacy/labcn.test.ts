@@ -60,7 +60,7 @@ function load() {
 }
 
 const { U, LAB } = load();
-const DEF_TABLE = "128.96.39.0/25 直接交付 接口0\n128.96.39.128/25 直接交付 接口1\n128.96.40.0/25 R2 接口1\n192.4.153.0/26 R3 接口2\n0.0.0.0/0 R4 接口2";
+const DEF_TABLE = "203.0.113.0/25 直接交付 接口0\n203.0.113.128/25 直接交付 接口1\n198.51.100.0/24 R2 接口1\n198.51.100.64/26 R3 接口2\n0.0.0.0/0 R4 接口2";
 
 describe("计网实验注册", () => {
   it("注册 7 个实验，id 唯一且都属于计算机网络", () => {
@@ -74,19 +74,19 @@ describe("计网实验注册", () => {
 });
 
 describe("CRC", () => {
-  it("101001 ÷ 1101：余数 001，发送 101001001，逐步异或", () => {
-    const c = U.crc("101001", "1101");
+  it("110101 ÷ 1011：余数 111，发送 110101111，逐步异或", () => {
+    const c = U.crc("110101", "1011");
     expect(c.err).toBeUndefined();
     expect(c.r).toBe(3);
-    expect(c.dividend).toBe("101001000");
-    expect(c.remainder).toBe("001");
-    expect(c.codeword).toBe("101001001");
-    expect(c.quotient).toBe("110101");
+    expect(c.dividend).toBe("110101000");
+    expect(c.remainder).toBe("111");
+    expect(c.codeword).toBe("110101111");
+    expect(c.quotient).toBe("111101");
     expect(c.steps.length).toBe(6);
-    expect(c.steps[0]!.win).toBe("1010");
-    expect(c.steps[0]!.xor).toBe("0111");
-    expect(c.steps[1]!.win).toBe("1110");
-    expect(c.steps[1]!.xor).toBe("0011");
+    expect(c.steps[0]!.win).toBe("1101");
+    expect(c.steps[0]!.xor).toBe("0110");
+    expect(c.steps[1]!.win).toBe("1100");
+    expect(c.steps[1]!.xor).toBe("0111");
   });
   it("多项式写法 x³+x²+1 与 1101 等价", () => {
     expect(U.parsePoly("x^3+x^2+1").bits).toBe("1101");
@@ -94,11 +94,11 @@ describe("CRC", () => {
     expect(U.parsePoly("x^4+x+1").bits).toBe("10011");
     expect(U.crc("1101011011", "x^4+x+1").remainder).toBe("1110");
   });
-  it("接收端校验：101001001 余数为 0，101001011 余数非 0", () => {
-    const ok = U.crcCheck("101001001", "1101");
+  it("接收端校验：110101111 余数为 0，110100111 余数非 0", () => {
+    const ok = U.crcCheck("110101111", "1011");
     expect(ok.remainder).toBe("000");
     expect(ok.ok).toBe(true);
-    const bad = U.crcCheck("101001011", "1101");
+    const bad = U.crcCheck("110100111", "1011");
     expect(bad.remainder).not.toMatch(/^0+$/);
     expect(bad.ok).toBe(false);
   });
@@ -144,13 +144,16 @@ describe("IP 分片", () => {
 });
 
 describe("最长前缀匹配", () => {
-  it("128.96.39.10 → /25，接口0", () => {
+  it("203.0.113.10 → /25，接口0；198.51.100.70 同时匹配 /24 与 /26 时选 /26", () => {
     const t = U.parseTable(DEF_TABLE).rows!;
-    const r = U.lpm(t, "128.96.39.10");
+    const r2 = U.lpm(t, "198.51.100.70");
+    expect(r2.rows.map((x) => x.match)).toEqual([false, false, true, true, true]);
+    expect(r2.entry!.hop).toBe("R3");
+    const r = U.lpm(t, "203.0.113.10");
     expect(r.rows.map((x) => x.match)).toEqual([true, false, false, false, true]);
     expect(r.best).toBe(0);
     expect(r.entry!.ifc).toBe("接口0");
-    expect(U.ipStr(r.rows[1]!.and)).toBe("128.96.39.0");
+    expect(U.ipStr(r.rows[1]!.and)).toBe("203.0.113.0");
   });
   it("/16 与 /24 都匹配时选 /24", () => {
     const t = U.parseTable("172.16.0.0/16 R1 接口0\n172.16.5.0/24 R2 接口1\n0.0.0.0/0 R5 接口3").rows!;
@@ -170,7 +173,7 @@ describe("最长前缀匹配", () => {
   });
   it("校验非法 IP 与主机位不为 0 的表项", () => {
     expect(U.lpm([], "300.1.1.1").err).toBeTruthy();
-    expect(U.parseTable("128.96.39.5/25 R1").err).toMatch(/128\.96\.39\.0/);
+    expect(U.parseTable("203.0.113.5/25 R1").err).toMatch(/203\.0\.113\.0/);
     expect(U.parseTable("").err).toBeTruthy();
   });
 });

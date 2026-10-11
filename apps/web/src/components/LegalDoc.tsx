@@ -14,11 +14,31 @@ export function Contact() {
   );
 }
 
+function TocList({ toc }: { toc: { id: string; t: string }[] }) {
+  return (
+    <ol>
+      {toc.map((x) => (
+        <li key={x.id}>
+          <a href={`#${x.id}`}>{x.t.replace(/^[一二三四五六七八九十]+、/, "")}</a>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export default function LegalDoc({ title, intro, children, other }: { title: string; intro: ReactNode; children: ReactNode; other: "terms" | "privacy" }) {
   const ref = useRef<HTMLElement>(null);
   const [toc, setToc] = useState<{ id: string; t: string }[]>([]);
   // 目录：平板以上默认展开，手机上默认折叠
   const [tocOpen, setTocOpen] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches);
+  // 大屏（≥1280）目录固定在左侧，始终展开
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1280px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1280px)");
+    const on = () => setWide(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
   // 目录从正文各节标题生成，章节增删后不用手动同步
   useEffect(() => {
     const secs = ref.current?.querySelectorAll<HTMLElement>("section[id] > h2") ?? [];
@@ -33,20 +53,20 @@ export default function LegalDoc({ title, intro, children, other }: { title: str
           <p className="muted small">更新日期：{LEGAL_UPDATED} · 生效日期：{LEGAL_UPDATED}</p>
         </header>
         <div className="legal__intro">{intro}</div>
-        {toc.length > 0 && (
-          <details className="legal__toc" open={tocOpen} onToggle={(e) => setTocOpen(e.currentTarget.open)}>
-            <summary>目录</summary>
-            <nav aria-label="目录">
-              <ol>
-                {toc.map((x) => (
-                  <li key={x.id}>
-                    <a href={`#${x.id}`}>{x.t.replace(/^[一二三四五六七八九十]+、/, "")}</a>
-                  </li>
-                ))}
-              </ol>
+        {toc.length > 0 &&
+          (wide ? (
+            <nav className="legal__toc legal__toc--side" aria-label="目录">
+              <p className="legal__toc-t">目录</p>
+              <TocList toc={toc} />
             </nav>
-          </details>
-        )}
+          ) : (
+            <details className="legal__toc" open={tocOpen} onToggle={(e) => setTocOpen(e.currentTarget.open)}>
+              <summary>目录</summary>
+              <nav aria-label="目录">
+                <TocList toc={toc} />
+              </nav>
+            </details>
+          ))}
         {children}
         <footer className="legal__foot muted small">
           另见{other === "terms" ? <Link to="/terms">《用户协议》</Link> : <Link to="/privacy">《隐私政策》</Link>}。

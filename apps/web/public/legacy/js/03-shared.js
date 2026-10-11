@@ -38,5 +38,20 @@
         function bySubject(id) { return subjects.filter(function (s) { return s.id === id; })[0]; }
         function go(id) { var t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }); }
         var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        return { subjects: subjects, svg: svg, el: el, dim: dim, bySubject: bySubject, go: go, reduced: reduced, ink: "#1A1C20", paper: "#FFFFFF" };
+        /* 单步到头时的轻提示：在 box（role=status）里显示一句话，约 2.6 秒后消失；btn 轻微抖动一下（减少动态效果时不抖） */
+        function hint(box, msg, btn) {
+          if (!box) return;
+          box.textContent = msg;
+          box.hidden = false;
+          clearTimeout(box.__t);
+          box.__t = setTimeout(function () { box.hidden = true; box.textContent = ""; }, 2600);
+          if (btn && !reduced) {
+            btn.classList.remove("x-shake");
+            void btn.offsetWidth;
+            btn.classList.add("x-shake");
+            clearTimeout(btn.__t);
+            btn.__t = setTimeout(function () { btn.classList.remove("x-shake"); }, 450);
+          }
+        }
+        return { subjects: subjects, svg: svg, el: el, dim: dim, bySubject: bySubject, go: go, hint: hint, reduced: reduced, ink: "#1A1C20", paper: "#FFFFFF" };
       })();

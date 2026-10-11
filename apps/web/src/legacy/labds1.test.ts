@@ -106,12 +106,12 @@ describe("实验注册", () => {
 });
 
 describe("中缀转后缀与求值", () => {
-  it("a+b*(c-d)-e/f → abcd-*+ef/-", () => {
-    const r = U.dsInfix("a+b*(c-d)-e/f");
+  it("a*(b-c)+d/e-f → abc-*de/+f-", () => {
+    const r = U.dsInfix("a*(b-c)+d/e-f");
     expect(r.err).toBeUndefined();
-    expect(r.postfix).toBe("abcd-*+ef/-");
-    expect(r.maxDepth).toBe(4);
-    expect(r.maxOps).toBe(3);
+    expect(r.postfix).toBe("abc-*de/+f-");
+    expect(r.maxDepth).toBe(3);
+    expect(r.maxOps).toBe(2);
     expect(r.numeric).toBe(false);
   });
   it("3+4*(2-1)-6/3 = 5", () => {
@@ -162,8 +162,10 @@ describe("KMP", () => {
     expect(n).toEqual([0, 1, 1, 2, 2, 3]);
     expect(U.dsKmpNextval("abaabc", n)).toEqual([0, 1, 0, 2, 1, 3]);
   });
-  it("经典 next / nextval", () => {
-    expect(U.dsKmpNext("ababaaababaa").next).toEqual([0, 1, 1, 2, 3, 4, 2, 2, 3, 4, 5, 6]);
+  it("示例 next / nextval", () => {
+    expect(U.dsKmpNext("abaabcabab").next).toEqual([0, 1, 1, 2, 2, 3, 1, 2, 3, 4]);
+    expect(U.dsKmpNextval("abaabcabab")).toEqual([0, 1, 0, 2, 1, 3, 0, 1, 0, 4]);
+    expect(U.dsKmpMatch("abaababaabcababc", "abaabcabab", U.dsKmpNext("abaabcabab").next).pos).toBe(6);
     expect(U.dsKmpNextval("aabaab")).toEqual([0, 0, 2, 0, 0, 2]);
   });
   it("2019 真题：比较 10 次，位置 10；朴素匹配更多", () => {
@@ -192,16 +194,16 @@ describe("KMP", () => {
 });
 
 describe("哈夫曼树", () => {
-  it("7 5 2 4 → WPL 35，结点 2n − 1", () => {
-    const r = U.dsHuffman("7, 5, 2, 4");
+  it("8 3 5 2 → WPL 33，结点 2n − 1", () => {
+    const r = U.dsHuffman("8, 3, 5, 2");
     expect(r.err).toBeUndefined();
-    expect(r.wpl).toBe(35);
+    expect(r.wpl).toBe(33);
     expect(r.total).toBe(7);
-    expect(r.innerSum).toBe(35);
+    expect(r.innerSum).toBe(33);
   });
   it("带字符写法、前缀码", () => {
-    const r = U.dsHuffman("a:5 b:29 c:7 d:8 e:14 f:23 g:3 h:11");
-    expect(r.wpl).toBe(271);
+    const r = U.dsHuffman("a:6 b:21 c:9 d:4 e:15 f:27 g:2 h:16");
+    expect(r.wpl).toBe(270);
     expect(r.total).toBe(15);
     const codes = r.codes.map((c) => c.code);
     for (const a of codes) for (const b of codes) if (a !== b) expect(b.startsWith(a)).toBe(false);
@@ -303,7 +305,7 @@ describe("B 树", () => {
     }
   });
   it("删除演示覆盖借与合并", () => {
-    const r = U.dsBtree(3, [53, 75, 139, 49, 145, 36, 101, 20, 66, 88], [36, 145, 53, 88]);
+    const r = U.dsBtree(3, [42, 18, 77, 63, 95, 25, 51, 88, 9, 70], [25, 95, 42, 70]);
     const txt = r.frames.map((f) => f.d).join("\n");
     expect(txt).toMatch(/借/);
     expect(txt).toMatch(/合并/);

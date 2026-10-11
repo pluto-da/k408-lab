@@ -188,3 +188,20 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .app-menu span, .app-menu span::before, .app-menu span::after { transition: none; }
 }
+
+/* 协议与隐私：大屏（≥1280）左侧固定目录 + 右侧正文，正文行长仍控制在 42em 以内 */
+@media (min-width: 1280px) {
+  .legal {
+    max-width: calc(42em + 240px + var(--s7, 48px));
+    display: grid; grid-template-columns: 240px minmax(0, 42em); column-gap: var(--s7, 48px); align-items: start;
+  }
+  .legal > * { grid-column: 2; }
+  .legal > .legal__toc {
+    grid-column: 1; grid-row: 1 / span 40; position: sticky; top: calc(var(--bar-h) + 24px);
+    max-height: calc(100vh - var(--bar-h) - 48px); overflow-y: auto; overscroll-behavior: contain;
+    margin: 0; padding: var(--s3) var(--s4); background: transparent; border: 0; border-left: 1px solid var(--line); border-radius: 0;
+  }
+  .legal__toc-t { margin: 0 0 4px !important; font-size: 0.875rem; font-weight: 600; color: var(--text-2); }
+  .legal > .legal__toc ol { columns: auto; padding-left: 1.2em; font-size: 0.875rem; }
+  .legal > .legal__toc a { padding: 3px 0; }
+}

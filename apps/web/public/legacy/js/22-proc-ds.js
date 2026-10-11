@@ -134,7 +134,7 @@
         }
 
         PROC.push({
-          id: "linklist", name: "单链表与双链表的插入删除", sub: "ds",
+          id: "linklist", name: "单链表与双链表的插入删除", sub: "ds", toc: "链表插入删除",
           lead: "每一步只改一根指针：看清先改哪根、为什么不能反过来。虚线是将被改掉的原指针，浅灰细线是尚未赋值的新指针。",
           note: ["单链表在 p 之后插入：s->next = p->next; p->next = s; 两句不能颠倒。", "双链表在 p 之后插入：s->next = p->next; p->next->prior = s; s->prior = p; p->next = s; 前两句必须在最后一句之前。", "单链表按位序插入、删除都要先找第 i − 1 个结点，时间复杂度 O(n)；给定结点的后插 O(1)。", "删除结点要先用 q 保存被删结点，改完指针再 free(q)。", "头插法建表得到的顺序与输入相反；尾插法需要一个尾指针 r，顺序相同。"],
           modes: [
@@ -476,19 +476,19 @@
               pre.push(k);
               S.push({ t: "先根第 " + (i + 1) + " 个：" + k, d: i === 0 ? "树的先根遍历：先访问根，再依次先根遍历每棵子树。二叉树先序：根、左、右。两边第一个都是 A。" : "树中访问 " + k + "；二叉树先序遍历此时也恰好访问 " + k + "。", on: ["t" + k, "b" + k], kv: { "树的先根": pre.join(" "), "二叉树先序": pre.join(" ") } });
             });
-            S.push({ t: "结论一：树的先根 = 二叉树的先序", d: "因为二叉树中“先左”就是先走第一个孩子，“后右”就是再走兄弟，和先根遍历的次序一致。", on: [], kv: { "树的后根": "—", "二叉树中序": "—" }, tip: "森林的先序遍历 = 对应二叉树的先序遍历。" });
+            S.push({ t: "对照一下：树的先根序列和二叉树的先序序列完全相同", d: "因为二叉树中“先左”就是先走第一个孩子，“后右”就是再走兄弟，和先根遍历的次序一致。", on: [], kv: { "树的后根": "—", "二叉树中序": "—" }, tip: "森林的先序遍历 = 对应二叉树的先序遍历。" });
             ["E", "F", "B", "C", "G", "D", "A"].forEach(function (k, i) {
               post.push(k);
               S.push({ t: "后根第 " + (i + 1) + " 个：" + k, d: i === 0 ? "树的后根遍历：先依次后根遍历每棵子树，最后访问根。二叉树中序：左、根、右。两边第一个都是 E。" : "树中访问 " + k + "；二叉树中序遍历此时也恰好访问 " + k + "。", on: ["t" + k, "b" + k], kv: { "树的后根": post.join(" "), "二叉树中序": post.join(" ") } });
             });
-            S.push({ t: "结论二：树的后根 = 二叉树的中序", d: "结点 x 在二叉树中的左子树就是它原来的全部子孙，中序先访问左子树再访问 x，正是“先子树后根”。", on: [], tip: "森林的中序遍历（也有资料叫“后序遍历”，即依次对每棵树做后根遍历）= 对应二叉树的中序遍历。树没有“中根遍历”。" });
+            S.push({ t: "再对照：树的后根序列和二叉树的中序序列完全相同", d: "结点 x 在二叉树中的左子树就是它原来的全部子孙，中序先访问左子树再访问 x，正是“先子树后根”。", on: [], tip: "森林的中序遍历（也有资料叫“后序遍历”，即依次对每棵树做后根遍历）= 对应二叉树的中序遍历。树没有“中根遍历”。" });
             return { w: 980, h: 470, nodes: nodes, edges: edges, steps: S };
           }
           if (!forest) {
             S.push({ t: "原树：A 有三个孩子", d: "树的结点孩子个数不定。孩子兄弟表示法（二叉链表）：左指针指向第一个孩子，右指针指向右边相邻的兄弟，于是任何树都能用二叉树存储。", on: ["tA", "tB", "tC", "tD", "tE", "tF", "tG"] });
-            S.push({ t: "第一步 加线：兄弟之间连线", d: "在所有相邻的兄弟结点之间加一条线：B—C、C—D、E—F（虚线）。", on: ["tB", "tC", "tD", "tE", "tF"], go: ["sBC", "sCD", "sEF"] });
-            S.push({ t: "第二步 抹线：只留与第一个孩子的连线", d: "对每个结点，只保留它与第一个孩子的连线，抹去与其他孩子的连线：A—C、A—D、B—F（标 × 的线）。", on: ["tA", "tB"], go: ["eAC", "eAD", "eBF"], tip: "抹线后每个结点最多剩两根线：一根向下到第一个孩子，一根向右到兄弟。" });
-            place("A", "第三步 旋转：A 成为二叉树的根", "以树根为轴顺时针转 45°：向下的线变成左孩子，向右的兄弟线变成右孩子。A 是树根，没有兄弟。", []);
+            S.push({ t: "第 1 步：把相邻的兄弟连起来", d: "在所有相邻的兄弟结点之间加一条线：B—C、C—D、E—F（虚线）。", on: ["tB", "tC", "tD", "tE", "tF"], go: ["sBC", "sCD", "sEF"] });
+            S.push({ t: "第 2 步：每个结点只保留通往第一个孩子的边", d: "对每个结点，只保留它与第一个孩子的连线，抹去与其他孩子的连线：A—C、A—D、B—F（标 × 的线）。", on: ["tA", "tB"], go: ["eAC", "eAD", "eBF"], tip: "这一步做完，每个结点最多剩两根线：一根向下到第一个孩子，一根向右到兄弟。" });
+            place("A", "第 3 步：把图顺时针转 45°，A 成为二叉树的根", "以树根为轴顺时针转 45°：向下的线变成左孩子，向右的兄弟线变成右孩子。A 是树根，没有兄弟。", []);
             place("B", "B 是 A 的第一个孩子 → A 的左孩子", "第一个孩子变成左孩子。", ["bAB"]);
             place("E", "E 是 B 的第一个孩子 → B 的左孩子", "同理，E 挂在 B 的左边。", ["bBE"]);
             place("F", "F 是 E 的右兄弟 → E 的右孩子", "兄弟变成右孩子（虚线）。", ["bEF"]);
@@ -539,7 +539,7 @@
         }
         DS.isMinHeap = function (h) { for (var i = 2; i <= h.length; i++) if (h[i - 1] < h[(i >> 1) - 1]) return false; return true; };
         function heapSpec(mode, inp) {
-          var data = nums(inp.heap == null ? "46 79 56 38 40 84 25 61 12 33" : inp.heap, 2, 10, "关键字序列");
+          var data = nums(inp.heap == null ? "57 23 91 14 68 35 82 40 9 76" : inp.heap, 2, 10, "关键字序列");
           var key = mode === "ins" ? nums(inp.hkey == null ? "13" : inp.hkey, 1, 1, "插入的关键字")[0] : null;
           var A = [null].concat(mode === "build" ? data : DS.buildHeap(data).heap), n = data.length, cmp = 0;
           var m = mode === "ins" ? n + 1 : n;
@@ -630,13 +630,13 @@
           }
           return { w: 980, h: 510, nodes: nodes, edges: edges, steps: S };
         }
-        var HEAP_IN = { k: "heap", label: "初始关键字序列（2–10 个）", value: "46 79 56 38 40 84 25 61 12 33", ph: "空格或逗号分隔" };
+        var HEAP_IN = { k: "heap", label: "初始关键字序列（2–10 个）", value: "57 23 91 14 68 35 82 40 9 76", ph: "空格或逗号分隔" };
         PROC.push({
           id: "heapop", name: "堆的插入与删除", sub: "ds",
           lead: "小根堆：数组和完全二叉树同步画。建堆从 ⌊n/2⌋ 开始向下筛选，插入放末尾再上浮，删除堆顶用末尾元素替换再下沉。",
           note: ["小根堆：A[i] ≤ A[2i] 且 A[i] ≤ A[2i+1]（下标从 1 开始）；大根堆相反。", "建堆从最后一个非叶结点 ⌊n/2⌋ 开始依次向前做下沉，时间复杂度 O(n)。", "插入：放到末尾，与双亲比较，小则交换，一路上浮，O(log n)。", "删除堆顶：末尾元素移到堆顶，与较小的孩子比较，大则交换，一路下沉，O(log n)。", "堆排序不稳定，时间 O(n log n)，空间 O(1)；比较次数是常考计算题，注意下沉时两个孩子之间也要比较一次。"],
           modes: [
-            { name: "建堆（筛选法）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("build", inp); }, presets: [{ label: "示例一（10 个，多层下沉）", v: { heap: "46 79 56 38 40 84 25 61 12 33" } }, { label: "逆序 8 个", v: { heap: "80 70 60 50 40 30 20 10" } }] },
+            { name: "建堆（筛选法）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("build", inp); }, presets: [{ label: "示例一（10 个，多层下沉）", v: { heap: "57 23 91 14 68 35 82 40 9 76" } }, { label: "逆序 8 个", v: { heap: "80 70 60 50 40 30 20 10" } }] },
             { name: "插入（上浮）", inputs: [HEAP_IN, { k: "hkey", label: "插入关键字", value: "13", num: 1 }], make: function (inp) { return heapSpec("ins", inp); } },
             { name: "删除堆顶（下沉）", inputs: [HEAP_IN], make: function (inp) { return heapSpec("del", inp); } }
           ]
@@ -945,7 +945,7 @@
           return { dummy: d, leaves: items, merges: merges, root: forest[0], wpl: wpl, io: 2 * wpl };
         };
         function bestSpec(inp) {
-          var lens = nums(inp.bl == null ? "2 3 6 9 12 17 18 24" : inp.bl, 2, 12, "归并段长度"), k = Number(inp.bk || 3);
+          var lens = nums(inp.bl == null ? "4 7 10 13 15 20 26 31" : inp.bl, 2, 12, "归并段长度"), k = Number(inp.bk || 3);
           if ([2, 3, 4].indexOf(k) < 0) throw new Error("k 只能取 2、3、4");
           var T = DS.bestTree(lens, k), n = lens.length;
           /* 布局：叶子按深度优先次序排列，内部结点取孩子横坐标的平均值 */
@@ -985,13 +985,13 @@
           return { w: 980, h: by + 80, nodes: nodes, edges: edges, steps: S };
         }
         PROC.push({
-          id: "extsort", name: "外部排序：置换—选择、败者树、最佳归并树", sub: "ds",
+          id: "extsort", name: "外部排序：置换—选择、败者树、最佳归并树", sub: "ds", toc: "外部排序",
           lead: "外部排序 = 生成初始归并段 + 多路归并。置换—选择排序让初始段更长，败者树让 k 路归并的比较次数与 k 无关，最佳归并树让读写次数最少。",
           note: ["外部排序的耗时由三块组成：生成初始段时的内部排序、反复读写外存、归并时的内部比较；真正的瓶颈是读写外存，所以优化都围绕减少 I/O 次数。", "r 个初始归并段做 k 路平衡归并，归并趟数 = ⌈log_k r⌉；增大 k 或减少 r 都能减少趟数。", "败者树：内部结点记败者，冠军在 ls[0]；每输出一个记录只需比较 ⌈log₂k⌉ 次，与 k 无关。", "置换—选择排序：每次输出 WA 中不小于 MINIMAX 的最小记录；得到的初始归并段长度不等，平均约为 WA 大小的 2 倍。", "最佳归并树：k 叉哈夫曼树，(n − 1) % (k − 1) ≠ 0 时补 (k − 1) − (n − 1) % (k − 1) 个虚段；读写次数 = 2 × WPL。"],
           modes: [
             { name: "置换—选择排序（WA = 3）", inputs: [{ k: "rs", label: "输入文件 FI 的记录（3–15 个）", value: "36 15 48 21 9 40 27 12 33 6 45", ph: "空格或逗号分隔" }], make: replSpec },
             { name: "败者树（k = 5）", make: loserSpec },
-            { name: "最佳归并树（补虚段）", inputs: [{ k: "bl", label: "各归并段长度（2–12 个）", value: "2 3 6 9 12 17 18 24", ph: "空格或逗号分隔" }, { k: "bk", label: "归并路数 k", type: "select", value: "3", opts: [["2", "2 路"], ["3", "3 路"], ["4", "4 路"]] }], make: bestSpec, presets: [{ label: "8 段 3 路（补 1 个）", v: { bl: "2 3 6 9 12 17 18 24", bk: "3" } }, { label: "9 段 3 路（不补）", v: { bl: "9 12 18 3 17 2 6 30 24", bk: "3" } }, { label: "8 段 4 路（补 2 个）", v: { bl: "5 8 12 3 20 7 15 10", bk: "4" } }] }
+            { name: "最佳归并树（补虚段）", inputs: [{ k: "bl", label: "各归并段长度（2–12 个）", value: "4 7 10 13 15 20 26 31", ph: "空格或逗号分隔" }, { k: "bk", label: "归并路数 k", type: "select", value: "3", opts: [["2", "2 路"], ["3", "3 路"], ["4", "4 路"]] }], make: bestSpec, presets: [{ label: "8 段 3 路（补 1 个）", v: { bl: "4 7 10 13 15 20 26 31", bk: "3" } }, { label: "9 段 3 路（不补）", v: { bl: "5 11 8 22 14 3 19 27 9", bk: "3" } }, { label: "8 段 4 路（补 2 个）", v: { bl: "5 8 12 3 20 7 15 10", bk: "4" } }] }
           ]
         });
       })();

@@ -241,20 +241,20 @@ describe("过程图解 · 数据结构", () => {
   });
 
   it("堆：建堆、插入、删除后都是小根堆，比较次数按约定累计", () => {
-    /* 示例一：10 个关键字，i = 5、4、3 各下沉一层，i = 2 下沉两层，i = 1 下沉三层；比较 1 + 2 + 2 + 4 + 5 = 14 次 */
-    const b = DS.buildHeap([46, 79, 56, 38, 40, 84, 25, 61, 12, 33]);
-    expect(b.heap).toEqual([12, 33, 25, 38, 40, 84, 56, 61, 79, 46]);
-    expect(b.cmp).toBe(14);
+    /* 示例一：10 个关键字，i = 5、4、3 各下沉一层，i = 2 下沉两层，i = 1 下沉三层；比较 1 + 2 + 2 + 4 + 6 = 15 次 */
+    const b = DS.buildHeap([57, 23, 91, 14, 68, 35, 82, 40, 9, 76]);
+    expect(b.heap).toEqual([9, 14, 35, 23, 68, 91, 82, 40, 57, 76]);
+    expect(b.cmp).toBe(15);
     const build = mode("heapop", 0);
     expect(segVals(build, "ARR").map(Number)).toEqual(b.heap);
-    expect(lastKv(build)["比较次数"]).toBe("14");
+    expect(lastKv(build)["比较次数"]).toBe("15");
     const ins = segVals(mode("heapop", 1), "ARR").map(Number);
-    expect(ins).toEqual([12, 13, 25, 38, 33, 84, 56, 61, 79, 46, 40]);
+    expect(ins).toEqual([9, 13, 35, 23, 14, 91, 82, 40, 57, 76, 68]);
     expect(lastKv(mode("heapop", 1))["比较次数"]).toBe("3");
     expect(DS.isMinHeap(ins)).toBe(true);
     const del = segVals(mode("heapop", 2), "ARR").filter((v) => v && v.trim()).map(Number);
-    expect(del).toEqual([25, 33, 46, 38, 40, 84, 56, 61, 79]);
-    expect(lastKv(mode("heapop", 2))["比较次数"]).toBe("4");
+    expect(del).toEqual([14, 23, 35, 40, 68, 91, 82, 76, 57]);
+    expect(lastKv(mode("heapop", 2))["比较次数"]).toBe("6");
     expect(DS.isMinHeap(del)).toBe(true);
     for (let t = 0; t < 30; t++) {
       const a = Array.from({ length: 2 + (t % 9) }, (_, i) => (i * 37 + t * 11) % 50);
@@ -324,11 +324,12 @@ describe("过程图解 · 数据结构", () => {
         expect((n + d - 1) % (k - 1)).toBe(0);
       }
     }
-    const T = DS.bestTree([2, 3, 6, 9, 12, 17, 18, 24], 3);
-    expect([T.dummy, T.wpl, T.io]).toEqual([1, 163, 326]);
+    const T = DS.bestTree([4, 7, 10, 13, 15, 20, 26, 31], 3);
+    expect([T.dummy, T.wpl, T.io]).toEqual([1, 232, 464]);
     const kv = lastKv(mode("extsort", 2));
-    expect([kv["虚段数"], kv.WPL, kv["读写次数"]]).toEqual(["1", "163", "326"]);
-    expect(lastKv(mode("extsort", 2, { bl: "9 12 18 3 17 2 6 30 24", bk: "3" }))["虚段数"]).toBe("0");
+    expect([kv["虚段数"], kv.WPL, kv["读写次数"]]).toEqual(["1", "232", "464"]);
+    expect(lastKv(mode("extsort", 2, { bl: "5 11 8 22 14 3 19 27 9", bk: "3" }))["虚段数"]).toBe("0");
+    expect(DS.bestTree([5, 11, 8, 22, 14, 3, 19, 27, 9], 3).wpl).toBe(225);
     expect(lastKv(mode("extsort", 2, { bl: "5 8 12 3 20 7 15 10", bk: "4" }))["虚段数"]).toBe("2");
   });
 });

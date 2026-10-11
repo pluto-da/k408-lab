@@ -35,7 +35,7 @@
           }).replace(/[−–]/g, "-").replace(/\s+/g, "");
         }
         function haystack(p) {
-          return norm([p.name, p.ch, (p.stmt || []).join(" "), p.def].join(" | "));
+          return norm([p.name, p.toc || "", p.ch, (p.stmt || []).join(" "), p.def].join(" | "));
         }
         function matches(p, term) {
           var t = norm(term);
@@ -181,6 +181,8 @@
             }
             var b = el("button", { type: "button", role: "tab", class: "x-prop__item", id: "prtab-" + p.id, "data-id": p.id, "aria-selected": "false", tabindex: "-1", style: "--c:" + (SUBJ[p.sub] ? SUBJ[p.sub].c : "#888") });
             b.appendChild(el("span", { class: "x-prop__in" })).textContent = p.name;
+            /* 窄屏横向标签用短名，宽屏列表与卡片标题仍用完整名称 */
+            if (p.toc && p.toc !== p.name) { b.classList.add("x-prop__item--s"); b.appendChild(el("span", { class: "x-prop__ins", "aria-hidden": "true" })).textContent = p.toc; b.title = p.name; b.setAttribute("aria-label", p.name); }
             b.addEventListener("click", function () { open(p.id, { user: true }); });
             nav.appendChild(b);
             items.push({ p: p, b: b });

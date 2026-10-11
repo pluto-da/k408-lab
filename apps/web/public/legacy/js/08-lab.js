@@ -34,6 +34,7 @@
               '<button type="button" class="x-lab__btn x-lab__btn--main" data-a="play" aria-pressed="false">播放</button>' +
               '<button type="button" class="x-lab__btn" data-a="step">下一步</button>' +
               '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5" aria-label="播放速度"></label></div>' +
+              '<p class="x-lab__hint" role="status" hidden></p>' +
               '<div class="x-lab__out"></div>' +
               '<details class="x-lab__note" open><summary><b>考点</b></summary><p></p></details></div>');
             p.querySelector(".x-lab__note p").textContent = d.note || "";
@@ -74,6 +75,8 @@
             q('[data-a="step"]').addEventListener("click", function () { stop(); if (demo.done()) { n = 0; demo.reset(); } else { n++; demo.step(); } });
             /* 键盘上一步：从头重放到前一帧（实验只提供 step / reset） */
             o.back = function () { stop(); if (n <= 0) return; var k = n - 1; n = 0; demo.reset(); while (n < k && !demo.done()) { n++; demo.step(); } };
+            o.atStart = function () { return n <= 0; };
+            o.atEnd = function () { return demo.done(); };
             q('[data-a="reset"]').addEventListener("click", K.restart);
             play.addEventListener("click", function () {
               if (timer) return stop();
@@ -83,11 +86,18 @@
             });
           }
           if (items.length) show(0);
-          /* 供键盘快捷键调用（28-rwd.js）：a = "step" | "play" | "reset" | "back" */
+          /* 供键盘快捷键调用（28-rwd.js）：a = "step" | "play" | "reset" | "back"
+             第 0 步再按 ←、最后一步再按 → 都不改变画面，只给一句提示（最后一步不再自动重置） */
           window.X_LAB_ACT = function (a) {
             var o = items.filter(function (x) { return !x.p.hidden; })[0];
             if (!o) return false;
-            if (a === "back") { if (o.back) o.back(); return true; }
+            var hintBox = o.p.querySelector(".x-lab__hint");
+            if (a === "back") {
+              if (o.atStart && o.atStart()) { X.hint(hintBox, "已经是第一步", o.p.querySelector('[data-a="reset"]')); return true; }
+              if (o.back) o.back();
+              return true;
+            }
+            if (a === "step" && o.atEnd && o.atEnd()) { X.hint(hintBox, "已到最后一步，按 R 或点“重置”重新开始", o.p.querySelector('[data-a="step"]')); return true; }
             var b = o.p.querySelector('[data-a="' + a + '"]');
             if (b) b.click();
             return !!b;
@@ -102,7 +112,7 @@
       /* demo 1: sorting */
       LAB.push({
         id: "sort", name: "排序动画", color: "var(--x-ds)",
-        note: "各排序一趟后的序列状态是选择题高频。看清每一趟结束时谁已归位：冒泡和堆每趟定一个最值，快排每趟定一个枢轴，插入只保证前缀有序。",
+        note: "单步时盯住每一趟结束的那一刻，看谁已经归位：冒泡和堆每趟定一个最值，快排每趟定一个枢轴，插入只保证前缀有序。",
         mount: function (panel, K) {
           var N = 16;
           var ALG = [
@@ -300,7 +310,7 @@
 
       /* demo 3: Dijkstra */
       var LAB_DJ = {
-        id: "dijkstra", name: "Dijkstra 最短路径", color: "var(--x-ds)",
+        id: "dijkstra", name: "Dijkstra 最短路径", color: "var(--x-ds)", toc: "Dijkstra 最短路",
         note: "Dijkstra 不能处理负权边；OSPF 用的就是它",
         graph: {
           P: [[60, 160], [210, 70], [210, 250], [380, 70], [380, 250], [530, 160]],
@@ -944,7 +954,7 @@
         id: "banker", name: "银行家算法", color: "var(--x-os)",
         note: "Need = Max − Allocation；存在一个安全序列即为安全状态",
         RES: ["A", "B", "C"],
-        DEF: { av: [3, 3, 2], max: [[7, 5, 3], [3, 2, 2], [9, 0, 2], [2, 2, 2], [4, 3, 3]], al: [[0, 1, 0], [2, 0, 0], [3, 0, 2], [2, 1, 1], [0, 0, 2]] },
+        DEF: { av: [2, 2, 1], max: [[6, 4, 3], [3, 2, 2], [8, 0, 3], [2, 3, 2], [5, 2, 4]], al: [[1, 1, 0], [2, 0, 1], [3, 0, 2], [1, 2, 1], [0, 1, 2]] },
         need: function (max, al) { return max.map(function (r, i) { return r.map(function (v, j) { return v - al[i][j]; }); }); },
         le: function (a, b) { return a.every(function (v, j) { return v <= b[j]; }); },
         add: function (a, b, s) { return a.map(function (v, j) { return v + (s || 1) * b[j]; }); },
@@ -1008,7 +1018,7 @@
           K.stage.appendChild(stage);
           K.out.innerHTML = '<div class="x-lab__stats" data-k="st"></div><p class="x-lab__seq" data-k="msg"></p><p class="x-lab__seq" data-k="hist"></p><p class="x-lab__big" data-k="seq"></p><p class="x-lab__seq" data-k="tip"></p>' +
             '<div class="x-bk-form"><span class="x-lab__lbl">请求资源</span><select class="x-lab__sel" data-k="rp" aria-label="请求进程"></select>' +
-            RES.map(function (r, j) { return '<label class="x-lab__lbl">' + r + ' <input type="number" class="x-lab__sel x-bk-in" min="0" max="20" value="' + [1, 0, 2][j] + '" data-r="' + j + '"></label>'; }).join("") +
+            RES.map(function (r, j) { return '<label class="x-lab__lbl">' + r + ' <input type="number" class="x-lab__sel x-bk-in" min="0" max="20" value="' + [1, 0, 1][j] + '" data-r="' + j + '"></label>'; }).join("") +
             '<button type="button" class="x-lab__btn" data-k="go">检查请求</button><button type="button" class="x-lab__btn x-lab__btn--ghost" data-k="ok" hidden>确认分配</button></div><p class="x-lab__seq" data-k="res"></p>';
           var out = {}; K.out.querySelectorAll("[data-k]").forEach(function (x) { out[x.dataset.k] = x; });
           for (var p = 0; p < 5; p++) out.rp.appendChild(X.el("option", { value: p }, "P" + p));
@@ -1052,7 +1062,7 @@
             }
             out.hist.innerHTML = "Work 历史：<span>" + hist.join(" → ") + "</span>";
             out.seq.textContent = seq.length ? "安全序列 " + ps(seq) : "安全序列 —";
-            out.tip.textContent = cur === steps.length && S.ok ? "按“每轮选编号最小的可执行进程”得到上面的序列；换一种挑选顺序（如 P1 → P3 → P4 → P0 → P2）同样成立，找到任意一个安全序列即可。" : "";
+            out.tip.textContent = cur === steps.length && S.ok ? "按“每轮选编号最小的可执行进程”得到上面的序列；换一种挑选顺序（如 P3 → P1 → P4 → P0 → P2）同样成立，找到任意一个安全序列即可。" : "";
           }
           function reset() {
             var need = LAB_BK.need(max, al), bad = [];
@@ -1313,7 +1323,7 @@
 
       /* demo 11: TCP three-way handshake / four-way teardown */
       var LAB_TW = {
-        id: "tcpconn", name: "TCP 三次握手 / 四次挥手", color: "var(--x-cn)",
+        id: "tcpconn", name: "TCP 三次握手 / 四次挥手", color: "var(--x-cn)", toc: "TCP 握手与挥手",
         note: "SYN、FIN 各消耗一个序号；TIME-WAIT 等 2MSL 防止最后的 ACK 丢失",
         /* st: [side 0 客户端 / 1 服务器, "s" at send time | "r" at receive time | "t" after 2MSL, state] */
         MODES: [

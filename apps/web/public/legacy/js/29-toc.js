@@ -172,7 +172,7 @@
           var PROP = window.PROP || [];
           Array.prototype.forEach.call(document.querySelectorAll("#x-prop .x-prop__item"), function (t) {
             var id = t.getAttribute("data-id"), d = PROP.filter(function (x) { return x.id === id; })[0];
-            var full = t.textContent.trim();
+            var tin = t.querySelector(".x-prop__in"), full = (d && d.name) || (tin ? tin.textContent : t.textContent).trim();
             out.push({ kind: "prop", id: id, course: (d && d.sub) || courseOfColor(t.getAttribute("style")), label: (d && (d.toc || d.short)) || full, full: full });
           });
           COURSES.forEach(function (c) {
@@ -305,6 +305,21 @@
           }
           renderAll(true);
           markActive();
+          /* 小屏：筛选框收成放大镜按钮，点开后展开 */
+          var qbtn = el("button", { type: "button", class: "x-toc__qbtn", "aria-label": "筛选目录", "aria-expanded": "false" });
+          bar.insertBefore(qbtn, lab);
+          qbtn.addEventListener("click", function () {
+            var on = !bar.classList.contains("is-q");
+            bar.classList.toggle("is-q", on);
+            qbtn.setAttribute("aria-expanded", on ? "true" : "false");
+            if (on) q.focus(); else if (q.value) { q.value = ""; setFilter(""); }
+          });
+          var cmq = compactMq();
+          if (cmq) {
+            setCompact(cmq.matches);
+            var onMq = function () { setCompact(cmq.matches); };
+            if (cmq.addEventListener) cmq.addEventListener("change", onMq); else if (cmq.addListener) cmq.addListener(onMq);
+          }
           if (pending) reveal(byKey[key(pending.kind, pending.id)], true);
           pending = null;
 
@@ -452,6 +467,66 @@
           var empty = toc.querySelector(".x-toc__empty");
           if (empty) empty.hidden = !(m && m.active && !m.items.length && !m.groups.length);
           toc.classList.toggle("is-filtering", !!filterTerm);
+          syncSupers(instant);
+        }
+
+        /* ---------- 小屏（320 宽、横屏手机）：收起状态一屏放下 ----------
+           四门课合成“四门课”组、3D 主板与知识图谱合成“更多”组，筛选框收成放大镜按钮；其他尺寸不变。
+           合并组只在 DOM 层包一层，不进入持久化状态；其中任一子组展开或有筛选结果时自动展开。 */
+        var COMPACT_Q = "(max-width: 340px), (orientation: landscape) and (max-height: 500px)";
+        var SUPERS = [["courses", "四门课", COURSES], ["more", "更多", ["board", "links"]]];
+        var supers = {}, superOpen = {}, compactOn = false;
+        function compactMq() { return window.matchMedia ? window.matchMedia(COMPACT_Q) : null; }
+        function setCompact(on) {
+          if (on === compactOn || !built) return;
+          compactOn = on;
+          var rootOl = toc.querySelector(".x-toc__root"), bar = toc.querySelector(".x-toc__bar");
+          toc.classList.toggle("x-toc--compact", on);
+          if (bar) bar.classList.remove("is-q");
+          SUPERS.forEach(function (sp) {
+            var id = sp[0], kids = sp[2].map(function (g) { return groupsEl[g] && groupsEl[g].li; }).filter(Boolean);
+            if (!kids.length) return;
+            if (on) {
+              var li = el("li", { class: "x-toc__g x-toc__g--sup", "data-sup": id });
+              var b = el("button", { type: "button", class: "x-toc__sup", "aria-expanded": "false", "aria-controls": "x-toc-sup-" + id });
+              b.appendChild(el("span", { class: "x-toc__t" }, sp[1]));
+              b.appendChild(badge(kids.length));
+              b.appendChild(chev());
+              var ol = el("ol", { class: "x-toc__supl", role: "list" });
+              var w = el("div", { class: "x-toc__wrap", id: "x-toc-sup-" + id, hidden: "" });
+              w.appendChild(ol);
+              rootOl.insertBefore(li, kids[0]);
+              kids.forEach(function (k) { ol.appendChild(k); });
+              li.appendChild(b); li.appendChild(w);
+              b.addEventListener("click", function () {
+                var want = b.getAttribute("aria-expanded") !== "true";
+                superOpen[id] = want;
+                /* 收起合并组时一并收起其中展开的子组，否则子组会让它立刻重新展开 */
+                if (!want && !filterTerm) { kids.forEach(function (k) { var g = k.getAttribute("data-g"); if (state.open.indexOf(g) >= 0) state = manual(state, g); }); save(); renderAll(false); }
+                else syncSupers(false);
+              });
+              supers[id] = { li: li, btn: b, wrap: w, kids: kids };
+            } else if (supers[id]) {
+              var sl = supers[id].li;
+              supers[id].kids.forEach(function (k) { rootOl.insertBefore(k, sl); });
+              sl.parentNode.removeChild(sl);
+              delete supers[id];
+            }
+          });
+          syncSupers(true);
+        }
+        function syncSupers(instant) {
+          Object.keys(supers).forEach(function (id) {
+            var sp = supers[id], open = filterTerm ? filterOpen : state.open;
+            var shown = sp.kids.filter(function (k) { return !k.hidden; });
+            sp.li.hidden = !shown.length;
+            var childOpen = sp.kids.some(function (k) { return open.indexOf(k.getAttribute("data-g")) >= 0; });
+            var on = filterTerm ? shown.length > 0 : !!superOpen[id] || childOpen;
+            sp.btn.setAttribute("aria-expanded", on ? "true" : "false");
+            sp.li.classList.toggle("is-open", on);
+            if (on) { sp.wrap.hidden = false; sp.wrap.removeAttribute("inert"); if (instant || reduced()) sp.wrap.classList.add("is-open"); else { void sp.wrap.offsetHeight; sp.wrap.classList.add("is-open"); } }
+            else { sp.wrap.setAttribute("inert", ""); sp.wrap.classList.remove("is-open"); sp.wrap.hidden = true; }
+          });
         }
         function setFilter(v) {
           var t = String(v || "").trim();

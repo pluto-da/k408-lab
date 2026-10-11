@@ -70,7 +70,7 @@
           ],
           int: [
             { t: "中断周期开始", d: "当前指令执行完，CPU 检测到中断请求且允许中断（EINT=1），进入中断周期。这一段由硬件完成，称为“中断隐指令”。断点是 PC 中的 1001。", set: { PC: { v: "1001" }, IR: { v: "ADD 3000" }, MAR: { v: "3000" }, MDR: { v: "0005" }, ALU: { v: "ACC=0008" }, CU: { badge: "EINT=1" } }, kv: { "访存次数": "0" } },
-            { t: "(SP) − 1 → SP，(SP) → MAR", d: "栈指针减 1 得到栈顶地址 7FFF，送 MAR（也有教材把断点存到固定单元，同理）。", on: ["SP", "MAR"], go: ["sp_mar"], set: { SP: { v: "7FFF" }, MAR: { v: "7FFF" } } },
+            { t: "(SP) − 1 → SP，(SP) → MAR", d: "栈指针减 1 得到栈顶地址 7FFF，送 MAR（有的机器把断点存到约定的固定单元，道理相同）。", on: ["SP", "MAR"], go: ["sp_mar"], set: { SP: { v: "7FFF" }, MAR: { v: "7FFF" } } },
             { t: "1 → W", d: "CU 发写命令，准备把断点写入栈顶。", on: ["CU", "CB", "M"], go: ["cu_cb", "cb_m"] },
             { t: "(PC) → MDR", d: "断点 1001 送 MDR。", on: ["PC", "MDR"], go: ["pc_mdr"], set: { MDR: { v: "1001" } } },
             { t: "MDR → M(MAR)", d: "MDR 中的断点经数据总线写入主存 7FFF 单元，保存断点。", on: ["MDR", "DB", "M"], go: ["mdr_db", "db_m"], set: { M: { hi: 4, rows: [["1000", "ADD @2000"], ["1001", "下一条指令"], ["2000", "3000"], ["3000", "0005"], ["7FFF", "1001（断点）"], ["0040", "5000（向量）"], ["5000", "中断服务程序"]] } }, kv: { "访存次数": "1" } },
@@ -286,7 +286,7 @@
           return { w: 880, h: 640, nodes: nodes, edges: edges, steps: S };
         }
         PROC.push({
-          id: "tlbcache", name: "TLB + Cache 地址转换", sub: "co",
+          id: "tlbcache", name: "TLB + Cache 地址转换", sub: "co", toc: "TLB + Cache",
           lead: "输入一个虚拟地址，按“拆字段 → 查 TLB → 拼物理地址 → 查 Cache”逐步算。可以切换 TLB 和 Cache 的命中情况。",
           note: ["虚拟地址 = 虚页号 ‖ 页内偏移；组相联 TLB 再把虚页号拆成 标记 ‖ 组号。", "物理地址 = 页框号 ‖ 页内偏移；Cache 再把它拆成 标记 ‖ 组号 ‖ 块内地址。", "Cache 标记位数 = 物理地址位数 − 组号位数 − 块内地址位数。", "TLB 命中与否只影响地址转换；Cache 命中与否只影响取数据。"],
           inputs: [

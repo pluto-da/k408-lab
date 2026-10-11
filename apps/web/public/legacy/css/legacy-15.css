@@ -9,25 +9,28 @@
 html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* ---------- 容器与留白 ---------- */
+/* 容器宽度与左右留白直接取顶栏（React 外壳）的 --max / --gut，两边在所有断点下左右边缘对齐。
+   顶栏内容区 = --max − 2 × --gut；实验室页面整体 zoom 时把宽度和留白除以 --x-z，换算回同样的屏幕像素。 */
 :root {
-  --x-gut: 16px;
-  --x-max: 1200px;
+  --x-gut: var(--gut, 16px);
+  --x-max: var(--max, 1200px);
   --x-z: 1;
   --x-padl: calc(var(--x-gut) + env(safe-area-inset-left, 0px));
   --x-padr: calc(var(--x-gut) + env(safe-area-inset-right, 0px));
 }
-@media (min-width: 768px) { :root { --x-gut: 24px; } }
-@media (min-width: 1280px) { :root { --x-gut: 32px; } }
-@media (min-width: 1600px) { :root { --x-max: 1440px; --x-z: 1.0625; } }
-@media (min-width: 2200px) { :root { --x-max: 1680px; --x-z: 1.125; } }
+@media (min-width: 1600px) { :root { --x-z: 1.0625; } }
+@media (min-width: 2200px) { :root { --x-z: 1.125; } }
 
 .page.x-page {
-  max-width: calc(var(--x-max) / var(--x-z) + var(--x-padl) + var(--x-padr));
-  padding-left: var(--x-padl); padding-right: var(--x-padr);
+  max-width: calc((var(--x-max) + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)) / var(--x-z));
+  padding-left: calc(var(--x-padl) / var(--x-z)); padding-right: calc(var(--x-padr) / var(--x-z));
   padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
   overflow-wrap: break-word;
 }
-.x-tool { margin: 0 calc(-1 * var(--x-padr)) 0 calc(-1 * var(--x-padl)); padding-left: var(--x-padl); padding-right: var(--x-padr); }
+.x-tool {
+  margin: 0 calc(-1 * var(--x-padr) / var(--x-z)) 0 calc(-1 * var(--x-padl) / var(--x-z));
+  padding-left: calc(var(--x-padl) / var(--x-z)); padding-right: calc(var(--x-padr) / var(--x-z));
+}
 
 /* 大屏：整体放大（相当于根字号 17px / 18px），3D 画布与知识图谱反向抵消 */
 @media (min-width: 1600px) {
@@ -298,7 +301,10 @@ html.x-zoom-open, html.x-zoom-open body { overflow: hidden; }
   .x-prop__item { flex: none; width: auto; min-height: 44px; padding: 6px 12px; white-space: nowrap; scroll-snap-align: start; }
   .x-prop__item[aria-selected="true"]::before { left: 10px; right: 10px; top: auto; bottom: 0; width: auto; height: 3px; }
   .x-prop__empty { white-space: nowrap; }
+  .x-prop__item--s .x-prop__in { display: none; }
 }
+.x-prop__ins { display: none; }
+@media (max-width: 1023px) { .x-prop__item--s .x-prop__ins { display: inline; } }
 @media (min-width: 1024px) {
   .x-prop { --lw: 260px; }
   .x-prop__wrap {
@@ -379,4 +385,91 @@ html.x-zoom-open, html.x-zoom-open body { overflow: hidden; }
   .x-chip { padding: 0 4px; }
   .x-chip::before { margin-right: 4px; }
   .x-chips { gap: 2px; }
+}
+
+/* ==========================================================================
+   单步到头的轻提示（X.hint）与按钮轻抖
+   ========================================================================== */
+.x-lab__hint { margin: 0; padding: 6px 10px; border-radius: var(--x-r); background: #f3f3f0; color: var(--x-ink); font: 500 13px/1.45 var(--x-head); }
+.x-lab__hint[hidden] { display: none; }
+@media (max-width: 1023px) { .x-lab__panel > .x-lab__side > .x-lab__hint, .x-lab__side .x-lab__hint { margin: 8px clamp(14px, 3vw, 24px) 0; } }
+.x-proc__hint { margin: 8px 0 0; }
+@keyframes x-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.x-shake { animation: x-shake .36s ease 1; }
+@media (prefers-reduced-motion: reduce) { .x-shake { animation: none; } }
+
+/* ==========================================================================
+   横屏手机（高 ≤ 500）：实验选项收进画布右上角的“设置”，点开从右侧滑出浮层
+   ========================================================================== */
+.x-setbtn { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .x-lab__panel.is-compact .x-lab__main > .x-lab__opts { display: none; }
+  .x-lab__panel.is-compact .x-lab__main { padding-top: 52px; }
+  .x-lab__panel.is-compact .x-setbtn { display: inline-flex; position: absolute; top: 8px; right: 14px; z-index: 4; min-height: 40px; padding: 0 14px; }
+  .x-lab__panel.is-compact .x-setbtn[hidden] { display: none; }
+}
+.x-sheet__mask { position: fixed; inset: 0; z-index: 190; background: rgba(20, 22, 26, .32); opacity: 0; transition: opacity .2s; }
+.x-sheet__mask.is-open { opacity: 1; }
+.x-sheet__mask[hidden], .x-sheet[hidden] { display: none; }
+.x-sheet {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 191; display: flex; flex-direction: column;
+  width: min(440px, 88vw); background: #fff; border-left: 1px solid var(--x-line); box-shadow: var(--x-sh-2, 0 8px 24px rgba(0,0,0,.12));
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0;
+  transform: translateX(100%); transition: transform .22s ease;
+}
+.x-sheet.is-open { transform: none; }
+@media (prefers-reduced-motion: reduce) { .x-sheet, .x-sheet__mask { transition: none; } }
+.x-sheet__head { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--x-line); background: #fafaf8; }
+.x-sheet__t { flex: 1 1 auto; min-width: 0; margin: 0; font: 600 15px/1.3 var(--x-head); color: var(--x-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x-sheet__body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 12px; }
+.x-sheet__body .x-lab__opts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.x-sheet__foot { flex: none; display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid var(--x-line); }
+.x-sheet__foot .x-lab__btn { min-width: 96px; }
+html.x-sheet-open, html.x-sheet-open body { overflow: hidden; }
+
+/* ==========================================================================
+   平板竖屏（768–1023）：画布下方分两列——左列控制条与提示、考点，右列输出（统计与当前步骤）；
+   输出表格较宽的实验（.is-wide2）输出区整宽放在最下方
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .x-lab__panel.is-tab2 {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-flow: row dense; align-items: start;
+  }
+  .x-lab__panel.is-tab2[hidden] { display: none; }
+  .x-lab__panel.is-tab2 .x-lab__main { grid-column: 1 / -1; }
+  .x-lab__panel.is-tab2 .x-lab__ctrl {
+    grid-column: 1; position: static; margin: 12px 0 0 clamp(14px, 3vw, 24px); padding: 0;
+    background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .x-lab__panel.is-tab2 .x-lab__ctrl .x-lab__speed { grid-column: 1 / -1; justify-self: stretch; max-width: none; }
+  .x-lab__panel.is-tab2 .x-lab__hint { grid-column: 1; }
+  .x-lab__panel.is-tab2 .x-lab__note { grid-column: 1; border-top: 0; margin-top: 8px; }
+  .x-lab__panel.is-tab2 .x-lab__out { grid-column: 2; grid-row: 2 / span 3; padding-top: 12px; border-left: 1px solid var(--x-line); }
+  .x-lab__panel.is-tab2.is-wide2 .x-lab__note { grid-column: 2; grid-row: 2 / span 2; margin-top: 12px; border-left: 1px solid var(--x-line); }
+  .x-lab__panel.is-tab2.is-wide2 .x-lab__out { grid-column: 1 / -1; grid-row: auto; border-left: 0; border-top: 1px solid var(--x-line); margin-top: 12px; }
+}
+
+/* ==========================================================================
+   过程图解 1024–1600：放不下侧栏时画布全宽，“全部步骤”变成画布下方的横向步骤条；
+   “显示侧栏”强制并排时画布按比例缩小（最小字号仍 ≥ 10px，由 11-proc-core.js 判断）
+   ========================================================================== */
+.x-proc__sidebtn[hidden] { display: none; }
+@media (min-width: 1024px) {
+  .x-proc__body.is-bar .x-proc__side { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px 16px; align-items: start; padding-top: 4px; }
+  .x-proc__body.is-bar .x-proc__all { grid-column: 1 / -1; grid-row: 1; margin-top: 8px; }
+  .x-proc__body.is-bar .x-proc__all > summary { display: none; }
+  .x-proc__body.is-bar .x-proc__steps {
+    display: flex; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 0 0 4px; overflow-x: auto; scrollbar-width: thin;
+    border-bottom: 1px solid var(--x-line);
+  }
+  .x-proc__body.is-bar .x-proc__steps li { flex: none; max-width: 15em; }
+  .x-proc__body.is-bar .x-proc__steps button { min-height: 44px; padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 15em; font-size: 13px; }
+  .x-proc__body.is-bar .x-proc__steps .is-cur button { box-shadow: inset 0 -3px 0 var(--c, var(--x-primary)); }
+  .x-proc__body.is-bar .x-proc__ctrl { grid-column: 1 / -1; grid-row: 2; margin-top: 0; }
+  .x-proc__body.is-bar .x-proc__hint { grid-column: 1 / -1; grid-row: 3; margin: 0; }
+  .x-proc__body.is-bar .x-proc__card { grid-column: 1; grid-row: 4; margin-top: 0; }
+  .x-proc__body.is-bar .x-proc__kv { grid-column: 2; grid-row: 4; margin-top: 0; }
+  .x-proc__body.is-split.is-forced .x-proc__stage svg { min-width: min(var(--x-svgmin-f, 0px), 100%) !important; }
+  .x-proc__body.is-split .x-proc__ctrl .x-proc__sidebtn { grid-column: 1 / -1; }
 }

@@ -236,25 +236,48 @@
             '<button type="button" class="x-lab__btn" data-a="next" aria-label="下一步">下一步</button>' +
             '<button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
             '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5" aria-label="播放速度"></label>' +
-            '<span class="x-proc__count" aria-hidden="true"></span></div>' +
+            '<span class="x-proc__count" aria-hidden="true"></span>' +
+            '<button type="button" class="x-lab__btn x-lab__btn--ghost x-proc__sidebtn" aria-pressed="false" hidden>显示侧栏</button></div>' +
+            '<p class="x-lab__hint x-proc__hint" role="status" hidden></p>' +
             '<div class="x-proc__card" aria-live="polite"><p class="x-proc__meta"></p><h4 class="x-proc__t"></h4><p class="x-proc__d"></p><p class="x-proc__tip"></p></div>' +
             '<div class="x-proc__kv"></div>' +
             '<details class="x-proc__all" open><summary>全部步骤</summary><ol class="x-proc__steps"></ol></details>' +
             '</div><aside class="x-proc__note"><b>考点</b><ul></ul></aside>');
-          /* 双栏判断：侧栏取剩余宽度（最多 38%），画布不小于图解的最小宽度、侧栏不窄于 280px 时才并排，否则上下排列 */
+          /* 双栏判断：侧栏取剩余宽度（最多 38%），画布不小于图解的最小宽度、侧栏不窄于 280px 时才并排。
+             ≥1024 但放不下时：画布全宽，“全部步骤”变成画布下方的横向步骤条（.is-bar）；
+             可点“显示侧栏”强制并排，此时画布按比例缩小，只要图解最小字号（约 12px）缩放后仍不小于 10px；做不到就保持全宽并提示。 */
           var splitMq = window.matchMedia ? window.matchMedia("(min-width: 1024px)") : null;
+          var forceSide = false, SIDE_MIN = 300, FONT_K = 10 / 12;
           function fitSplit() {
             var svg = body.querySelector(".x-proc__stage svg"), mw = svg ? parseFloat(svg.style.minWidth) || 0 : 0, bw = body.clientWidth;
+            var wide = !!(splitMq && splitMq.matches);
             var side = Math.min(Math.round(bw * 0.38), bw - mw - 56);
-            var ok = !!(splitMq && splitMq.matches) && side >= 280;
+            var ok = wide && side >= 280, forced = false;
+            if (wide && !ok && forceSide) {
+              var room = bw - SIDE_MIN - 56;
+              if (room >= mw * FONT_K) { ok = true; forced = true; side = SIDE_MIN; body.style.setProperty("--x-svgmin-f", Math.floor(room) + "px"); }
+              else { forceSide = false; X.hint(q(".x-proc__hint"), "当前宽度放不下侧栏，已保持画布全宽"); }
+            }
+            if (!forced) body.style.removeProperty("--x-svgmin-f");
             if (ok) body.style.setProperty("--x-side", side + "px"); else body.style.removeProperty("--x-side");
             if (body.classList.contains("is-split") !== ok) body.classList.toggle("is-split", ok);
+            body.classList.toggle("is-forced", forced);
+            var bar = wide && !ok;
+            body.classList.toggle("is-bar", bar);
+            var sb = q(".x-proc__sidebtn");
+            if (sb) {
+              /* 只有强制并排确实可行（缩放后字号仍 ≥ 10px）时才显示按钮 */
+              sb.hidden = !(forced || (bar && bw - SIDE_MIN - 56 >= mw * FONT_K));
+              sb.textContent = forced ? "隐藏侧栏" : "显示侧栏";
+              sb.setAttribute("aria-pressed", forced ? "true" : "false");
+            }
           }
           if (window.ResizeObserver) new ResizeObserver(function () { fitSplit(); }).observe(body);
           else window.addEventListener("resize", fitSplit);
           root.appendChild(tabs);
           root.appendChild(body);
           var q = function (s) { return body.querySelector(s); };
+          q(".x-proc__sidebtn").addEventListener("click", function () { forceSide = !forceSide; fitSplit(); });
           var opts = q(".x-proc__opts"), stage = q(".x-proc__stage"), ctrl = q(".x-proc__ctrl"), card = q(".x-proc__card"), kvBox = q(".x-proc__kv"), list = q(".x-proc__steps"), all = q(".x-proc__all");
           var play = q('[data-a="play"]'), speed = q(".x-lab__speed input"), count = q(".x-proc__count");
           var cur = null, mode = 0, inp = {}, flow = null, circ = null, pos = 0, timer = null;
@@ -449,13 +472,23 @@
           body.addEventListener("keydown", function (e) {
             var t = e.target.tagName;
             if (t === "INPUT" || t === "SELECT" || t === "TEXTAREA") return;
-            if (e.key === "ArrowRight") { e.preventDefault(); stop(); showStep(pos + 1, true); }
-            if (e.key === "ArrowLeft") { e.preventDefault(); stop(); showStep(pos - 1, false); }
+            if (e.key === "ArrowRight") { e.preventDefault(); stop(); if (!edge("next")) showStep(pos + 1, true); }
+            if (e.key === "ArrowLeft") { e.preventDefault(); stop(); if (!edge("prev")) showStep(pos - 1, false); }
+            if ((e.key === "r" || e.key === "R") && !e.ctrlKey && !e.metaKey && !e.altKey && !ctrl.hidden) { e.preventDefault(); q('[data-a="reset"]').click(); }
             if ((e.key === " " || e.key === "Spacebar") && t !== "BUTTON" && t !== "SUMMARY" && t !== "A" && !ctrl.hidden) { e.preventDefault(); play.click(); }
           });
+          /* 单步到头：第 0 步按“上一步”、最后一步按“下一步”时给出轻提示，返回 true 表示已处理 */
+          function edge(a) {
+            var n = total();
+            if (!n || ctrl.hidden) return false;
+            if (a === "prev" && pos <= 0) { X.hint(q(".x-proc__hint"), "已经是第一步", q('[data-a="reset"]')); return true; }
+            if (a === "next" && pos >= n - 1) { X.hint(q(".x-proc__hint"), "已到最后一步，按 R 或点“重置”重新开始", q('[data-a="next"]')); return true; }
+            return false;
+          }
           /* 供键盘快捷键调用（28-rwd.js）：a = "next" | "prev" | "play" | "reset" */
           window.X_PROC_ACT = function (a) {
             var b = q('[data-a="' + a + '"]');
+            if ((a === "next" || a === "prev") && edge(a)) return true;
             if (!b || ctrl.hidden || b.disabled) return false;
             b.click();
             return true;

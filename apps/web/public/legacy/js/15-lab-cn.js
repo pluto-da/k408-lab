@@ -148,7 +148,7 @@
       if (!ln) continue;
       var f = ln.split(/[\s,，]+/), m = /^(\d{1,3}(?:\.\d{1,3}){3})\/(\d{1,2})$/.exec(f[0]);
       var where = "路由表第 " + (rows.length + 1) + " 行“" + ln + "”：";
-      if (!m) return E(where + "目的网络应写成 a.b.c.d/前缀，例如 128.96.39.0/25");
+      if (!m) return E(where + "目的网络应写成 a.b.c.d/前缀，例如 203.0.113.0/25");
       var net = LABU.parseIp(m[1]), len = parseInt(m[2], 10);
       if (isNaN(net)) return E(where + "IP 地址每段应在 0–255 之间");
       if (len > 32) return E(where + "前缀长度应在 0–32 之间");
@@ -163,7 +163,7 @@
   /* table: [{ net: 数或点分串, len, hop, ifc }]，ip: 数或点分串 */
   LABU.lpm = function (table, ip) {
     var d = typeof ip === "number" ? ip : LABU.parseIp(ip);
-    if (isNaN(d)) return E("目的 IP 格式应为 a.b.c.d，每段 0–255，例如 128.96.39.10");
+    if (isNaN(d)) return E("目的 IP 格式应为 a.b.c.d，每段 0–255，例如 203.0.113.10");
     var rows = [], best = -1;
     for (var i = 0; i < table.length; i++) {
       var t = table[i], net = typeof t.net === "number" ? t.net : LABU.parseIp(t.net), m = LABU.mask(t.len), and = (d & m) >>> 0;
@@ -527,7 +527,7 @@
 
   /* ================= 实验 1：滑动窗口 ================= */
   LAB.push({
-    id: "slidewin", name: "滑动窗口：停等 / GBN / SR", color: CN,
+    id: "slidewin", name: "滑动窗口：停等 / GBN / SR", color: CN, toc: "滑动窗口协议",
     note: "n 位序号：GBN 发送窗口 ≤ 2^n − 1、接收窗口 = 1，累积确认，超时回退重发全部已发未确认帧；SR 接收窗口 ≤ 2^(n−1)、W_T + W_R ≤ 2^n，逐帧确认、只重发出错帧，接收方缓存乱序帧；停等就是窗口为 1。信道利用率 U = W·T_d /(T_d + RTT)，超过 1 按 1 算。",
     mount: function (panel, K) {
       var mode = "gbn", S, pos;
@@ -640,7 +640,7 @@
   /* ================= 实验 2：CSMA/CD 与二进制指数退避 ================= */
   LAB.push({
     id: "csmacd", name: "CSMA/CD 与指数退避", color: CN,
-    note: "先听后发、边发边听、冲突停发、随机重发。第 k 次碰撞后 r ∈ [0, 2^min(k,10) − 1]，退避 r × 2τ；16 次碰撞放弃。最短帧长 = 2τ × 数据率，10Mb/s 以太网为 512 bit = 64 字节；争用期内没检测到碰撞才能确定这次发送不会碰撞。",
+    note: "站点发送前先监听信道，发送过程中持续检测；一旦发现碰撞就立刻停下，发一段干扰信号，然后等一个随机时间再试。第 k 次碰撞后 r ∈ [0, 2^min(k,10) − 1]，退避 r × 2τ；16 次碰撞放弃。最短帧长 = 2τ × 数据率，10Mb/s 以太网为 512 bit = 64 字节；争用期内没检测到碰撞才能确定这次发送不会碰撞。",
     mount: function (panel, K) {
       var fk = field(K, "第几次冲突 k", "3"), ft = field(K, "争用期 2τ (μs)", "51.2", "s", "decimal"), fr = field(K, "随机数 r", "5"), fv = field(K, "数据率 (Mb/s)", "10", "s", "decimal");
       br(K);
@@ -714,7 +714,7 @@
       var MSG = [
         "两个站 A、B 连在同一条总线上，单程传播时延 τ。按“下一步”看一次碰撞、强化干扰和二进制指数退避；k、r 可以在上方修改。",
         "① 载波监听：站 A 先监听信道，信道空闲，立即开始发送；A 的信号以有限速度沿总线向 B 传播。",
-        "② 站 B 也有数据要发：A 的信号还没传到 B，B 监听到的仍是“空闲”，于是也开始发送——传播时延让“先听后发”也避免不了碰撞。",
+        "② 站 B 也有数据要发：A 的信号还没传到 B，B 监听到的仍是“空闲”，于是也开始发送——传播需要时间，所以“发送前先监听”也挡不住碰撞。",
         "③ 两路信号在总线中途相遇发生碰撞，叠加后的碰撞信号继续向两端传播；此时 A、B 都还没察觉。",
         "④ 冲突检测：A、B 边发送边监听，检测到信号电压异常后立即停止发送，并发送 32 位（或 48 位）强化干扰信号，让所有站都知道发生了碰撞。"
       ];
@@ -763,12 +763,12 @@
       var mode = "calc", S, pos, N, err;
       var setMode = group(K, [["calc", "发送端：求 FCS"], ["check", "接收端：校验"]], mode, function (m) { mode = m; K.restart(); });
       br(K);
-      var fd = field(K, "数据位", "101001", "m"), fg = field(K, "生成多项式", "1101", "m", "text"), fr = field(K, "接收位串", "101001001", "w");
+      var fd = field(K, "数据位", "110101", "m"), fg = field(K, "生成多项式", "1011", "m", "text"), fr = field(K, "接收位串", "110101111", "w");
       br(K);
       tag(K, "例题");
-      preset(K, "101001 ÷ 1101", function () { mode = "calc"; setMode(mode); fd.value = "101001"; fg.value = "1101"; fr.value = "101001001"; });
+      preset(K, "110101 ÷ 1011", function () { mode = "calc"; setMode(mode); fd.value = "110101"; fg.value = "1011"; fr.value = "110101111"; });
       preset(K, "1101011011 ÷ x⁴+x+1", function () { mode = "calc"; setMode(mode); fd.value = "1101011011"; fg.value = "x^4+x+1"; fr.value = "11010110111110"; });
-      preset(K, "接收出错 101001011", function () { mode = "check"; setMode(mode); fg.value = "1101"; fr.value = "101001011"; });
+      preset(K, "接收出错 110100111", function () { mode = "check"; setMode(mode); fg.value = "1011"; fr.value = "110100111"; });
       var svg = svgIn(K, 680, 200), o = outs(K, ["st", "msg", "tip"]);
       function draw() {
         clear(svg);
@@ -931,14 +931,14 @@
   });
 
   /* ================= 实验 5：最长前缀匹配 ================= */
-  var LPM_DEF = "128.96.39.0/25 直接交付 接口0\n128.96.39.128/25 直接交付 接口1\n128.96.40.0/25 R2 接口1\n192.4.153.0/26 R3 接口2\n0.0.0.0/0 R4 接口2";
+  var LPM_DEF = "203.0.113.0/25 直接交付 接口0\n203.0.113.128/25 直接交付 接口1\n198.51.100.0/24 R2 接口1\n198.51.100.64/26 R3 接口2\n0.0.0.0/0 R4 接口2";
   var LPM_B = "172.16.0.0/16 R1 接口0\n172.16.5.0/24 R2 接口1\n172.16.5.192/26 R3 接口2\n10.0.0.0/8 R4 接口3\n0.0.0.0/0 R5 接口3";
   LAB.push({
     id: "lpm", name: "最长前缀匹配", color: CN,
     note: "目的地址与每条表项的掩码逐位相与，结果等于该表项的网络地址就算匹配；所有匹配项中选前缀最长的（最具体）。默认路由 0.0.0.0/0 与任何地址都匹配，但前缀为 0，只有别的都不匹配时才用；都不匹配又没有默认路由就丢弃并发 ICMP 终点不可达。",
     mount: function (panel, K) {
       var S, P, pos, N, err;
-      var fi = field(K, "目的 IP", "128.96.39.10", "w", "decimal");
+      var fi = field(K, "目的 IP", "203.0.113.10", "w", "decimal");
       br(K);
       var tl = X.el("label", { class: "x-lab__lbl x-lc-f x-lc-f--ta" }, "路由表（每行：目的网络/前缀 下一跳 接口）");
       var ta = X.el("textarea", { class: "x-lc-ta", rows: 5, spellcheck: "false", autocapitalize: "off", "aria-label": "路由表" });
@@ -949,7 +949,7 @@
       var go = X.el("button", { type: "button", class: "x-lab__btn" }, "按新表重算");
       go.addEventListener("click", function () { K.restart(); }); K.opts.appendChild(go);
       tag(K, "例题");
-      preset(K, "128.96.39.10", function () { fi.value = "128.96.39.10"; ta.value = LPM_DEF; });
+      preset(K, "203.0.113.10", function () { fi.value = "203.0.113.10"; ta.value = LPM_DEF; });
       preset(K, "/16 与 /24 都匹配", function () { fi.value = "172.16.5.10"; ta.value = LPM_B; });
       preset(K, "走默认路由", function () { fi.value = "8.8.8.8"; ta.value = LPM_DEF; });
       var svg = svgIn(K, 680, 186), o = outs(K, ["st", "msg", "tbl", "tip"]);
@@ -1034,7 +1034,7 @@
   /* ================= 实验 6：数字编码 ================= */
   LAB.push({
     id: "encoding", name: "数字编码波形", color: CN,
-    note: "NRZ：高 1 低 0，整位不变；NRZI：遇 1 翻转、遇 0 不变；曼彻斯特：每位中间必跳变，跳变方向表示数据；差分曼彻斯特：中间跳变只作同步，位开始处有跳变表示 0、无跳变表示 1。后两者能自同步，但波特率是比特率的 2 倍。曼彻斯特的方向约定教材不一，以题目为准。",
+    note: "NRZ：高 1 低 0，整位不变；NRZI：遇 1 翻转、遇 0 不变；曼彻斯特：每位中间必跳变，跳变方向表示数据；差分曼彻斯特：中间跳变只作同步，位开始处有跳变表示 0、无跳变表示 1。后两者能自同步，但波特率是比特率的 2 倍。曼彻斯特用哪个跳变方向代表 1，不同资料并不统一，做题看题目给的约定。",
     mount: function (panel, K) {
       var conv = "hl", S, pos, N, err;
       var fb = field(K, "比特串", "0110", "w");
@@ -1099,7 +1099,7 @@
         err = S.err || null;
         if (err) { showErr(o, svg, err); return; }
         N = S.n + 2;
-        o.tip.textContent = "约定：站内默认曼彻斯特“位中间由高到低表示 1、由低到高表示 0”（国内教材和真题图示中较常见的画法）；IEEE 802.3 标准的定义正好相反。做题一律以题目给出的约定为准，可用上方按钮切换。";
+        o.tip.textContent = "约定：站内默认曼彻斯特“位中间由高到低表示 1、由低到高表示 0”（国内真题图示里较常见的画法）；IEEE 802.3 标准的定义正好相反。做题一律以题目给出的约定为准，可用上方按钮切换。";
         render();
       }
       function step() { if (err) return false; if (pos < N - 1) { pos++; render(); } return pos < N - 1; }

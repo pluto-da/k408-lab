@@ -37,7 +37,7 @@
         LABU.dsInfixTokens = function (s) {
           var t = String(s == null ? "" : s).replace(/（/g, "(").replace(/）/g, ")").replace(/[×＊]/g, "*").replace(/[÷／]/g, "/")
             .replace(/[−–—－]/g, "-").replace(/＋/g, "+").replace(/\s+/g, "");
-          if (!t) return { err: "请输入中缀表达式，例如 a+b*(c-d)-e/f" };
+          if (!t) return { err: "请输入中缀表达式，例如 a*(b-c)+d/e-f" };
           if (t.length > 60) return { err: "表达式太长：最多 60 个字符" };
           var tk = [], i = 0, k;
           while (i < t.length) {
@@ -785,10 +785,10 @@
           id: "infix", name: "中缀转后缀与求值", color: "var(--x-ds)",
           note: "转换规则：操作数直接输出；“(”直接入栈；“)”弹栈到“(”为止；运算符先弹出栈顶所有优先级不低于它的运算符（同级左结合也要弹），再入栈；扫描完把栈弹空。后缀表达式里操作数的相对次序与中缀相同，运算符次序可能变化，括号全部消失。后缀求值只用一个操作数栈：遇运算符弹两个，先弹出的是右操作数。选择题常问“栈中最多同时有几个运算符”，2012 年真题口径把“(”也算进去。",
           mount: function (panel, K) {
-            var expr = "a+b*(c-d)-e/f", inp;
+            var expr = "a*(b-c)+d/e-f", inp;
             inp = field(K.opts, "中缀表达式", expr, { "aria-label": "中缀表达式", inputmode: "text" }, function (v) { expr = v; K.restart(); });
             br(K);
-            presets(K, [["a+b*(c-d)-e/f", "a+b*(c-d)-e/f"], ["3+4*(2-1)-6/3", "3+4*(2-1)-6/3"], ["2012 真题", "a+b-a*((c+d)/e-f)+g"], ["(15-3)/(2+2)*5", "(15-3)/(2+2)*5"]].map(function (p) {
+            presets(K, [["a*(b-c)+d/e-f", "a*(b-c)+d/e-f"], ["6*(5-3)+8/4-1", "6*(5-3)+8/4-1"], ["2012 真题", "a+b-a*((c+d)/e-f)+g"], ["(15-3)/(2+2)*5", "(15-3)/(2+2)*5"]].map(function (p) {
               return [p[0], function () { expr = p[1]; inp.value = expr; K.restart(); }];
             }));
             var o = ui(K);
@@ -870,7 +870,7 @@
         /* ======================= 实验 2：循环队列 ======================= */
         LAB.push({
           id: "cqueue", name: "循环队列", color: "var(--x-ds)",
-          note: "入队 rear = (rear + 1) % MaxSize，出队 front = (front + 1) % MaxSize。只靠 front == rear 无法区分空和满，三种办法：①牺牲一个单元，队满 (rear + 1) % MaxSize == front，最多存 MaxSize − 1 个；②增设 size，队空 size == 0、队满 size == MaxSize；③增设 tag，入队置 1、出队置 0，front == rear 时 tag 为 0 是空、为 1 是满。队列长度 (rear − front + MaxSize) % MaxSize。注意题目约定：有的教材让 rear 指向队尾元素本身，此时公式整体差 1。",
+          note: "入队 rear = (rear + 1) % MaxSize，出队 front = (front + 1) % MaxSize。光看 front == rear 分不出是空还是满，常见的解决办法有三种：少用一个单元，队满写成 (rear + 1) % MaxSize == front，最多存 MaxSize − 1 个；或者另设计数 size，队空 size == 0、队满 size == MaxSize；或者另设标志 tag，入队置 1、出队置 0，front == rear 时看 tag，0 是空、1 是满。切换上面的方案，对照同一串操作的结果。队列长度 (rear − front + MaxSize) % MaxSize。如果题目让 rear 指向队尾元素本身而不是它的下一个位置，上面的公式都要相应差 1，先看清题目怎么约定。",
           mount: function (panel, K) {
             var N = 6, sc = "sac", ops = LABU.CQ_DEF.slice(), nextV = "i", iN, iV;
             iN = field(K.opts, "MaxSize", String(N), { inputmode: "numeric", "aria-label": "队列容量 MaxSize（3–10）" }, function (v) { var t = parseInt(v, 10); N = t; K.restart(); }, true);
@@ -971,7 +971,7 @@
             br(K);
             btnGroup(K.opts, [["next", "按 next 匹配"], ["nextval", "按 nextval 匹配"], ["naive", "朴素匹配"]], mode, function (v) { mode = v; K.restart(); }, "匹配方式");
             br(K);
-            presets(K, [["2019 真题（比较 10 次）", "abaabaabcabaabc", "abaabc"], ["2015 真题", "abaabaabacacaabaabcc", "abaabc"], ["nextval 优势", "aaabaaaab", "aaaab"], ["ababaaababaa", "ababaabababaaababaa", "ababaaababaa"]].map(function (p) {
+            presets(K, [["2019 真题（比较 10 次）", "abaabaabcabaabc", "abaabc"], ["2015 真题", "abaabaabacacaabaabcc", "abaabc"], ["nextval 优势", "aaabaaaab", "aaaab"], ["abaabcabab", "abaababaabcababc", "abaabcabab"]].map(function (p) {
               return [p[0], function () { S0 = p[1]; P0 = p[2]; iS.value = S0; iP.value = P0; K.restart(); }];
             }));
             var o = ui(K);
@@ -1095,10 +1095,10 @@
           id: "huffman", name: "哈夫曼树与编码", color: "var(--x-ds)",
           note: "每次从森林中选两棵根权值最小的树合并，新根权值为两者之和；n 个叶子合并 n − 1 次，结点总数 2n − 1，没有度为 1 的结点。WPL = Σ 叶子权值 × 路径长度 = 所有非叶结点权值之和。权值相同时选法不同、左右次序不同，哈夫曼树不唯一，但 WPL 相同且最小。哈夫曼编码是前缀编码（任何编码都不是另一个的前缀），左 0 右 1 只是约定。",
           mount: function (panel, K) {
-            var txt = "7 5 2 4", inp;
+            var txt = "8 3 5 2", inp;
             inp = field(K.opts, "权值", txt, { "aria-label": "权值序列，可写成 a:45 b:13" }, function (v) { txt = v; K.restart(); });
             br(K);
-            presets(K, [["7 5 2 4", "7 5 2 4"], ["2023 真题 3 4 5 6 8 10", "3 4 5 6 8 10"], ["经典示例·8 字符", "a:5 b:29 c:7 d:8 e:14 f:23 g:3 h:11"], ["a:45 b:13 c:12 d:16 e:9 f:5", "a:45 b:13 c:12 d:16 e:9 f:5"]].map(function (p) {
+            presets(K, [["8 3 5 2", "8 3 5 2"], ["2023 真题 3 4 5 6 8 10", "3 4 5 6 8 10"], ["示例·8 字符", "a:6 b:21 c:9 d:4 e:15 f:27 g:2 h:16"], ["a:45 b:13 c:12 d:16 e:9 f:5", "a:45 b:13 c:12 d:16 e:9 f:5"]].map(function (p) {
               return [p[0], function () { txt = p[1]; inp.value = txt; K.restart(); }];
             }));
             var o = ui(K), tv = treeView();
@@ -1209,14 +1209,14 @@
           id: "btree", name: "B 树插入与删除", color: "var(--x-ds)",
           note: "m 阶 B 树：每个结点至多 m 棵子树、m − 1 个关键字；非根结点至少 ⌈m/2⌉ 棵子树、⌈m/2⌉ − 1 个关键字；根至少 1 个关键字；所有叶结点（终端结点）在同一层。插入总在终端结点，溢出时从第 ⌈m/2⌉ 个关键字处分裂、中间关键字上移，分裂到根时树长高。删除非终端结点的关键字先用前驱（或后继）替代；下溢时兄弟够借就“父下移、兄上移”，不够借就与兄弟及父结点的分隔关键字合并，合并可能一路传到根使树变矮。含 n 个关键字的 m 阶 B 树高度 h ≤ log⌈m/2⌉((n+1)/2) + 1。",
           mount: function (panel, K) {
-            var m = 3, ks = "53 75 139 49 145 36 101 20 66 88", ds = "36 145 53 88", iK, iD;
+            var m = 3, ks = "42 18 77 63 95 25 51 88 9 70", ds = "25 95 42 70", iK, iD;
             var mg = btnGroup(K.opts, [[3, "3 阶"], [4, "4 阶"], [5, "5 阶"]], m, function (v) { m = v; K.restart(); }, "阶数 m");
             br(K);
             iK = field(K.opts, "插入序列", ks, { inputmode: "numeric", "aria-label": "依次插入的关键字" }, function (v) { ks = v; K.restart(); });
             iD = field(K.opts, "删除序列", ds, { inputmode: "numeric", placeholder: "可留空", "aria-label": "插入后依次删除的关键字" }, function (v) { ds = v; K.restart(); });
             br(K);
             presets(K, [
-              ["3 阶 插入 + 删除", 3, "53 75 139 49 145 36 101 20 66 88", "36 145 53 88"],
+              ["3 阶 插入 + 删除", 3, "42 18 77 63 95 25 51 88 9 70", "25 95 42 70"],
               ["2020 真题（4 阶）", 4, "5 6 9 13 8 2 12 15", ""],
               ["3 阶 10 20 30 …", 3, "10 20 30 40 50 60 70 80 90", "40 10 90"],
               ["5 阶 借与合并", 5, "1 2 3 4 5 6 7 8 9 10 11 12 13", "4 3 13 8"]

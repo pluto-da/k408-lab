@@ -11,6 +11,8 @@
  *   AUDIT_VIEWPORTS  只跑部分视口，按名称或宽度匹配，逗号分隔，如 "320,1920,横屏手机"
  *   AUDIT_BASELINE   上一次的 results.json；给出时逐项对比，列出变差的项
  *   AUDIT_SHOTS      all（默认，每页都截图）| key（只截 / /lab /pc）| none
+ *   AUDIT_REAL_API   1 时不模拟登录（线上实测个人中心时用，需在浏览器里已登录）；默认用模拟的 /api/me 让 /profile 以登录状态渲染
+ *   AUDIT_DEEP       1 时在 /lab 逐个打开全部实验、图解、性质，检查是否溢出内容列（较慢，默认关）
  *   PLAYWRIGHT_CORE  playwright-core 路径（默认 /workspace/work/pw/node_modules/playwright-core，再退回 require("playwright-core")）
  *   CHROMIUM         浏览器可执行文件（默认 /usr/bin/chromium）
  *
@@ -22,8 +24,14 @@
  *   line       正文段落每行约多少个汉字（宽度 / 字号），取最大值
  *   scene      /pc：3D 场景未被顶部、底部控件遮挡的高度占视口高度的比例
  *   errors     页面 JS 异常与 console.error（忽略预览环境下 /api 请求失败）
+ * /lab 额外检查（原先散落在工作目录里的实验室适配脚本，合并到这里统一回归）：
+ *   align      顶栏内容区与实验室内容区左右边缘差（像素，应 ≤ 1）
+ *   toc        目录形态（侧栏 / 面板）；<1024 打开目录面板后，收起状态是否一屏放下；320 宽与横屏手机为合并分组（6 行左右）
+ *   kbd        第 0 步按 ← 提示“已经是第一步”、最后一步按 → 提示“已到最后一步”且不重置
+ *   layout     平板竖屏实验面板两列（is-tab2）、横屏手机“设置”浮层可打开并用 Esc 关闭、1024–1600 图解横向步骤条（is-bar）或并排
+ *   deep       （AUDIT_DEEP=1）逐个打开实验 / 图解 / 性质，记录溢出内容列或整页的条目
  * 结果：控制台表格 + AUDIT_OUT/results.json + AUDIT_OUT/report.md + 截图。
- * 退出码：有横向溢出或 JS 异常时为 1。
+ * 退出码：有横向溢出、JS 异常或 /lab 额外检查发现问题时为 1。
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -65,7 +73,7 @@ const VIEWPORTS = [
   ["1080p", 1920, 1080, false],
   ["2K", 2560, 1440, false],
 ];
-const ROUTES = ["/", "/lab", "/pc", "/login", "/register", "/terms", "/privacy", "/nope"];
+const ROUTES = ["/", "/lab", "/pc", "/login", "/register", "/terms", "/privacy", "/profile", "/nope"];
 
 function pick(list, env, key) {
   if (!env) return list;
@@ -176,6 +184,90 @@ function measure({ touch }) {
   return { W, H, sw, off, tiny, small, smallList, content, contentSel, line, bodyFs, rootFs, scene };
 }
 
+/** /lab 额外检查，在页面里执行 */
+async function labChecks({ w, h, deep }) {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const o = { issues: [] };
+  const bi = document.querySelector(".app-bar__in"), lay = document.querySelector(".x-layout");
+  if (bi && lay) {
+    const a = bi.getBoundingClientRect(), cs = getComputedStyle(bi), l = lay.getBoundingClientRect();
+    o.align = Math.round(Math.max(Math.abs(a.left + parseFloat(cs.paddingLeft) - l.left), Math.abs(a.right - parseFloat(cs.paddingRight) - l.right)) * 10) / 10;
+    if (o.align > 1) o.issues.push("顶栏与内容区边缘差 " + o.align + "px");
+  }
+  const toc = document.getElementById("x-toc");
+  if (toc) {
+    o.toc = getComputedStyle(toc).position;
+    o.tocCompact = toc.classList.contains("x-toc--compact");
+    const wantCompact = w <= 340 || (w > h && h <= 500);
+    if (wantCompact !== o.tocCompact) o.issues.push("目录合并分组状态不对：" + o.tocCompact);
+    if (w >= 1024 && o.toc !== "sticky") o.issues.push("≥1024 目录不是左侧侧栏");
+    if (w < 1024) {
+      const was = toc.classList.contains("is-open");
+      toc.classList.add("is-open"); await sleep(60);
+      o.tocFits = toc.scrollHeight <= toc.clientHeight + 1;
+      if (!was) toc.classList.remove("is-open");
+      if (o.tocCompact && !o.tocFits) o.issues.push("小屏收起的目录一屏放不下");
+    }
+  }
+  const lab = [...document.querySelectorAll(".x-lab__panel")].find((x) => !x.hidden);
+  if (lab && window.X_LAB_ACT) {
+    const hb = lab.querySelector(".x-lab__hint");
+    window.X_LAB_ACT("reset"); await sleep(30);
+    window.X_LAB_ACT("back"); await sleep(30);
+    const first = hb && !hb.hidden && /第一步/.test(hb.textContent);
+    let n = 0;
+    while (n < 600 && !/最后一步/.test(hb.textContent)) { window.X_LAB_ACT("step"); n++; }
+    const last = /最后一步/.test(hb.textContent);
+    window.X_LAB_ACT("step"); await sleep(30);
+    const stay = /最后一步/.test(hb.textContent);
+    o.kbd = first && last && stay ? "ok" : `first=${first} last=${last} stay=${stay}`;
+    if (o.kbd !== "ok") o.issues.push("键盘边界：" + o.kbd);
+    window.X_LAB_ACT("reset");
+    o.labCls = lab.className.replace("x-lab__panel", "").trim();
+    if (w >= 768 && w <= 1023 && !(w > h && h <= 500) && !/is-tab2/.test(lab.className)) o.issues.push("平板竖屏实验面板没有两列");
+    if (w > h && h <= 500) {
+      const sb = lab.querySelector(".x-setbtn");
+      if (!sb || sb.hidden) o.issues.push("横屏手机没有“设置”按钮");
+      else {
+        sb.click(); await sleep(260);
+        const sh = document.querySelector(".x-sheet");
+        const opened = sh && !sh.hidden && sh.querySelector(".x-lab__opts");
+        sh.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await sleep(260);
+        const back = sh.hidden && lab.querySelector(".x-lab__main > .x-lab__opts");
+        o.sheet = opened && back ? "ok" : `open=${!!opened} back=${!!back}`;
+        if (o.sheet !== "ok") o.issues.push("设置浮层：" + o.sheet);
+      }
+    }
+  }
+  const pb = document.getElementById("x-proc-body");
+  if (pb) {
+    o.proc = /is-split/.test(pb.className) ? "split" : /is-bar/.test(pb.className) ? "bar" : "stack";
+    if (w >= 1024 && o.proc === "stack") o.issues.push("≥1024 图解仍是上下排列");
+  }
+  if (deep) {
+    const main = document.querySelector(".x-layout > :not(#x-toc)");
+    const cr = main.getBoundingClientRect();
+    const over = (root) => [...root.querySelectorAll("*")].filter((e) => {
+      if (!e.offsetParent) return false;
+      const r = e.getBoundingClientRect(); if (!r.width) return false;
+      for (let a = e.parentElement; a && a !== main; a = a.parentElement) { const ox = getComputedStyle(a).overflowX; if (ox === "auto" || ox === "scroll" || ox === "hidden" || ox === "clip") return false; }
+      return r.right > cr.right + 1;
+    }).length;
+    o.deep = [];
+    for (const [attr, fn, sec] of [["data-lab", "X_OPEN_LAB", "lab"], ["data-proc", "X_OPEN_PROC", "proc"], ["data-prop", "X_OPEN_PROP", "prop"]]) {
+      const ids = [...new Set([...document.querySelectorAll("#x-toc a[" + attr + "]")].map((a) => a.getAttribute(attr)))];
+      for (const id of ids) {
+        try { window[fn](id); } catch (e) { o.deep.push(sec + ":" + id + " 打开出错"); continue; }
+        await sleep(120);
+        if (over(document.getElementById(sec))) o.deep.push(sec + ":" + id + " 溢出内容列");
+        if (document.documentElement.scrollWidth > innerWidth + 1) o.deep.push(sec + ":" + id + " 整页横向溢出");
+      }
+    }
+    if (o.deep.length) o.issues.push("逐项检查：" + o.deep.slice(0, 6).join("，") + (o.deep.length > 6 ? " 等 " + o.deep.length + " 项" : ""));
+  }
+  return o;
+}
+
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch({
@@ -185,6 +277,10 @@ function measure({ touch }) {
   const results = [];
   for (const [name, w, h, touch] of vps) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1, hasTouch: touch, isMobile: touch && Math.min(w, h) < 600 });
+    /* 预览环境没有后端：模拟一个已登录用户，个人中心按登录状态渲染（数据为虚构的测试值） */
+    if (process.env.AUDIT_REAL_API !== "1") {
+      await ctx.route("**/api/me", (rt) => rt.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { id: "audit", username: "audit_user", email: "audit@example.com", nickname: "测试同学", createdAt: "2026-10-01T00:00:00.000Z" } }) }));
+    }
     for (const r of routes) {
       const page = await ctx.newPage();
       const errors = [];
@@ -210,6 +306,10 @@ function measure({ touch }) {
           await page.waitForTimeout(700);
         }
         Object.assign(row, await page.evaluate(measure, { touch }));
+        if (r === "/lab") {
+          row.lab = await page.evaluate(labChecks, { w, h, deep: process.env.AUDIT_DEEP === "1" }).catch((e) => ({ issues: ["实验室检查出错：" + String(e).slice(0, 120)] }));
+          await page.evaluate(() => window.scrollTo(0, 0));
+        }
         row.overflow = row.sw > row.W + 1;
         row.errors = errors;
         if (SHOTS === "all" || (SHOTS === "key" && ["/", "/lab", "/pc"].includes(r))) {
@@ -256,7 +356,10 @@ function measure({ touch }) {
     failed: results.filter((x) => x.fail).length,
     tiny: results.reduce((a, x) => a + (x.tiny || 0), 0),
     smallTouch: results.reduce((a, x) => a + (x.touch ? x.small || 0 : 0), 0),
+    labIssues: results.reduce((a, x) => a + ((x.lab && x.lab.issues.length) || 0), 0),
   };
+  const labLines = results.filter((x) => x.lab).map((x) => `${x.vp} 对齐差 ${x.lab.align ?? "-"}px · 目录 ${x.lab.toc}${x.lab.tocCompact ? "（合并）" : ""}${x.lab.tocFits === undefined ? "" : x.lab.tocFits ? " 一屏放下" : " 需滚动"} · 键盘 ${x.lab.kbd ?? "-"} · 实验 ${x.lab.labCls || "-"} · 图解 ${x.lab.proc ?? "-"}${x.lab.sheet ? " · 设置浮层 " + x.lab.sheet : ""}${x.lab.issues.length ? " · 问题：" + x.lab.issues.join("；") : ""}`);
+  if (labLines.length) console.log("\n/lab 额外检查:\n" + labLines.join("\n"));
   console.log("\n汇总:", JSON.stringify(sum));
   const detail = results.filter((x) => x.touch && x.small).map((x) => `${x.vp} ${x.route}: ${x.smallList.join(", ")}`);
   if (detail.length) console.log("\n小目标样例:\n" + detail.slice(0, 40).join("\n"));
@@ -280,7 +383,7 @@ function measure({ touch }) {
   fs.writeFileSync(path.join(OUT, "results.json"), JSON.stringify({ base: BASE, at: new Date().toISOString(), sum, results, regress }, null, 2));
   fs.writeFileSync(path.join(OUT, "report.md"), md + "\n\n汇总: " + JSON.stringify(sum) + "\n");
   console.log(`\n结果与截图：${OUT}`);
-  process.exit(sum.overflow || sum.jsErrors || sum.failed ? 1 : 0);
+  process.exit(sum.overflow || sum.jsErrors || sum.failed || sum.labIssues ? 1 : 0);
 })().catch((e) => {
   console.error(e);
   process.exit(2);
