@@ -10,6 +10,11 @@ function goToHash(hash: string) {
     document.getElementById("lab")?.scrollIntoView();
     return;
   }
+  const proc = /^proc-(.+)$/.exec(hash)?.[1];
+  if (proc && window.X_OPEN_PROC?.(proc)) {
+    document.getElementById("proc")?.scrollIntoView();
+    return;
+  }
   if ((hash === "board" || hash === "hero") && window.X_BOARD) {
     void window.X_BOARD.open().catch(() => undefined);
     document.getElementById("board")?.scrollIntoView();

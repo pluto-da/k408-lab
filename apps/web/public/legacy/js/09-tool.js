@@ -35,11 +35,13 @@
           var a = e.target.closest("a"); if (!a) return;
           var lab = a.getAttribute("data-lab");
           if (lab && window.X_OPEN_LAB) { e.preventDefault(); window.X_OPEN_LAB(lab); }
+          var pr = a.getAttribute("data-proc");
+          if (pr && window.X_OPEN_PROC) { e.preventDefault(); window.X_OPEN_PROC(pr); if (window.X) X.go("proc"); }
           setToc(false);
         });
 
         /* ---------- 当前所在区块：工具栏与目录同步高亮 ---------- */
-        var IDS = ["overview", "ds", "co", "os", "cn", "lab", "board", "links"];
+        var IDS = ["overview", "ds", "co", "os", "cn", "lab", "proc", "board", "links"];
         var secs = IDS.map(function (id) { return $(id); });
         var cur = null;
         function spy() {
@@ -68,7 +70,7 @@
           });
         });
         function filter() {
-          var term = q.value.trim().toLowerCase(), nCh = 0, nLab = 0, nLink = 0;
+          var term = q.value.trim().toLowerCase(), nCh = 0, nLab = 0, nLink = 0, nProc = 0;
           root.classList.toggle("is-searching", !!term);
           /* 章节 */
           Array.prototype.forEach.call(document.querySelectorAll(".x-subj"), function (sec) {
@@ -96,6 +98,19 @@
           if (selHidden && firstTab) firstTab.click();
           var labNone = !!term && !firstTab;
           $("lab").hidden = labNone;
+          /* 过程图解 */
+          var ptabs = document.querySelectorAll("#x-proc .x-proc__tab"), procs = window.PROC || [], firstP = null, pSelHidden = false;
+          Array.prototype.forEach.call(ptabs, function (t) {
+            var d = procs.filter(function (x) { return "ptab-" + x.id === t.id; })[0] || {};
+            var txt = (t.textContent + " " + (d.lead || "") + " " + (d.note || []).join(" ")).toLowerCase();
+            var hit = !term || txt.indexOf(term) >= 0;
+            t.hidden = !hit;
+            if (hit) { nProc++; if (!firstP) firstP = t; }
+            else if (t.getAttribute("aria-selected") === "true") pSelHidden = true;
+          });
+          Array.prototype.forEach.call(document.querySelectorAll("#x-proc .x-proc__grp"), function (g) { g.hidden = !g.querySelector(".x-proc__tab:not([hidden])"); });
+          if (pSelHidden && firstP) firstP.click();
+          if ($("proc")) $("proc").hidden = !!term && !firstP;
           /* 跨科连线（文字版） */
           Array.prototype.forEach.call(document.querySelectorAll("#x-links .x-lgrp"), function (g) {
             var any = 0;
@@ -106,7 +121,7 @@
             g.hidden = !any; nLink += any;
           });
           $("links").hidden = !!term && !nLink;
-          sum.textContent = term ? (nCh + nLab + nLink ? "找到 " + nCh + " 个章节 · " + (labNone ? 0 : nLab) + " 个实验 · " + nLink + " 条连线" : "没有找到“" + q.value.trim() + "”，换个关键词试试") : "";
+          sum.textContent = term ? (nCh + nLab + nLink + nProc ? "找到 " + nCh + " 个章节 · " + (labNone ? 0 : nLab) + " 个实验 · " + nProc + " 个图解 · " + nLink + " 条连线" : "没有找到“" + q.value.trim() + "”，换个关键词试试") : "";
           spy();
         }
         var ft = null;
@@ -114,7 +129,7 @@
         q.addEventListener("keydown", function (e) {
           if (e.key === "Enter") {
             e.preventDefault(); filter();
-            var t = Array.prototype.filter.call(document.querySelectorAll(".x-subj, #lab, #links"), function (s) { return !s.hidden; })[0];
+            var t = Array.prototype.filter.call(document.querySelectorAll(".x-subj, #lab, #proc, #links"), function (s) { return !s.hidden; })[0];
             if (t && window.X) X.go(t.id);
           }
         });
@@ -201,6 +216,14 @@
             li.appendChild(a); ol.appendChild(li);
           });
         }
-        if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", function () { setTimeout(fillToc, 0); });
-        else setTimeout(fillToc, 0);
+        function fillProcToc() {
+          var ol = $("x-toc-procs"); if (!ol || ol.children.length) return;
+          Array.prototype.forEach.call(document.querySelectorAll("#x-proc .x-proc__tab"), function (t) {
+            var li = document.createElement("li"), a = document.createElement("a");
+            a.href = "#proc"; a.textContent = t.textContent; a.setAttribute("data-proc", t.id.replace(/^ptab-/, ""));
+            li.appendChild(a); ol.appendChild(li);
+          });
+        }
+        if (window.__LEGACY_LOADER__) window.addEventListener("legacy:ready", function () { setTimeout(function () { fillToc(); fillProcToc(); }, 0); });
+        else setTimeout(function () { fillToc(); fillProcToc(); }, 0);
       })();

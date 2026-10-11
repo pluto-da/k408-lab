@@ -11,6 +11,7 @@ interface Window {
   X_BOARD?: { open: () => Promise<void>; close: () => void; isOpen: () => boolean };
   /** 切到实验室里的某个实验并滚过去（由 02-chapters.js 提供） */
   X_OPEN_LAB?: (id: string) => void;
+  X_OPEN_PROC?: (id: string) => boolean;
 }
 
 interface ImportMetaEnv {

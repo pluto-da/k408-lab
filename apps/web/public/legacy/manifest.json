@@ -2,13 +2,18 @@
   "css": [
     "css/legacy-01.css",
     "css/legacy-02.css",
-    "css/legacy-03.css"
+    "css/legacy-03.css",
+    "css/legacy-04.css"
   ],
   "scripts": [
     "js/01-x408-data.js",
     "js/02-chapters.js",
     "js/03-shared.js",
     "js/08-lab.js",
+    "js/11-proc-core.js",
+    "js/12-proc-circuit.js",
+    "js/13-proc-co.js",
+    "js/14-proc-os.js",
     "js/09-tool.js"
   ],
   "lazy": {
