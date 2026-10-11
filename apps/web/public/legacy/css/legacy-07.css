@@ -1,0 +1,106 @@
+/* ---------- 数据结构动画实验（一）（19-lab-ds1.js），类名前缀 x-d1- ---------- */
+.x-d1-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.x-d1-grp > .x-lab__lbl { margin-right: 2px; }
+.x-d1-f { flex: 1 1 240px; min-width: 0; max-width: 100%; }
+.x-d1-f .x-lab__in { flex: 1 1 auto; width: 100%; min-width: 0; }
+.x-d1-f--s { flex: 0 1 150px; }
+.x-d1-f--s .x-lab__in { width: 72px; flex: 1 1 72px; }
+
+.x-d1-say { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid var(--c, var(--x-ds, #3a8475)); background: #fafaf8; font: 400 14px/1.6 var(--x-head, sans-serif); color: var(--x-ink, #1a1c20); overflow-wrap: anywhere; min-height: 40px; }
+.x-d1-tip { margin: 10px 0 0; font: 400 12px/1.6 var(--x-head, sans-serif); color: var(--x-ink-2, #5b606b); overflow-wrap: anywhere; }
+.x-d1-tip:empty { display: none; }
+.x-d1-tbl td { font-variant-numeric: tabular-nums; }
+.x-lab .x-d1-tbl table, .x-d1-tbl table { min-width: 0; }
+.x-lab .x-d1-wrap table, .x-d1-wrap table { min-width: 480px; }
+.x-d1-wrap td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.x-d1-wrap td:first-child { white-space: nowrap; }
+.x-d1-kmp th, .x-d1-kmp td { text-align: center; padding: 6px 8px; }
+.x-d1-kmp td:first-child { text-align: left; white-space: nowrap; color: var(--x-ink-2, #5b606b); }
+.x-d1-tbl .x-d1-mono { font-family: var(--x-mono, monospace); white-space: nowrap; }
+.x-d1-scroll { max-height: 300px; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+.x-d1-scroll .x-tbl { margin-top: 0; }
+
+/* SVG 通用 */
+.x-d1-svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 0 auto; }
+.x-d1-t { fill: var(--x-ink, #1a1c20); font-family: var(--x-head, sans-serif); }
+.x-d1-mono { font-family: var(--x-mono, monospace); }
+.x-d1-b { font-weight: 600; }
+.x-d1-dim { fill: var(--x-ink-2, #5b606b); }
+.x-d1-acc { fill: var(--x-ds-ink, #2b6d60); }
+.x-d1-bad { fill: var(--x-bad, #b3261e); }
+.x-d1-box { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1; }
+.x-d1-box.is-was { fill: #f3f3f0; }
+.x-d1-box.is-empty { fill: #fff; stroke: var(--x-line-2, #c9cbd0); stroke-dasharray: 3 3; }
+.x-d1-box.is-hl { fill: #fdf3d8; stroke: #b07d12; stroke-width: 2.5; }
+.x-d1-box.is-top { fill: #e6f2ef; stroke: var(--x-ds, #3a8475); stroke-width: 2; }
+.x-d1-box.is-new { fill: #e6f2ef; stroke: var(--x-ds, #3a8475); stroke-width: 2; }
+.x-d1-box.is-ok { fill: #eaf5ef; stroke: #1f7a4d; stroke-width: 2; }
+.x-d1-box.is-bad { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 2.5; }
+.x-d1-box.is-pre { fill: #e3ebfb; }
+.x-d1-box.is-suf { fill: #fbe9e1; }
+.x-d1-ln { stroke: var(--x-ink-2, #5b606b); stroke-width: 1; fill: none; }
+.x-d1-wall { stroke: var(--x-ink, #1a1c20); stroke-width: 2; }
+.x-d1-brk { stroke-width: 3; stroke-linecap: round; }
+.x-d1-brk--a { stroke: #4766b3; }
+.x-d1-brk--b { stroke: #c0603e; }
+
+/* 循环队列 */
+.x-d1-slot { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1.2; }
+.x-d1-slot.is-full { fill: #e6f2ef; }
+.x-d1-slot.is-touch { stroke: #b07d12; stroke-width: 3; }
+.x-d1-slot.is-sac { fill: #f3f3f0; stroke-dasharray: 4 3; }
+.x-d1-ptr { stroke-width: 2; fill: none; }
+.x-d1-pf { stroke: var(--x-ds, #3a8475); }
+.x-d1-pr { stroke: #c0603e; }
+.x-d1-pf-t { fill: var(--x-ds-ink, #2b6d60); }
+.x-d1-pr-t { fill: #a34e2f; }
+.x-d1-arh { fill: var(--x-ink-2, #5b606b); }
+
+/* 树 */
+.x-d1-edge { stroke: var(--x-ink-2, #5b606b); stroke-width: 1.5; fill: none; transition: d .4s ease; }
+.x-d1-edge.is-hl { stroke: var(--x-ds, #3a8475); stroke-width: 3; }
+.x-d1-node { transition: transform .4s ease; }
+.x-d1-node circle { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1.5; }
+.x-d1-node.x-d1-lf circle { fill: #f7f6ef; }
+.x-d1-node.is-cur circle { fill: #fdf3d8; stroke: #b07d12; stroke-width: 3; }
+.x-d1-node.is-new circle { fill: #e6f2ef; stroke: var(--x-ds, #3a8475); stroke-width: 3; }
+.x-d1-node.is-bad circle { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 3; }
+.x-d1-node.is-piv circle { fill: #fbe9e1; stroke: #c0603e; stroke-width: 3; }
+.x-d1-node.is-piv2 circle { fill: #fdf3d8; stroke: #c0603e; stroke-width: 2; stroke-dasharray: 4 2; }
+.x-d1-node.is-done2 circle { fill: #f3f3f0; }
+.x-d1-node.is-leaf circle { fill: #e6f2ef; stroke: var(--x-ds, #3a8475); }
+.x-d1-node.is-path circle { fill: #fdf3d8; stroke: #b07d12; stroke-width: 2; }
+.x-d1-node.is-root circle { stroke: var(--x-ds, #3a8475); stroke-width: 3; }
+.x-d1-nt { fill: var(--x-ink, #1a1c20); font-family: var(--x-mono, monospace); font-weight: 600; }
+.x-d1-ns { fill: var(--x-ds-ink, #2b6d60); font-family: var(--x-mono, monospace); font-size: 13px; }
+.x-d1-nb { fill: var(--x-ink-2, #5b606b); font-family: var(--x-mono, monospace); font-size: 13px; }
+.x-d1-nb.is-bad { fill: var(--x-bad, #b3261e); font-weight: 700; }
+.x-d1-wbg { fill: #fff; stroke: none; }
+.x-d1-el { fill: var(--x-ink-2, #5b606b); font-family: var(--x-mono, monospace); }
+.x-d1-tag { fill: #fbe9e1; stroke: #c0603e; stroke-width: 1.5; }
+.x-d1-tag-t { fill: #a34e2f; font-weight: 700; }
+
+/* B 树 */
+.x-d1-bnode { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1.5; }
+.x-d1-bnode.is-cur { fill: #fdf3d8; stroke: #b07d12; stroke-width: 3; }
+.x-d1-bnode.is-new { fill: #e6f2ef; stroke: var(--x-ds, #3a8475); stroke-width: 3; }
+.x-d1-bnode.is-bad { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 3; }
+.x-d1-bnode.is-split { fill: #fbe9e1; stroke: #c0603e; stroke-width: 2.5; }
+.x-d1-bnode.is-piv { fill: #e3ebfb; stroke: #4766b3; stroke-width: 2.5; }
+.x-d1-bsep { stroke: var(--x-line-2, #c9cbd0); stroke-width: 1; }
+.x-d1-bedge { stroke: var(--x-ink-2, #5b606b); stroke-width: 1.5; }
+.x-d1-bedge.is-hl { stroke: var(--x-ds, #3a8475); stroke-width: 2.5; }
+
+/* 手机：画布可横向滑动，结点不被压得太小 */
+:is(#lab-infix, #lab-cqueue, #lab-kmp, #lab-huffman, #lab-bst, #lab-btree, #lab-ufset) .x-lab__stage { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+:is(#lab-infix, #lab-cqueue, #lab-kmp, #lab-huffman, #lab-bst, #lab-btree, #lab-ufset) .x-lab__stage > svg.x-d1-svg { min-width: 560px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .x-d1-node, .x-d1-edge { transition: none; }
+}
+@media (max-width: 760px) {
+  .x-d1-f { flex: 1 1 100%; }
+  .x-d1-f--s { flex: 1 1 40%; }
+  .x-d1-f--s .x-lab__in { width: auto; }
+  .x-d1-say { font-size: 13px; }
+}

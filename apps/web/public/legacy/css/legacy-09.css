@@ -1,0 +1,51 @@
+/* ---------- 数据结构动画实验（三）：散列表、折半查找、排序补充（21-lab-ds3.js），类名前缀 x-d3- ---------- */
+.x-d3-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.x-d3-grp > .x-lab__lbl { margin-right: 2px; }
+.x-d3-f { flex: 1 1 240px; min-width: 0; max-width: 100%; }
+.x-d3-f .x-lab__in { flex: 1 1 auto; width: 100%; min-width: 0; }
+.x-d3-f--s { flex: 0 1 170px; }
+.x-d3-f--s .x-lab__in { width: 88px; flex: 1 1 88px; }
+.x-d3-say { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid var(--c, var(--x-ds, #3a8475)); background: #fafaf8; font: 400 14px/1.6 var(--x-head, sans-serif); color: var(--x-ink, #1a1c20); overflow-wrap: anywhere; min-height: 40px; }
+.x-d3-tip { margin: 10px 0 0; font: 400 12px/1.6 var(--x-head, sans-serif); color: var(--x-ink-2, #5b606b); overflow-wrap: anywhere; }
+.x-d3-tip:empty { display: none; }
+.x-d3-asl { margin: 10px 0 0; padding: 8px 12px; background: #eef5f3; border-radius: 6px; font: 500 13px/1.7 var(--x-mono, monospace); color: var(--x-ink, #1a1c20); overflow-wrap: anywhere; }
+.x-lab .x-d3-tbl table, .x-d3-tbl table { min-width: 0; }
+.x-d3-tbl td { font-variant-numeric: tabular-nums; }
+.x-d3-tbl tr.is-cur td { background: #eef5f3; }
+.x-lab .x-d3-wrap table, .x-d3-wrap table { min-width: 420px; }
+.x-d3-wrap td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.x-d3-wrap td:first-child { white-space: nowrap; }
+.x-d3-mono { font-family: var(--x-mono, monospace); }
+
+/* SVG */
+.x-d3-svg { display: block; width: 100%; max-width: 100%; height: auto; }
+.x-d3-t { fill: var(--x-ink, #1a1c20); font-family: var(--x-head, sans-serif); }
+.x-d3-t.x-d3-mono { font-family: var(--x-mono, monospace); }
+.x-d3-b { font-weight: 600; }
+.x-d3-dim { fill: var(--x-ink-2, #5b606b); }
+.x-d3-p { fill: var(--x-ds-ink, #2b6d60); font-weight: 600; }
+.x-d3-cell { fill: #fff; stroke: var(--x-line-2, #c9cbd0); stroke-width: 1; }
+.x-d3-cell.is-out { fill: #f0f0ec; stroke: #dcdcd6; }
+.x-d3-cell.is-range { fill: #eef5f3; stroke: var(--x-ds, #3a8475); }
+.x-d3-cell.is-probe { fill: #fdf3d8; stroke: #c49431; stroke-width: 2; }
+.x-d3-cell.is-hit { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 2; }
+.x-d3-cell.is-new { fill: #d9efe8; stroke: var(--x-ds, #3a8475); stroke-width: 2.5; }
+.x-d3-cell.is-fail { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 2; stroke-dasharray: 4 3; }
+.x-d3-cell.is-done { fill: #e6f1ee; stroke: var(--x-ds, #3a8475); }
+.x-d3-cell.is-faded { opacity: .35; }
+.x-d3-g0 { fill: #e3ebfb; stroke: #4766b3; }
+.x-d3-g1 { fill: #fbe3da; stroke: #c0603e; }
+.x-d3-g2 { fill: #f6ecd2; stroke: #c49431; }
+.x-d3-g3 { fill: #dff0ea; stroke: #3a8475; }
+.x-d3-g4 { fill: #ece3f6; stroke: #7a52a8; }
+.x-d3-g5 { fill: #f0f0ec; stroke: #5b606b; }
+.x-d3-ln { stroke: var(--x-ink-2, #5b606b); stroke-width: 1; fill: none; }
+.x-d3-edge { stroke: var(--x-line-2, #b9bbc0); stroke-width: 1.5; }
+.x-d3-edge--e { stroke-dasharray: 3 3; stroke-width: 1; }
+.x-d3-edge.is-on { stroke: var(--x-ds, #3a8475); stroke-width: 3; stroke-dasharray: none; }
+.x-d3-node { fill: #fff; stroke: var(--x-ink-2, #5b606b); stroke-width: 1.5; }
+.x-d3-node.is-on { fill: #eef5f3; stroke: var(--x-ds, #3a8475); stroke-width: 2; }
+.x-d3-node.is-cur { fill: #fdf3d8; stroke: #c49431; stroke-width: 3; }
+.x-d3-node.is-new { fill: #d9efe8; stroke: var(--x-ds, #3a8475); stroke-width: 3; }
+.x-d3-ext { fill: #fff; stroke: var(--x-ink-2, #5b606b); stroke-width: 1; }
+.x-d3-ext.is-fail { fill: var(--x-bad, #b3261e); stroke: var(--x-bad, #b3261e); }

@@ -5,7 +5,10 @@
     "css/legacy-03.css",
     "css/legacy-04.css",
     "css/legacy-05.css",
-    "css/legacy-06.css"
+    "css/legacy-06.css",
+    "css/legacy-07.css",
+    "css/legacy-08.css",
+    "css/legacy-09.css"
   ],
   "scripts": [
     "js/01-x408-data.js",
@@ -20,6 +23,10 @@
     "js/16-lab-coos.js",
     "js/17-proc-cn.js",
     "js/18-proc-coos.js",
+    "js/19-lab-ds1.js",
+    "js/20-lab-ds2.js",
+    "js/21-lab-ds3.js",
+    "js/22-proc-ds.js",
     "js/09-tool.js"
   ],
   "lazy": {

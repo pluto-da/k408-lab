@@ -1,0 +1,75 @@
+/* ---------- 数据结构 · 图的动画实验（20-lab-ds2.js），类名前缀 x-d2- ---------- */
+.x-d2-f { flex-wrap: wrap; }
+.x-d2-in { width: 72px; }
+.x-d2-in--m { width: 150px; }
+.x-d2-tag { margin-right: 2px; font-weight: 600; }
+.x-d2-f--ta { flex: 1 1 100%; flex-direction: column; align-items: stretch; gap: 6px; line-height: 1.4; }
+.x-d2-ta {
+  width: 100%; min-height: 76px; padding: 8px 10px; border: 1px solid var(--x-line-2); border-radius: var(--x-r);
+  background: #fff; color: var(--x-ink); font: 400 14px/1.6 var(--x-mono); resize: vertical;
+}
+.x-d2-ta:focus-visible { outline: none; border-color: var(--x-primary); box-shadow: 0 0 0 3px rgba(47, 91, 234, .18); }
+
+/* 手机上画布可横向滑动，保证顶点和字号看得清 */
+:is(#lab-graphtrav, #lab-mst, #lab-topo, #lab-floyd) .x-lab__stage { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+:is(#lab-graphtrav, #lab-mst, #lab-topo, #lab-floyd) .x-lab__stage > svg { min-width: 560px; }
+
+/* 说明与输出 */
+.x-d2-msg { font: 400 14px/1.75 var(--x-head) !important; color: var(--x-ink) !important; overflow-wrap: break-word !important; }
+.x-d2-tip { margin: 8px 0 0; font: 400 12.5px/1.7 var(--x-head); color: var(--x-ink-2); }
+.x-d2-tip:empty { display: none; }
+.x-d2-tip code { font: 400 12.5px/1.5 var(--x-mono); background: #f3f3f0; padding: 1px 5px; border-radius: 4px; white-space: nowrap; display: inline-block; margin: 2px 2px 2px 0; }
+.x-d2-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
+.x-d2-k { flex: 0 0 auto; min-width: 88px; font: 600 13px/1.4 var(--x-head); color: var(--x-ink-2); }
+.x-d2-cells { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.x-d2-cell {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 6px;
+  border: 1px solid var(--x-line-2); border-radius: 4px; background: #fff; font: 700 14px/1 var(--x-mono); color: var(--x-ink);
+}
+.x-d2-cell.is-top { background: var(--x-ds); border-color: var(--x-ds); color: #fff; }
+.x-d2-empty { font: 400 13px/30px var(--x-head); color: var(--x-ink-2); }
+.x-d2-edge {
+  display: inline-flex; align-items: baseline; gap: 4px; padding: 5px 7px; border: 1px solid var(--x-line-2); border-radius: 4px;
+  background: #fff; font: 600 13px/1 var(--x-mono); color: var(--x-ink);
+}
+.x-d2-edge i { font-style: normal; font-weight: 400; color: var(--x-ink-2); }
+.x-d2-edge.is-in { background: #e3f1ec; border-color: var(--x-ds); }
+.x-d2-edge.is-take { background: var(--x-ds); border-color: var(--x-ds); color: #fff; }
+.x-d2-edge.is-take i { color: #fff; }
+.x-d2-edge.is-skip { background: #fcf1f0; border-color: var(--x-bad); color: var(--x-bad); }
+.x-d2-edge.is-rej { color: var(--x-ink-2); text-decoration: line-through; }
+.x-d2-edge.is-wait { opacity: .6; }
+.x-d2-cmp { margin: 10px 0 0; padding: 8px 10px; border-left: 3px solid var(--x-ds); background: #f4f8f6; font: 400 13px/1.7 var(--x-head); color: var(--x-ink); }
+.x-d2-cmp b { font-family: var(--x-mono); }
+
+/* 表格 */
+.x-lab .x-d2-tbl { margin-top: 10px; }
+.x-lab .x-d2-tbl table { min-width: 0; width: auto; }
+.x-d2-tbl th, .x-d2-tbl td { padding: 6px 10px; text-align: center; font-family: var(--x-mono); }
+.x-d2-tbl caption { text-align: left; }
+.x-d2-tbl .x-d2-hc { background: #e3f1ec; color: var(--x-ds-ink); }
+.x-d2-tbl td.x-d2-ch { background: #fff1c2; font-weight: 700; color: var(--x-ink); }
+.x-d2-tbl td.x-d2-kk { background: #f4f8f6; }
+.x-d2-tbl td.x-d2-dim { color: var(--x-ink-2); }
+.x-d2-tbl tr.x-d2-crow > * { background: #fcefe9; font-weight: 600; }
+.x-d2-mats { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.x-d2-why { margin: 8px 0 0; padding-left: 20px; font: 400 13px/1.7 var(--x-mono); color: var(--x-ink); }
+
+/* SVG */
+.x-d2-svg text { dominant-baseline: auto; }
+.x-d2-svg .x-lab-node text, .x-d2-svg .x-lab-w text { dominant-baseline: central; }
+.x-d2-svg .x-lab-node text.x-d2-sm { font-size: 14px; }
+.x-d2-ph { font: 400 14px/1 var(--x-head); fill: var(--x-ink-2); }
+.x-d2-aux { font: 700 13px/1 var(--x-mono); fill: var(--x-ink-2); }
+.x-d2-aux.is-upd { fill: var(--x-ds-ink); }
+.x-d2-ttl { font: 600 13px/1 var(--x-head); fill: var(--x-ink-2); }
+.x-d2-sep { stroke: var(--x-line); stroke-width: 1; stroke-dasharray: 4 4; }
+.x-d2-svg .x-lab-edge.x-d2-enew { stroke: var(--x-ds); stroke-width: 3; }
+.x-d2-svg .x-lab-arc.x-d2-rej { stroke: var(--x-bad); stroke-width: 3; stroke-dasharray: 6 4; }
+.x-d2-svg .x-lab-arc.x-d2-rejd { stroke: var(--x-bad); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .55; }
+.x-d2-svg .x-lab-arc.x-d2-crit { stroke: var(--x-bad); stroke-width: 4; }
+.x-d2-mk--r { fill: var(--x-bad); }
+.x-d2-svg .x-lab-w.x-d2-won rect { stroke: var(--x-ds); stroke-width: 1.5; }
+.x-d2-svg .x-lab-node.x-d2-gone { opacity: .35; }
+.x-d2-svg .x-lab-node.x-d2-bad circle { stroke: var(--x-bad); stroke-width: 3; }
+.x-d2-svg .x-lab-node.x-d2-cn circle { fill: #fcefe9; stroke: var(--x-bad); stroke-width: 3; }
