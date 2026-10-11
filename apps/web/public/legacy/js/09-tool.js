@@ -95,6 +95,7 @@
             if (hit) { nLab++; if (!firstTab) firstTab = t; }
             else if (t.getAttribute("aria-selected") === "true") selHidden = true;
           });
+          Array.prototype.forEach.call(document.querySelectorAll("#x-lab .x-lab__grp"), function (g) { g.hidden = !g.querySelector(".x-lab__tab:not([hidden])"); });
           if (selHidden && firstTab) firstTab.click();
           var labNone = !!term && !firstTab;
           $("lab").hidden = labNone;

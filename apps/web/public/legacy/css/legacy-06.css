@@ -1,0 +1,69 @@
+/* ---------- 组成原理 / 操作系统 动画实验（16-lab-coos.js），类名前缀 x-lx- ---------- */
+.x-lx-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.x-lx-try .x-lab__lbl { margin-right: 2px; }
+.x-lx-f { flex: 1 1 240px; min-width: 0; max-width: 100%; }
+.x-lx-f .x-lab__in { flex: 1 1 auto; width: 100%; min-width: 0; }
+.x-lx-f--s { flex: 0 1 160px; }
+.x-lx-f--s .x-lab__in { width: 88px; flex: 1 1 88px; }
+
+.x-lx-say { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid var(--c, var(--x-primary, #2f5bea)); background: #fafaf8; font: 400 14px/1.6 var(--x-head, sans-serif); color: var(--x-ink, #1a1c20); overflow-wrap: anywhere; min-height: 40px; }
+.x-lx-tip { margin: 10px 0 0; font: 400 12px/1.6 var(--x-head, sans-serif); color: var(--x-ink-2, #5b606b); overflow-wrap: anywhere; }
+.x-lx-tip:empty { display: none; }
+.x-lab .x-lx-tbl table { min-width: 0; }
+.x-lx-tbl td { font-variant-numeric: tabular-nums; }
+.x-lab .x-lx-wrap table, .x-lx-wrap table { min-width: 520px; }
+.x-lx-wrap td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.x-lx-wrap td:first-child { white-space: nowrap; }
+.x-lx-tbl .x-lx-mono, .x-lx-tbl td .x-lx-mono { font-family: var(--x-mono, monospace); white-space: nowrap; }
+.x-lx-scroll { max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+.x-lx-scroll .x-tbl { margin-top: 0; }
+
+/* SVG */
+.x-lx-svg { max-width: 100%; }
+.x-lx-t { fill: var(--x-ink, #1a1c20); font-family: var(--x-head, sans-serif); }
+.x-lx-mono { font-family: var(--x-mono, monospace); }
+.x-lx-b { font-weight: 600; }
+.x-lx-dim { fill: var(--x-ink-2, #5b606b); }
+.x-lx-neg { fill: var(--x-bad, #b3261e); }
+.x-lx-p { fill: var(--c, #c0603e); font-weight: 600; }
+.x-lx-box { fill: #fff; stroke: var(--x-line-2, #c9cbd0); stroke-width: 1; }
+.x-lx-box.is-hl { fill: var(--x-primary-soft, #edf1fd); stroke: var(--c, #2f5bea); stroke-width: 2; }
+.x-lx-box.is-was { fill: #f6f6f2; }
+.x-lx-box.is-ok { fill: #eaf5ef; stroke: #1f7a4d; stroke-width: 1.5; }
+.x-lx-bit { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1; }
+.x-lx-bit--s.is-on { fill: #fbe3da; }
+.x-lx-bit--e.is-on { fill: #e3ebfb; }
+.x-lx-bit--m.is-on { fill: #f3f0e2; }
+.x-lx-bit--sgn { fill: #f3f3f0; }
+.x-lx-bit--p { fill: #fbeee8; }
+.x-lx-bit.is-hl { fill: var(--x-primary-soft, #edf1fd); stroke: var(--c, #2f5bea); stroke-width: 2.5; }
+.x-lx-bit.is-bad { fill: #fcf1f0; stroke: var(--x-bad, #b3261e); stroke-width: 2; }
+.x-lx-cov { fill: var(--c, #c0603e); fill-opacity: .12; stroke: none; }
+.x-lx-ln { stroke: var(--x-ink-2, #5b606b); stroke-width: 1; fill: none; }
+.x-lx-ln.is-hl { stroke: var(--c, #2f5bea); stroke-width: 2; }
+.x-lx-axis { stroke: var(--x-ink-2, #5b606b); stroke-width: 1; }
+.x-lx-req { fill: var(--c, #c49431); }
+.x-lx-trk { stroke: var(--c, #c49431); stroke-width: 2; fill: none; }
+.x-lx-trk.is-cur { stroke-width: 3; }
+.x-lx-trk.is-jump { stroke-dasharray: 6 4; stroke-width: 1.5; }
+.x-lx-dot { fill: var(--c, #c49431); stroke: #fff; stroke-width: 1.5; }
+.x-lx-dot0 { fill: var(--x-ink, #1a1c20); }
+.x-lx-dot2 { fill: #fff; stroke: var(--c, #c49431); stroke-width: 2; }
+.x-lx-os { fill: #d9dadd; stroke: var(--x-ink, #1a1c20); stroke-width: 1; }
+.x-lx-job { stroke: var(--x-ink, #1a1c20); stroke-width: 1; }
+.x-lx-free { fill: #fff; stroke: var(--x-ink-2, #5b606b); stroke-width: 1; stroke-dasharray: 4 3; }
+.x-lx-hit { fill: none; stroke: var(--x-bad, #b3261e); stroke-width: 3; }
+.x-lx-ptr { fill: var(--c, #c49431); }
+.x-lx-ptr2 { fill: var(--x-ink-2, #5b606b); }
+.x-lx-slot { fill: #fff; stroke: var(--x-ink, #1a1c20); stroke-width: 1; }
+.x-lx-slot.is-full { fill: #f6ecd2; }
+.x-lx-proc { fill: #fff; stroke: var(--x-line-2, #c9cbd0); stroke-width: 1; }
+.x-lx-proc.is-blk { fill: #ececec; stroke: #9a9a9a; stroke-dasharray: 4 3; }
+.x-lx-proc.is-hl { stroke: var(--c, #2f5bea); stroke-width: 2.5; }
+
+@media (max-width: 760px) {
+  .x-lx-f { flex: 1 1 100%; }
+  .x-lx-f--s { flex: 1 1 40%; }
+  .x-lx-f--s .x-lab__in { width: auto; }
+  .x-lx-say { font-size: 13px; }
+}

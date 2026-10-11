@@ -4,7 +4,7 @@
       (function () {
         var PROC = window.PROC = window.PROC || [];
         var NUMS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
-        var SUBJ = { co: { name: "组成原理", c: "var(--x-co)" }, os: { name: "操作系统", c: "var(--x-os)" } };
+        var SUBJ = { co: { name: "组成原理", c: "var(--x-co)" }, os: { name: "操作系统", c: "var(--x-os)" }, cn: { name: "计算机网络", c: "var(--x-cn)" } };
 
         /* ---------- 小工具，供各图解数据使用 ---------- */
         var P = window.PROCU = {
@@ -208,10 +208,12 @@
           var root = document.getElementById("x-proc");
           if (!root || root.dataset.built || !PROC.length) return;
           root.dataset.built = "1";
-          var ORDER = ["gates", "adder", "decoder", "icycle", "micro", "tlbflow", "tlbcache", "intr", "dma", "boot", "syscall", "pstate", "pswitch", "twolevel", "mixidx", "devalloc"];
-          PROC.sort(function (a, b) { var i = ORDER.indexOf(a.id), j = ORDER.indexOf(b.id); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); });
+          var ORDER = ["gates", "adder", "decoder", "icycle", "micro", "tlbflow", "tlbcache", "cachewrite", "intr", "dma", "boot", "syscall", "pstate", "pswitch", "twolevel", "mixidx", "fileopen", "devalloc", "spooling", "encap", "webvisit", "dns", "arp", "dhcp", "nat", "switch", "icmp", "email"];
+          var SO = { co: 0, os: 1, cn: 2 }, reg = PROC.slice();
+          PROC.sort(function (a, b) { var i = ORDER.indexOf(a.id), j = ORDER.indexOf(b.id); return (SO[a.sub] - SO[b.sub]) || ((i < 0 ? 99 : i) - (j < 0 ? 99 : j)) || (reg.indexOf(a) - reg.indexOf(b)); });
           var tabs = el("div", { class: "x-proc__tabs", role: "tablist", "aria-label": "过程图解" });
-          ["co", "os"].forEach(function (sub) {
+          ["co", "os", "cn"].forEach(function (sub) {
+            if (!PROC.some(function (d) { return d.sub === sub; })) return;
             var grp = el("div", { class: "x-proc__grp", role: "presentation" }, '<span class="x-proc__gl" style="--c:' + SUBJ[sub].c + '">' + SUBJ[sub].name + "</span>");
             PROC.forEach(function (d, i) {
               if (d.sub !== sub) return;
@@ -438,7 +440,7 @@
           tabs.addEventListener("keydown", function (e) {
             if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
             e.preventDefault();
-            var k = PROC.indexOf(cur), order = PROC.filter(function (d) { return d.sub === "co"; }).concat(PROC.filter(function (d) { return d.sub === "os"; }));
+            var k = PROC.indexOf(cur), order = ["co", "os", "cn"].reduce(function (a, sb) { return a.concat(PROC.filter(function (d) { return d.sub === sb; })); }, []);
             var j = order.indexOf(cur) + (e.key === "ArrowRight" ? 1 : -1);
             j = (j + order.length) % order.length;
             open(PROC.indexOf(order[j]), true);

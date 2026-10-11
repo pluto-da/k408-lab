@@ -157,3 +157,19 @@
 @media (prefers-reduced-motion: reduce) {
   .x-pn__box, .x-pe, .x-c__w, .x-c__lamp, .x-proc__kvi { transition: none; }
 }
+
+/* 实验标签按科目分组 */
+.x-lab__tabs--grp { flex-direction: column; gap: 4px; padding: 8px 10px; overflow: visible; }
+.x-lab__grp { display: flex; align-items: center; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.x-lab__grp[hidden] { display: none; }
+.x-lab__gl { flex: none; display: inline-flex; align-items: center; gap: 6px; min-width: 76px; padding-right: 6px; font: 600 12px/1 var(--x-head); color: var(--x-ink-2); }
+.x-lab__gl::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.x-lab__grp .x-lab__tab { flex: none; }
+.x-lab__grp .x-lab__tab::before { display: none; }
+@media (max-width: 760px) { .x-lab__gl { min-width: 0; } }
+
+/* 新增计算类实验：手机上图形保持可读宽度，横向滑动查看 */
+@media (max-width: 560px) {
+  :is(#lab-slidewin, #lab-csmacd, #lab-crc, #lab-ipfrag, #lab-lpm, #lab-encoding, #lab-rip, #lab-ieee754, #lab-booth, #lab-hamming, #lab-addressing, #lab-disk, #lab-partition, #lab-prodcons) .x-lab__stage { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  :is(#lab-slidewin, #lab-csmacd, #lab-encoding, #lab-rip, #lab-disk, #lab-partition, #lab-prodcons, #lab-lpm, #lab-ipfrag) .x-lab__stage > svg { min-width: 620px; }
+}

@@ -1,0 +1,150 @@
+/* ---------- 计算机网络动画实验（15-lab-cn.js），类名前缀 x-lc- ---------- */
+.x-lc-f { flex-wrap: wrap; }
+.x-lc-in { width: 72px; }
+.x-lc-in--m { width: 132px; }
+.x-lc-in--w { width: 220px; max-width: 100%; }
+.x-lc-tag { margin-right: 2px; font-weight: 600; }
+.x-lc-f--ta { flex: 1 1 100%; flex-direction: column; align-items: stretch; gap: 6px; line-height: 1.4; }
+.x-lc-ta {
+  width: 100%; min-height: 120px; padding: 8px 10px; border: 1px solid var(--x-line-2); border-radius: var(--x-r);
+  background: #fff; color: var(--x-ink); font: 400 14px/1.6 var(--x-mono); resize: vertical;
+}
+.x-lc-ta:focus-visible { outline: none; border-color: var(--x-primary); box-shadow: 0 0 0 3px rgba(47, 91, 234, .18); }
+.x-lc-msg { font: 400 14px/1.75 var(--x-head) !important; color: var(--x-ink) !important; overflow-wrap: break-word !important; }
+.x-lc-tip { margin: 6px 0 0; font: 400 12.5px/1.6 var(--x-head); color: var(--x-ink-2); }
+.x-lc-tip:empty { display: none; }
+.x-lc-tbl { margin-top: 10px; }
+.x-lc-tbl tr.is-cur > * { background: var(--x-primary-soft); }
+.x-lc-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font: 400 12.5px/1.5 var(--x-head); color: var(--x-ink-2); }
+.x-lc-legend:empty { display: none; }
+.x-lc-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.x-lc-sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--x-ink-2); }
+.x-lc-sw.is-ack { background: #cfe8da; border-color: #1f7a4d; }
+.x-lc-sw.is-out { background: var(--x-cn); border-color: var(--x-cn); }
+.x-lc-sw.is-ok { background: #fff; border: 2px solid var(--x-cn); }
+.x-lc-sw.is-no { background: var(--x-paper-2); border-color: var(--x-line-2); }
+.x-lc-sw.is-re { background: var(--x-co); border-color: var(--x-co); }
+.x-lc-log {
+  max-height: 200px; overflow: auto; margin-top: 8px; padding: 8px 10px; border: 1px solid var(--x-line); border-radius: var(--x-r);
+  background: var(--x-paper); font: 400 12.5px/1.7 var(--x-head); color: var(--x-ink); white-space: pre-wrap;
+}
+.x-lc-log[hidden] { display: none; }
+.x-lc-log:focus-visible { outline: 2px solid var(--x-cn); outline-offset: -2px; }
+
+/* SVG：通用文字 */
+.x-lc-svg text { dominant-baseline: auto; }
+.x-lc-t { font: 400 13px/1 var(--x-head); fill: var(--x-ink-2); }
+.x-lc-t.is-strong { font-weight: 700; fill: var(--x-ink); }
+.x-lc-t.is-bad { fill: var(--x-bad); font-weight: 700; }
+.x-lc-lb { font: 700 14px/1 var(--x-head); fill: var(--x-ink); }
+.x-lc-big { font: 800 20px/1 var(--x-head); fill: var(--x-cn-ink); }
+.x-lc-big.is-bad { fill: var(--x-bad); }
+.x-lc-ph { font: 400 14px/1 var(--x-head); fill: var(--x-ink-2); }
+.x-lc-ah { fill: var(--x-cn); }
+.x-lc-ah.is-re { fill: var(--x-co); }
+.x-lc-ah.is-ak { fill: var(--x-ink-2); }
+.x-lc-x line { stroke: var(--x-bad); stroke-width: 3; stroke-linecap: round; }
+
+/* 序号轴格子（滑动窗口 / 退避取值） */
+.x-lc-cell { fill: var(--x-paper-2); stroke: var(--x-line-2); stroke-width: 1; }
+.x-lc-cell.is-ack { fill: #cfe8da; stroke: #1f7a4d; }
+.x-lc-cell.is-out { fill: var(--x-cn); stroke: var(--x-cn); }
+.x-lc-cell.is-ok { fill: #fff; stroke: var(--x-cn); stroke-width: 2; }
+.x-lc-cellt { font: 700 13px/1 var(--x-mono); fill: var(--x-ink); }
+.x-lc-cellt.is-out { fill: #fff; }
+.x-lc-cellt.is-no { fill: var(--x-ink-2); }
+.x-lc-idx { font: 400 12px/1 var(--x-mono); fill: var(--x-ink-2); }
+.x-lc-win { fill: none; stroke: var(--x-ink); stroke-width: 2.5; }
+.x-lc-winl { font: 700 12.5px/1 var(--x-head); fill: var(--x-ink); }
+
+/* 时序图 */
+.x-lc-tl { stroke: var(--x-ink); stroke-width: 2; }
+.x-lc-grid { stroke: var(--x-line); stroke-width: 1; stroke-dasharray: 2 4; }
+.x-lc-tick { font: 400 12px/1 var(--x-mono); fill: var(--x-ink-2); }
+.x-lc-now { stroke: var(--x-co); stroke-width: 1.5; stroke-dasharray: 5 3; }
+.x-lc-nowt { font: 700 12.5px/1 var(--x-mono); fill: var(--x-co-ink); }
+.x-lc-fr { stroke: var(--x-cn); stroke-width: 2; }
+.x-lc-fr.is-re { stroke: var(--x-co); }
+.x-lc-ak { stroke: var(--x-ink-2); stroke-width: 1.5; }
+.x-lc-fr.is-cur, .x-lc-ak.is-cur { stroke-width: 3.5; }
+.x-lc-fr.is-fut, .x-lc-ak.is-fut { stroke-dasharray: 3 4; opacity: .5; stroke-width: 1.5; }
+.x-lc-dot { fill: var(--x-cn); }
+.x-lc-dot.is-re { fill: var(--x-co); }
+.x-lc-dot.is-ak { fill: var(--x-ink-2); }
+.x-lc-fl { font: 700 12.5px/1 var(--x-mono); fill: var(--x-cn-ink); }
+.x-lc-fl.is-re { fill: var(--x-co-ink); }
+.x-lc-al { font: 400 12px/1 var(--x-mono); fill: var(--x-ink-2); }
+
+/* CSMA/CD */
+.x-lc-node { fill: var(--x-paper-2); stroke: var(--x-ink); stroke-width: 1.25; }
+.x-lc-tap { stroke: var(--x-ink); stroke-width: 1.5; }
+.x-lc-bus { stroke: var(--x-ink-2); stroke-width: 4; stroke-linecap: round; }
+.x-lc-sa { fill: var(--x-cn); opacity: .85; }
+.x-lc-sb { fill: var(--x-os); opacity: .85; }
+.x-lc-sc { fill: var(--x-bad); }
+.x-lc-sc.is-faint { opacity: .25; }
+.x-lc-jam { fill: var(--x-bad); }
+.x-lc-boom { font: 800 14px/1 var(--x-head); fill: var(--x-bad); }
+.x-lc-dim { stroke: var(--x-ink-2); stroke-width: 1; }
+.x-lc-dimbg { fill: #fff; }
+.x-lc-tri { fill: var(--x-co); }
+
+/* CRC 长除法（字号由外层 g 的 style 决定） */
+.x-lc-bit { font-family: var(--x-mono); font-weight: 600; fill: var(--x-ink-2); }
+.x-lc-bit.is-gen { fill: var(--x-ink); font-weight: 800; }
+.x-lc-bit.is-pad { fill: var(--x-co-ink); }
+.x-lc-bit.is-q { fill: var(--x-ink); font-weight: 800; }
+.x-lc-bit.is-zero { fill: #a3a7ae; }
+.x-lc-bit.is-down { fill: var(--x-co-ink); }
+.x-lc-bit.is-cur { fill: var(--x-cn-ink); font-weight: 800; }
+.x-lc-divl { fill: none; stroke: var(--x-ink); stroke-width: 1.5; }
+.x-lc-rule { stroke: var(--x-ink-2); stroke-width: 1; }
+.x-lc-rule.is-cur { stroke: var(--x-cn); stroke-width: 2; }
+.x-lc-box { fill: none; stroke: var(--x-co); stroke-width: 2.5; }
+
+/* IP 分片 */
+.x-lc-hdr { fill: #e8e5dc; stroke: var(--x-ink-2); stroke-width: 1; }
+.x-lc-hdr.is-cur { stroke: var(--x-cn); stroke-width: 2.5; }
+.x-lc-data { fill: var(--x-paper-2); stroke: var(--x-ink-2); stroke-width: 1; }
+.x-lc-data.is-on { fill: #dfe5f4; stroke: var(--x-cn); }
+.x-lc-data.is-cur { fill: #c3cfee; stroke-width: 2.5; }
+.x-lc-ghost { fill: none; stroke: var(--x-line-2); stroke-dasharray: 4 3; }
+.x-lc-cut { stroke: var(--x-co); stroke-width: 2; stroke-dasharray: 4 3; }
+.x-lc-map { fill: none; stroke: var(--x-cn); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7; }
+
+/* 最长前缀匹配：二进制位格子 */
+.x-lc-bc { fill: #fff; stroke: var(--x-line-2); stroke-width: 1; }
+.x-lc-bc.is-net { fill: #dfe5f4; stroke: var(--x-cn); }
+.x-lc-bc.is-one { fill: var(--x-paper-2); }
+.x-lc-bc.is-bad { fill: #fcf1f0; stroke: var(--x-bad); stroke-width: 2; }
+.x-lc-bitc { font: 600 12px/1 var(--x-mono); fill: var(--x-ink); }
+.x-lc-bitc.is-bad { fill: var(--x-bad); font-weight: 800; }
+
+/* 数字编码 */
+.x-lc-colhl { fill: var(--x-primary-soft); }
+.x-lc-bd { stroke: var(--x-line-2); stroke-width: 1; stroke-dasharray: 4 3; }
+.x-lc-md { stroke: var(--x-line); stroke-width: 1; stroke-dasharray: 1 3; }
+.x-lc-bith { font: 800 15px/1 var(--x-mono); fill: var(--x-ink); }
+.x-lc-bith.is-dim { fill: #a3a7ae; font-weight: 400; }
+.x-lc-base { stroke: var(--x-line); stroke-width: 1; }
+.x-lc-wave { fill: none; stroke: var(--x-cn); stroke-width: 2.5; stroke-linejoin: miter; }
+.x-lc-mkm { fill: var(--x-cn); stroke: #fff; stroke-width: 1.5; }
+.x-lc-mks { fill: var(--x-co); stroke: #fff; stroke-width: 1.5; }
+
+/* RIP */
+.x-lc-rt { fill: #fff; stroke: var(--x-ink); stroke-width: 2; }
+.x-lc-rt.is-src { fill: var(--x-os); stroke: var(--x-os); }
+.x-lc-rt.is-cur { fill: var(--x-cn); stroke: var(--x-cn); }
+.x-lc-rtt { font: 800 15px/1 var(--x-head); fill: var(--x-ink); }
+.x-lc-rtt.is-src, .x-lc-rtt.is-cur { fill: #fff; }
+.x-lc-link { stroke: var(--x-ink-2); stroke-width: 2.5; }
+.x-lc-link.is-down { stroke-dasharray: 6 5; opacity: .6; }
+.x-lc-msgar { stroke: var(--x-cn); stroke-width: 2.5; }
+
+@media (max-width: 480px) {
+  .x-lc-in--w { width: 100%; }
+  .x-lc-f:has(.x-lc-in--w) { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .x-lc-log { scroll-behavior: auto; }
+}

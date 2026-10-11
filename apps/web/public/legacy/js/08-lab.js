@@ -8,10 +8,25 @@
           if (!root || root.dataset.built) return;
           root.dataset.built = "1";
           var tabs = root.querySelector(".x-lab__tabs"), items = [];
+          /* 按科目分组：数据结构 / 组成原理 / 操作系统 / 计算机网络，组内保持注册顺序 */
+          var SUBS = [["var(--x-ds)", "数据结构"], ["var(--x-co)", "组成原理"], ["var(--x-os)", "操作系统"], ["var(--x-cn)", "计算机网络"]];
+          var subOf = function (d) { for (var k = 0; k < SUBS.length; k++) if (SUBS[k][0] === d.color) return k; return SUBS.length; };
+          var reg = LAB.slice();
+          LAB.sort(function (a, b) { return (subOf(a) - subOf(b)) || (reg.indexOf(a) - reg.indexOf(b)); });
+          tabs.classList.add("x-lab__tabs--grp");
+          var grps = {};
           LAB.forEach(function (d, i) {
             var tab = X.el("button", { type: "button", class: "x-lab__tab", role: "tab", id: "tab-" + d.id, "aria-controls": "lab-" + d.id, style: "--c:" + d.color });
             tab.textContent = d.name;
-            tabs.appendChild(tab);
+            var gk = subOf(d);
+            if (!grps[gk]) {
+              grps[gk] = X.el("div", { class: "x-lab__grp", role: "presentation" });
+              var gl = X.el("span", { class: "x-lab__gl", style: "--c:" + (SUBS[gk] ? SUBS[gk][0] : "#888") });
+              gl.textContent = SUBS[gk] ? SUBS[gk][1] : "其他";
+              grps[gk].appendChild(gl);
+              tabs.appendChild(grps[gk]);
+            }
+            grps[gk].appendChild(tab);
             var p = X.el("div", { class: "x-lab__panel", role: "tabpanel", id: "lab-" + d.id, "aria-labelledby": "tab-" + d.id, style: "--c:" + d.color },
               '<div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div>' +
               '<div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
