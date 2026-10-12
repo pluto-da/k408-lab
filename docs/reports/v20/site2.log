@@ -1,0 +1,7 @@
+phone-360-bar 360×660  132/138 通过
+   ✗ /lab lab:floyd:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ipfrag:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:encoding:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /pc journey: touch: button.is-on 41×44 < 44；touch: button 41×44 < 44；touch: button 41×44 < 44；touch: button 41×44 < 44 等 7 项

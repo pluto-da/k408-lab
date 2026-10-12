@@ -1,0 +1,12 @@
+
+==== ride-audit ====
+tablet-land-1180 1180×700 default: 12/12  fault: 16/16
+laptop-1366 1366×648 default: 12/12  fault: 16/16
+laptop-1440 1440×780 default: 12/12  fault: 15/16
+   ✗ 8 mmu: 没有焦点矩形；3 最小字 nullpx < 12
+desktop-1920 1920×960   errors: script: page.screenshot: Timeout 30000ms exceeded.
+Call log:
+[2m  - taking page screenshot[22m
+[2m  - waiting for fonts to load...[22m
+[2m  - fonts loaded[22m
+

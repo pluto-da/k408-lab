@@ -1,0 +1,98 @@
+phone-393-bar 393×732  116/138 通过
+   ✗ / menu-open: contrast: p.hm-note "免费使用 · 手机、平板、电" 4.42:1
+   ✗ /lab toc-open: touch: button.x-toc__jump "跳到区块" 40×40 < 44；touch: input.x-toc__q 263×40 < 44；touch: button.x-toc__all "全部收起" 60×40 < 44
+   ✗ /lab lab:ufset:init: overlap: button.x-lab__btn.x-lab__btn--ghost "链式退化" 与 button.x-lab__btn "重置" 重叠 71×3；overlap: button.x-lab__btn.x-lab__btn--ghost "链式退化" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 7×3；overlap: button.x-lab__btn.x-lab__btn--ghost "按秩对比" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 86×3；overlap: button.x-lab__btn.x-lab__btn--ghost "路径压缩" 与 button.x-lab__btn "下一步" 重叠 78×3
+   ✗ /lab lab:graphtrav:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:graphtrav:run: contrast: span.x-d2-cell.is-top "4" 4.43:1
+   ✗ /lab lab:topo:init: contrast: span.x-d2-cell.is-top "2" 4.43:1
+   ✗ /lab lab:topo:run: contrast: span.x-d2-cell.is-top "3" 4.43:1
+   ✗ /lab lab:hamming:init: overlap: button.x-lab__btn.x-lab__btn--ghost "1010 第 5 位错" 与 button.x-lab__btn "重置" 重叠 71×3；overlap: button.x-lab__btn.x-lab__btn--ghost "1010 第 5 位错" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 43×3；overlap: button.x-lab__btn.x-lab__btn--ghost "1101 奇校验 无错" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 56×3；overlap: button.x-lab__btn.x-lab__btn--ghost "1101 奇校验 无错" 与 button.x-lab__btn "下一步" 重叠 69×3
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:paging:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:paging:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:paging:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:banker:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:init: overlap: button.x-lab__btn.x-lab__btn--ghost "清空，手动从头走" 与 button.x-lab__btn "重置" 重叠 105×12；overlap: button.x-lab__btn.x-lab__btn--ghost "清空，手动从头走" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 29×12
+   ✗ /lab lab:tcp:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:slidewin:init: overlap: input.x-lab__sel.x-lc-in 与 button.x-lab__btn "重置" 重叠 60×11；overlap: input.x-lab__sel.x-lc-in 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 64×11
+   ✗ /lab lab:csmacd:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:lpm:init: overlap: button.x-lab__btn "按新表重算" 与 button.x-lab__btn "重置" 重叠 100×4；overlap: button.x-lab__btn.x-lab__btn--ghost "203.0.113.10" 与 button.x-lab__btn.x-lab__btn--main "播放" 重叠 78×4；overlap: button.x-lab__btn.x-lab__btn--ghost "203.0.113.10" 与 button.x-lab__btn "下一步" 重叠 24×4
+   ✗ /pc overview: touch: button.is-on "展示" 48×40 < 44；touch: button "氛围灯" 61×40 < 44
+   ✗ /pc part-open: touch: button.is-on "展示" 48×40 < 44；touch: button "氛围灯" 61×40 < 44；contrast: button.is-on "CPU 与散热器" 2.34:1
+   ✗ /pc journey: touch: button.is-on "展示" 48×40 < 44；touch: button "氛围灯" 61×40 < 44；touch: button.is-on 46×40 < 44；touch: button 46×40 < 44 等 9 项
+   ✗ /pc ride: touch: div.rd-steps 361×12 < 44
+laptop-1366-bar 1366×648  62/135 通过
+   ✗ / initial: contrast: p.hm-note "免费使用 · 手机、平板、电" 4.42:1
+   ✗ /lab initial: contrast: i "★" 1.62:1；contrast: i "★" 1.62:1
+   ✗ /lab lab:sort:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点Di" 压住
+   ✗ /lab lab:dijkstra:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:dijkstra:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:infix:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点转换" 压住
+   ✗ /lab lab:infix:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:infix:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点入队" 压住
+   ✗ /lab lab:cqueue:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:cqueue:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:btree:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点m " 压住
+   ✗ /lab lab:btree:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:btree:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:ufset:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:graphtrav:run: contrast: span.x-d2-cell.is-top "4" 4.43:1
+   ✗ /lab lab:topo:init: contrast: span.x-d2-cell.is-top "2" 4.43:1
+   ✗ /lab lab:topo:run: contrast: span.x-d2-cell.is-top "3" 4.43:1
+   ✗ /lab lab:hash:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点散列" 压住
+   ✗ /lab lab:hash:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:hash:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:bsearch:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点折半" 压住
+   ✗ /lab lab:bsearch:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:bsearch:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:sort2:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点选择" 压住
+   ✗ /lab lab:sort2:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:sort2:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:cache:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点地址" 压住
+   ✗ /lab lab:cache:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:cache:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:pipeline:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点三种" 压住
+   ✗ /lab lab:pipeline:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:pipeline:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:ieee754:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点单精" 压住
+   ✗ /lab lab:ieee754:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:ieee754:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:booth:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点看乘" 压住
+   ✗ /lab lab:booth:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:booth:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:hamming:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点校验" 压住
+   ✗ /lab lab:hamming:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:hamming:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点立即" 压住
+   ✗ /lab lab:addressing:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:addressing:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点周转" 压住
+   ✗ /lab lab:gantt:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:gantt:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:disk:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点一次" 压住
+   ✗ /lab lab:disk:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:disk:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:partition:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点首次" 压住
+   ✗ /lab lab:partition:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:partition:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点P " 压住
+   ✗ /lab lab:prodcons:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:prodcons:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:tcp:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:tcp:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点CI" 压住
+   ✗ /lab lab:subnet:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:subnet:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:ipfrag:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点每片" 压住
+   ✗ /lab lab:ipfrag:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:ipfrag:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:lpm:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点目的" 压住
+   ✗ /lab lab:lpm:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:lpm:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:rip:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__side "重置播放下一步速度 考点收到" 压住
+   ✗ /lab lab:rip:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /lab lab:rip:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__side "重置播放下一步速度 已到最后" 压住
+   ✗ /terms initial: contrast: p.eyebrow "考研408动画实验室" 4.42:1
+不通过：95 个状态

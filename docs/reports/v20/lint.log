@@ -1,0 +1,9 @@
+$ pnpm -r run lint
+Scope: 3 of 4 workspace projects
+packages/shared lint$ eslint src
+packages/shared lint: Done
+apps/web lint$ eslint src
+apps/api lint$ eslint src test
+apps/api lint: Done
+apps/web lint: Done
+EXIT 0

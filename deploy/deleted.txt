@@ -1,0 +1,2 @@
+apps/web/public/legacy/css/hark.css
+apps/web/public/legacy/js/00-hark.js

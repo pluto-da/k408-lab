@@ -1,0 +1,411 @@
+phone-360-bar 360×660  124/138 通过
+   ✗ /lab initial: font: button#x-tocbtn.x-tocbtn "目录" 0px
+   ✗ /lab toc-open: font: button#x-tocbtn.x-tocbtn "目录" 0px
+   ✗ /lab lab:infix:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:kmp:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:topo:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:floyd:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:bsearch:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:disk:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:partition:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:tcp:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /pc part-open: contrast: button.is-on "CPU 与散热器" 2.34:1
+phone-393-bar 393×732  129/138 通过
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hash:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:pipeline:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hamming:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:slidewin:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:csmacd:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:lpm:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+phone-land-bar 852×273  51/137 通过
+   ✗ /lab toc-open: overlap: button#x-tocbtn.x-tocbtn "目录" 与 a "概览" 重叠 25×29
+   ✗ /lab lab:sort:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:tree:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:dijkstra:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:dijkstra:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:dijkstra:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:infix:init: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:infix:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:infix:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cqueue:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cqueue:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:kmp:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:huffman:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:huffman:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:bst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 4/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:bst:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:btree:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:btree:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:btree:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ufset:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:graphtrav:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:mst:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:topo:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:floyd:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:hash:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hash:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hash:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:bsearch:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:bsearch:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:bsearch:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:sort2:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 8/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:sort2:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:sort2:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cache:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cache:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cache:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:pipeline:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:pipeline:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:pipeline:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ieee754:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 10/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ieee754:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ieee754:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:booth:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:booth:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:booth:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hamming:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hamming:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:hamming:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:addressing:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:addressing:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:paging:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:banker:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:disk:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:disk:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:disk:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:partition:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:partition:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:partition:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:prodcons:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:tcp:init: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:tcp:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:subnet:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:subnet:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:tcpconn:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:slidewin:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:csmacd:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:crc:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:ipfrag:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ipfrag:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ipfrag:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:lpm:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:lpm:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:lpm:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:encoding:init: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:encoding:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44
+   ✗ /lab lab:rip:run: touch: button.x-lab__btn.x-setbtn "设置" 58×40 < 44；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:rip:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /pc part-open: contrast: button.is-on "CPU 与散热器" 2.34:1
+fold-673-bar 673×721  128/137 通过
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:ufset:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:topo:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:cache:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:banker:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 36/36 个取样点被 div.x-lab__ctrl "重置播放下一步速度" 压住
+fold-884-bar 884×984  136/136 通过
+tablet-820-bar 820×1060  136/136 通过
+tablet-1180-bar 1180×700  117/136 通过
+   ✗ /lab lab:kmp:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+tablet-1210-bar 1210×680  116/136 通过
+   ✗ /lab lab:kmp:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+laptop-1366-bar 1366×648  118/135 通过
+   ✗ /lab lab:kmp:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:run: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:done: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+laptop-1440-bar 1440×780  24/135 通过
+   ✗ /lab lab:sort:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tree:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tree:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:huffman:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:huffman:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:graphtrav:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:graphtrav:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 30/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 30/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:paging:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:paging:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcp:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcp:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcpconn:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcpconn:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:encoding:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:encoding:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:encoding:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab proc:linklist: cover: #x-proc-body 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab proc:cqueue: cover: #x-proc-body 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+desktop-1920-bar 1920×960  31/135 通过
+   ✗ /lab lab:sort:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tree:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tree:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:dijkstra:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:infix:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cqueue:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:kmp:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:huffman:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:huffman:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:huffman:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bst:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:btree:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ufset:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:graphtrav:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:graphtrav:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:mst:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:topo:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:floyd:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hash:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:bsearch:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:sort2:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:cache:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:pipeline:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ieee754:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:booth:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:hamming:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:addressing:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:gantt:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:banker:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:disk:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:partition:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:prodcons:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcp:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcp:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:subnet:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcpconn:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:tcpconn:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:slidewin:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:csmacd:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:crc:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:init: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 24/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:ipfrag:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:lpm:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:encoding:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:encoding:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 12/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:init: cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:run: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+   ✗ /lab lab:rip:done: cover: .x-lab__panel:not([hidden]) .x-lab__stage 有 18/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住；cover: .x-lab__panel:not([hidden]) .x-lab__out 有 6/36 个取样点被 div#x-tool.x-tool "搜索考点或实验 数据结构 组" 压住
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserContext.newPage: Protocol error (Target.createTarget): Failed to open a new tab
+    at /workspace/fullstack-408/apps/web/scripts/site-audit.cjs:364:30 {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v22.23.3

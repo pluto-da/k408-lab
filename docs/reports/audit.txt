@@ -1,0 +1,112 @@
+iPhone SE 	320x568 	/ 	ok 	 	small:0 	tiny:0 	main:320
+iPhone SE 	320x568 	/lab 	ok 	 	small:3 	tiny:14 	main:320
+iPhone SE 	320x568 	/pc 	ok 	 	small:3 	tiny:0 	main:320
+iPhone SE 	320x568 	/login 	ok 	 	small:1 	tiny:0 	main:320
+iPhone SE 	320x568 	/register 	ok 	 	small:3 	tiny:0 	main:320
+iPhone SE 	320x568 	/terms 	ok 	 	small:3 	tiny:0 	main:320
+iPhone SE 	320x568 	/privacy 	ok 	 	small:2 	tiny:0 	main:320
+iPhone SE 	320x568 	/nope 	ok 	 	small:0 	tiny:0 	main:320
+iPhone 15 	393x852 	/ 	ok 	 	small:0 	tiny:0 	main:393
+iPhone 15 	393x852 	/lab 	ok 	 	small:3 	tiny:14 	main:393
+iPhone 15 	393x852 	/pc 	ok 	 	small:3 	tiny:0 	main:393
+iPhone 15 	393x852 	/login 	ok 	 	small:1 	tiny:0 	main:393
+iPhone 15 	393x852 	/register 	ok 	 	small:2 	tiny:0 	main:393
+iPhone 15 	393x852 	/terms 	ok 	 	small:3 	tiny:0 	main:393
+iPhone 15 	393x852 	/privacy 	ok 	 	small:2 	tiny:0 	main:393
+iPhone 15 	393x852 	/nope 	ok 	 	small:0 	tiny:0 	main:393
+Pro Max 	430x932 	/ 	ok 	 	small:0 	tiny:0 	main:430
+Pro Max 	430x932 	/lab 	ok 	 	small:3 	tiny:14 	main:430
+Pro Max 	430x932 	/pc 	ok 	 	small:3 	tiny:0 	main:430
+Pro Max 	430x932 	/login 	ok 	 	small:1 	tiny:0 	main:430
+Pro Max 	430x932 	/register 	ok 	 	small:3 	tiny:0 	main:430
+Pro Max 	430x932 	/terms 	ok 	 	small:3 	tiny:0 	main:430
+Pro Max 	430x932 	/privacy 	ok 	 	small:2 	tiny:0 	main:430
+Pro Max 	430x932 	/nope 	ok 	 	small:0 	tiny:0 	main:430
+Galaxy Fold 外屏 	344x882 	/ 	ok 	 	small:0 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/lab 	ok 	 	small:3 	tiny:14 	main:344
+Galaxy Fold 外屏 	344x882 	/pc 	ok 	 	small:3 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/login 	ok 	 	small:1 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/register 	ok 	 	small:3 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/terms 	ok 	 	small:3 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/privacy 	ok 	 	small:2 	tiny:0 	main:344
+Galaxy Fold 外屏 	344x882 	/nope 	ok 	 	small:0 	tiny:0 	main:344
+Fold 内屏 	673x841 	/ 	ok 	 	small:0 	tiny:0 	main:673
+Fold 内屏 	673x841 	/lab 	ok 	 	small:3 	tiny:14 	main:673
+Fold 内屏 	673x841 	/pc 	ok 	 	small:3 	tiny:0 	main:673
+Fold 内屏 	673x841 	/login 	ok 	 	small:1 	tiny:0 	main:673
+Fold 内屏 	673x841 	/register 	ok 	 	small:3 	tiny:0 	main:673
+Fold 内屏 	673x841 	/terms 	ok 	 	small:3 	tiny:0 	main:673
+Fold 内屏 	673x841 	/privacy 	ok 	 	small:2 	tiny:0 	main:673
+Fold 内屏 	673x841 	/nope 	ok 	 	small:0 	tiny:0 	main:673
+iPad mini 竖 	744x1133 	/ 	ok 	 	small:0 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/lab 	ok 	 	small:3 	tiny:14 	main:744
+iPad mini 竖 	744x1133 	/pc 	ok 	 	small:3 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/login 	ok 	 	small:1 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/register 	ok 	 	small:3 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/terms 	ok 	 	small:2 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/privacy 	ok 	 	small:2 	tiny:0 	main:744
+iPad mini 竖 	744x1133 	/nope 	ok 	 	small:0 	tiny:0 	main:744
+iPad 竖 	820x1180 	/ 	ok 	 	small:0 	tiny:0 	main:820
+iPad 竖 	820x1180 	/lab 	ok 	 	small:3 	tiny:48 	main:820
+iPad 竖 	820x1180 	/pc 	ok 	 	small:3 	tiny:0 	main:820
+iPad 竖 	820x1180 	/login 	ok 	 	small:1 	tiny:0 	main:820
+iPad 竖 	820x1180 	/register 	ok 	 	small:3 	tiny:0 	main:820
+iPad 竖 	820x1180 	/terms 	ok 	 	small:3 	tiny:0 	main:820
+iPad 竖 	820x1180 	/privacy 	ok 	 	small:2 	tiny:0 	main:820
+iPad 竖 	820x1180 	/nope 	ok 	 	small:0 	tiny:0 	main:820
+iPad Pro 横 	1366x1024 	/ 	ok 	 	small:0 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/lab 	ok 	 	small:3 	tiny:48 	main:1366
+iPad Pro 横 	1366x1024 	/pc 	ok 	 	small:3 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/login 	ok 	 	small:1 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/register 	ok 	 	small:3 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/terms 	ok 	 	small:3 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/privacy 	ok 	 	small:2 	tiny:0 	main:1366
+iPad Pro 横 	1366x1024 	/nope 	ok 	 	small:0 	tiny:0 	main:1366
+安卓平板横 	1280x800 	/ 	ok 	 	small:0 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/lab 	ok 	 	small:3 	tiny:48 	main:1280
+安卓平板横 	1280x800 	/pc 	ok 	 	small:3 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/login 	ok 	 	small:1 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/register 	ok 	 	small:3 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/terms 	ok 	 	small:3 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/privacy 	ok 	 	small:2 	tiny:0 	main:1280
+安卓平板横 	1280x800 	/nope 	ok 	 	small:0 	tiny:0 	main:1280
+笔记本 	1366x768 	/ 	ok 	 	small:0 	tiny:0 	main:1366
+笔记本 	1366x768 	/lab 	ok 	 	small:3 	tiny:48 	main:1366
+笔记本 	1366x768 	/pc 	ok 	 	small:3 	tiny:0 	main:1366
+笔记本 	1366x768 	/login 	ok 	 	small:1 	tiny:0 	main:1366
+笔记本 	1366x768 	/register 	ok 	 	small:3 	tiny:0 	main:1366
+笔记本 	1366x768 	/terms 	ok 	 	small:3 	tiny:0 	main:1366
+笔记本 	1366x768 	/privacy 	ok 	 	small:2 	tiny:0 	main:1366
+笔记本 	1366x768 	/nope 	ok 	 	small:0 	tiny:0 	main:1366
+MacBook 	1440x900 	/ 	ok 	 	small:0 	tiny:0 	main:1440
+MacBook 	1440x900 	/lab 	ok 	 	small:3 	tiny:48 	main:1440
+MacBook 	1440x900 	/pc 	ok 	 	small:3 	tiny:0 	main:1440
+MacBook 	1440x900 	/login 	ok 	 	small:1 	tiny:0 	main:1440
+MacBook 	1440x900 	/register 	ok 	 	small:3 	tiny:0 	main:1440
+MacBook 	1440x900 	/terms 	ok 	 	small:3 	tiny:0 	main:1440
+MacBook 	1440x900 	/privacy 	ok 	 	small:2 	tiny:0 	main:1440
+MacBook 	1440x900 	/nope 	ok 	 	small:0 	tiny:0 	main:1440
+1080p 	1920x1080 	/ 	ok 	 	small:0 	tiny:0 	main:1920
+1080p 	1920x1080 	/lab 	ok 	 	small:3 	tiny:48 	main:1920
+1080p 	1920x1080 	/pc 	ok 	 	small:3 	tiny:0 	main:1920
+1080p 	1920x1080 	/login 	ok 	 	small:1 	tiny:0 	main:1920
+1080p 	1920x1080 	/register 	ok 	 	small:3 	tiny:0 	main:1920
+1080p 	1920x1080 	/terms 	ok 	 	small:3 	tiny:0 	main:1920
+1080p 	1920x1080 	/privacy 	ok 	 	small:2 	tiny:0 	main:1920
+1080p 	1920x1080 	/nope 	ok 	 	small:0 	tiny:0 	main:1920
+2K 	2560x1440 	/ 	ok 	 	small:0 	tiny:0 	main:2560
+2K 	2560x1440 	/lab 	ok 	 	small:3 	tiny:48 	main:2560
+2K 	2560x1440 	/pc 	ok 	 	small:3 	tiny:0 	main:2560
+2K 	2560x1440 	/login 	ok 	 	small:1 	tiny:0 	main:2560
+2K 	2560x1440 	/register 	ok 	 	small:3 	tiny:0 	main:2560
+2K 	2560x1440 	/terms 	ok 	 	small:3 	tiny:0 	main:2560
+2K 	2560x1440 	/privacy 	ok 	 	small:2 	tiny:0 	main:2560
+2K 	2560x1440 	/nope 	ok 	 	small:0 	tiny:0 	main:2560
+横屏手机 	852x393 	/ 	ok 	 	small:0 	tiny:0 	main:852
+横屏手机 	852x393 	/lab 	ok 	 	small:3 	tiny:48 	main:852
+横屏手机 	852x393 	/pc 	ok 	 	small:3 	tiny:0 	main:852
+横屏手机 	852x393 	/login 	ok 	 	small:1 	tiny:0 	main:852
+横屏手机 	852x393 	/register 	ok 	 	small:3 	tiny:0 	main:852
+横屏手机 	852x393 	/terms 	ok 	 	small:3 	tiny:0 	main:852
+横屏手机 	852x393 	/privacy 	ok 	 	small:2 	tiny:0 	main:852
+横屏手机 	852x393 	/nope 	ok 	 	small:0 	tiny:0 	main:852

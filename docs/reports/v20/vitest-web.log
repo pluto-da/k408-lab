@@ -1,0 +1,43 @@
+$ vitest run
+
+ RUN  v3.2.7 /workspace/fullstack-408/apps/web
+
+ ✓ src/legacy/labds1.test.ts (37 tests) 6101ms
+   ✓ jsdom 挂载冒烟测试 > infix：默认数据播放到底，所有选项与预设也能走完  1389ms
+   ✓ jsdom 挂载冒烟测试 > cqueue：默认数据播放到底，所有选项与预设也能走完  649ms
+   ✓ jsdom 挂载冒烟测试 > kmp：默认数据播放到底，所有选项与预设也能走完  1600ms
+   ✓ jsdom 挂载冒烟测试 > bst：默认数据播放到底，所有选项与预设也能走完  512ms
+   ✓ jsdom 挂载冒烟测试 > btree：默认数据播放到底，所有选项与预设也能走完  635ms
+   ✓ jsdom 挂载冒烟测试 > ufset：默认数据播放到底，所有选项与预设也能走完  522ms
+ ✓ src/legacy/propds.test.ts (30 tests) 2816ms
+   ✓ 验证动画在 jsdom 中挂载 > 每个验证动画在随机参数下等式都成立（各 20 次）  1489ms
+ ✓ src/legacy/labds2.test.ts (28 tests) 2675ms
+   ✓ 界面冒烟（jsdom） > graphtrav：默认数据、每个按钮和例题都能走到底  1309ms
+   ✓ 界面冒烟（jsdom） > topo：默认数据、每个按钮和例题都能走到底  713ms
+ ✓ src/legacy/toc.test.ts (16 tests) 1554ms
+   ✓ 目录 DOM（jsdom） > 筛选：只显示匹配条目，匹配的组展开，不匹配的组隐藏；无结果提示；清空后恢复  439ms
+ ✓ src/legacy/propos.test.ts (37 tests) 1211ms
+ ✓ src/legacy/propco.test.ts (38 tests) 1372ms
+   ✓ PROPU.co 纯函数 > 溢出：三种方法在 2000 组随机加减法上与真实结果一致  334ms
+ ✓ src/legacy/labcoos.test.ts (31 tests) 1153ms
+   ✓ Booth 补码一位乘法 > 4 / 6 / 8 位全部输入结果正确  1050ms
+ ✓ src/legacy/propcn.test.ts (40 tests) 1041ms
+ ✓ src/legacy/propcore.test.ts (14 tests) 679ms
+ ✓ src/legacy/procds.test.ts (14 tests) 265ms
+ ✓ src/legacy/labds3.test.ts (16 tests) 78ms
+ ✓ src/legacy/content.test.ts (3 tests) 100ms
+ ✓ src/legacy/proccn.test.ts (10 tests) 67ms
+ ✓ src/legacy/proc.test.ts (6 tests) 55ms
+ ✓ src/pc/ride/sim/access.test.ts (31 tests) 50ms
+ ✓ src/legacy/proccoos.test.ts (5 tests) 47ms
+ ✓ src/lib/seo.test.ts (3 tests) 31ms
+ ✓ src/legacy/labcn.test.ts (30 tests) 33ms
+ ✓ src/lib/catalog.test.ts (3 tests) 19ms
+ ✓ src/pc/parts.test.ts (6 tests) 13ms
+
+ Test Files  20 passed (20)
+      Tests  398 passed (398)
+   Start at  08:53:30
+   Duration  116.64s (transform 1.35s, setup 0ms, collect 2.69s, tests 19.36s, environment 80.90s, prepare 6.69s)
+
+EXIT 0

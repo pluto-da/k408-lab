@@ -1,0 +1,90 @@
+vite v6.4.4 building for production...
+transforming...
+✓ 195 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../work/v20/tb/robots.txt                  0.13 kB │ gzip:   0.09 kB
+../../../work/v20/tb/legacy/a3478644c7.json      0.37 kB │ gzip:   0.25 kB
+../../../work/v20/tb/index.html                  4.05 kB │ gzip:   1.53 kB
+../../../work/v20/tb/assets/YijhT1k6.webp        4.91 kB
+../../../work/v20/tb/assets/Dknamu7V.webp        6.08 kB
+../../../work/v20/tb/assets/XpQmoMjJ.webp        6.59 kB
+../../../work/v20/tb/assets/CWrSazg1.webp        6.86 kB
+../../../work/v20/tb/assets/DWjr2vvk.webp        6.98 kB
+../../../work/v20/tb/assets/8hOS_d1U.webp        7.24 kB
+../../../work/v20/tb/assets/BCS3Ajwu.webp        7.37 kB
+../../../work/v20/tb/assets/C3ld6ezo.webp        8.89 kB
+../../../work/v20/tb/assets/C2xBtJHG.webp       10.38 kB
+../../../work/v20/tb/assets/BM-s3MEZ.webp       11.65 kB
+../../../work/v20/tb/assets/Ce85YjMO.webp       12.44 kB
+../../../work/v20/tb/legacy/3cc91b6f00.js       12.57 kB
+../../../work/v20/tb/assets/XnPsuZio.webp       17.27 kB
+../../../work/v20/tb/assets/m_9kJhEH.webp       18.47 kB
+../../../work/v20/tb/legacy/5fae73eb6c.html     18.85 kB │ gzip:   5.25 kB
+../../../work/v20/tb/assets/BhDVWB73.webp       21.16 kB
+../../../work/v20/tb/assets/D_b3xWWb.webp       26.10 kB
+../../../work/v20/tb/assets/DYUFAS2Q.webp       33.59 kB
+../../../work/v20/tb/assets/Chh--m0e.webp       39.13 kB
+../../../work/v20/tb/assets/D2UI56Yn.webp       39.30 kB
+../../../work/v20/tb/assets/yYKox4zf.webp       39.45 kB
+../../../work/v20/tb/assets/D1YmA6aQ.glb        40.53 kB
+../../../work/v20/tb/assets/UTo-MGsx.webp       43.61 kB
+../../../work/v20/tb/assets/CJoALfdN.webp       53.71 kB
+../../../work/v20/tb/assets/Cb2sMQYr.webp       59.27 kB
+../../../work/v20/tb/legacy/d9975d6773.js       64.99 kB
+../../../work/v20/tb/assets/BasNPylZ.webp       77.23 kB
+../../../work/v20/tb/assets/BZDEjKYB.webp       91.50 kB
+../../../work/v20/tb/legacy/5917193bd1.js       93.20 kB
+../../../work/v20/tb/assets/BLKGCshL.webp      114.83 kB
+../../../work/v20/tb/assets/BL_XtXEr.webp      136.11 kB
+../../../work/v20/tb/legacy/8575207dc2.bin     147.73 kB
+../../../work/v20/tb/assets/xtuF2I4p.webp      171.93 kB
+../../../work/v20/tb/assets/Cwqy6JqJ.glb       197.35 kB
+../../../work/v20/tb/assets/CpwnZN8r.webp      228.15 kB
+../../../work/v20/tb/assets/DtaX9Gf4.webp      255.86 kB
+../../../work/v20/tb/assets/BLVS629U.glb       295.64 kB
+../../../work/v20/tb/assets/CPmACGy0.glb       302.86 kB
+../../../work/v20/tb/assets/CBl6P2OF.webp      305.77 kB
+../../../work/v20/tb/assets/Cmn5wfwO.glb       336.50 kB
+../../../work/v20/tb/assets/Cdcl4skG.webp      361.38 kB
+../../../work/v20/tb/assets/B9D8DRg_.glb       468.54 kB
+../../../work/v20/tb/legacy/d318a8da63.js      609.90 kB
+../../../work/v20/tb/assets/_mNT9v7F.webp      620.21 kB
+../../../work/v20/tb/assets/DUl22f3P.glb       817.71 kB
+../../../work/v20/tb/assets/B1LKxN37.glb       973.00 kB
+../../../work/v20/tb/legacy/431c913fc7.glb     992.66 kB
+../../../work/v20/tb/assets/CEOH39tP.glb     1,171.46 kB
+../../../work/v20/tb/legacy/46f937ec13.js    1,269.89 kB
+../../../work/v20/tb/assets/DCzoqJuE.glb     1,344.47 kB
+../../../work/v20/tb/assets/BgxhJ-zC.glb     1,410.93 kB
+../../../work/v20/tb/assets/B9A1mrYo.glb     1,515.98 kB
+../../../work/v20/tb/assets/DGQmRI1L.glb     1,727.89 kB
+../../../work/v20/tb/assets/BQqv9tXN.glb     2,007.62 kB
+../../../work/v20/tb/assets/CKKCmbpN.glb     2,036.24 kB
+../../../work/v20/tb/assets/imZ4EOx3.glb     2,120.72 kB
+../../../work/v20/tb/assets/D-TEaAoR.glb     2,329.47 kB
+../../../work/v20/tb/assets/BgPeWTkb.css        17.32 kB │ gzip:   4.11 kB
+../../../work/v20/tb/assets/BpZco6ka.css        22.11 kB │ gzip:   5.38 kB
+../../../work/v20/tb/assets/BmUBdm5a.css        30.34 kB │ gzip:   6.40 kB
+../../../work/v20/tb/legacy/8460aa7796.css     129.16 kB │ gzip:  23.35 kB
+../../../work/v20/tb/assets/CCYZITYh.js          0.65 kB │ gzip:   0.43 kB
+../../../work/v20/tb/assets/BXWa27zF.js          0.78 kB │ gzip:   0.57 kB
+../../../work/v20/tb/assets/eRzrLTbN.js          1.29 kB │ gzip:   0.81 kB
+../../../work/v20/tb/assets/DdfOtOi-.js          1.95 kB │ gzip:   1.02 kB
+../../../work/v20/tb/assets/BTv7zJQk.js          2.86 kB │ gzip:   1.47 kB
+../../../work/v20/tb/assets/DnDIcXVx.js          3.79 kB │ gzip:   2.08 kB
+../../../work/v20/tb/assets/DTMv_J4g.js          4.38 kB │ gzip:   1.76 kB
+../../../work/v20/tb/assets/BktUdSes.js          5.94 kB │ gzip:   2.85 kB
+../../../work/v20/tb/assets/DZ3KZn-c.js          7.66 kB │ gzip:   3.34 kB
+../../../work/v20/tb/assets/csVpiBiA.js         56.72 kB │ gzip:  21.25 kB
+../../../work/v20/tb/assets/DBa5imXR.js        149.25 kB │ gzip:  51.59 kB
+../../../work/v20/tb/assets/cGpzRTMj.js        229.55 kB │ gzip:  75.50 kB
+../../../work/v20/tb/assets/GKVwoHX2.js        280.66 kB │ gzip:  84.28 kB
+../../../work/v20/tb/assets/DDizcfVa.js        651.86 kB │ gzip: 166.33 kB
+✓ built in 17.07s
+npm notice
+npm notice New major version of npm available! 10.9.9 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+BUILD_EXIT 0

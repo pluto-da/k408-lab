@@ -1,0 +1,23 @@
+
+==== ride-audit ====
+phone-land-852 852×273 default: 12/12  fault: 16/16
+phone-land-780 780×240 default: 9/12  fault: 14/16
+   ✗ 2 tlb: 6 正文只露 0 行（要 4）；13 结论卡片被裁 3px（顶 4）
+   ✗ 5 ptTbl: 6 正文只露 0 行（要 4）；13 结论卡片被裁 8px（顶 4）
+   ✗ 9 l2: 6 正文只露 0 行（要 4）；13 结论卡片被裁 3px（顶 4）
+   ✗ 2 tlb: 6 正文只露 0 行（要 4）；13 结论卡片被裁 3px（顶 4）
+   ✗ 5 ptTbl: 6 正文只露 0 行（要 4）；13 结论卡片被裁 30px（顶 4）
+fold-673 673×721 default: 12/12  fault: 16/16
+fold-884 884×984 default: 12/12  fault: 14/16
+   ✗ 8 mmu: 1 焦点被界面压住：section.rd-panel "08 / 16拼出物理地"(35064px²)；2 焦点出了观察窗口
+   ✗ 15 fill: 没有焦点矩形；3 最小字 nullpx < 12
+tablet-portrait 820×1060 default: 12/12  fault: 13/16
+   ✗ 8 mmu: 1 焦点被界面压住：section.rd-panel "08 / 16拼出物理地"(41915px²)；2 焦点出了观察窗口
+   ✗ 13 dram: 1 焦点被界面压住：div.rd-tl.rd-ov "内存 · DRAM 颗粒"(1566px²)，section.rd-panel "13 / 16内存颗粒："(9788px²)；2 焦点出了观察窗口
+   ✗ 15 fill: 1 焦点被界面压住：section.rd-panel "15 / 16装入 L1"(114903px²)；2 焦点出了观察窗口
+tablet-land 1210×680 default: 12/12  fault: 16/16
+不通过：10 项
+
+==== audit:ui 汇总 ====
+✗ ride
+截图与结果：/workspace/work/v20/ui3/RA

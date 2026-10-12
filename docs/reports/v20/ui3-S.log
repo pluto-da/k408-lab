@@ -1,0 +1,10 @@
+
+==== ride-audit ====
+phone-land-852 852×273 default: 11/12  fault: 16/16
+   ✗ 2 tlb: 13 结论卡片被裁 116px（顶 162）
+phone-land-780 780×240 default: 12/12  fault: 16/16
+不通过：1 项
+
+==== audit:ui 汇总 ====
+✗ ride
+截图与结果：/workspace/work/v20/ui3/S

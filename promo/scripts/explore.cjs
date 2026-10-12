@@ -1,0 +1,20 @@
+const { chromium } = require("/workspace/work/pw/node_modules/playwright-core");
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const B = "http://154.8.183.93";
+(async () => {
+  const b = await chromium.launch({ executablePath: "/usr/bin/chromium", args: ["--no-sandbox", "--no-proxy-server", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+  const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 } });
+  const p = await ctx.newPage();
+  p.on("pageerror", (e) => console.log("ERR", e.message));
+  let t=Date.now();
+  await p.goto(B + "/", { waitUntil: "networkidle" }); await sleep(1500);
+  await p.screenshot({ path: "explore/home.png" }); console.log("home", Date.now()-t);
+  t=Date.now();
+  await p.goto(B + "/lab#lab-sort", { waitUntil: "domcontentloaded" });
+  await p.waitForSelector(".lab-loading", { state: "detached", timeout: 90000 }).catch(()=>console.log("loading still"));
+  await sleep(3000); console.log("lab", Date.now()-t);
+  await p.screenshot({ path: "explore/lab-sort.png" });
+  const info = await p.evaluate(() => { const l = document.getElementById("lab"); const r=l&&l.getBoundingClientRect(); return {r, tabs:[...document.querySelectorAll('[id^="tab-"]')].map(e=>e.id+":"+e.textContent.trim().slice(0,14)), btns:[...(l||document).querySelectorAll("button")].slice(0,60).map(b=>b.textContent.trim().slice(0,10)).filter(Boolean)}; });
+  console.log(JSON.stringify(info));
+  await b.close();
+})();
