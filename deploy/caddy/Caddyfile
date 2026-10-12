@@ -8,7 +8,7 @@
 }
 
 (guard) {
-	@grabber header_regexp User-Agent (?i)(httrack|wget|curl|python-requests|python-urllib|aiohttp|httpx|scrapy|go-http-client|java/|okhttp|libwww-perl|lwp-|webcopier|webzip|webripper|teleport|offline explorer|sitesucker|webcopy|website downloader|axel|aria2|node-fetch|undici|headlesschrome|phantomjs)
+	@grabber header_regexp User-Agent (?i)(httrack|wget|curl|python-requests|python-urllib|aiohttp|httpx|scrapy|go-http-client|java/|okhttp|libwww-perl|lwp-|webcopier|webzip|webripper|teleport|offline\sexplorer|sitesucker|webcopy|website\sdownloader|axel|aria2|node-fetch|undici|headlesschrome|phantomjs)
 	@noua not header User-Agent *
 	@hotlink expression `{http.request.header.Referer} != "" && !{http.request.header.Referer}.matches("^https?://" + {http.request.host} + "(:[0-9]+)?(/|$)")`
 	error @grabber 403
