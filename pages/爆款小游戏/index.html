@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>爆款小游戏</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Sans+SC:wght@400;500;700;800;900&display=swap" />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      /* ---------- base: warm paper ---------- */
+      body{--x-ink:#1A1A1A;--x-mut:#6B6B6B;--x-paper:#F6F3EE;--x-line:#E5E0D8;--x-chip:#EFEBE4;--x-acc:#FF4F1F;--x-ease:cubic-bezier(.2,.8,.2,1);
+        --x-font:"PingFang SC","HarmonyOS Sans SC","Noto Sans SC",sans-serif}
+      .x-app{position:fixed;inset:0;overflow:hidden auto;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
+        font-family:var(--x-font);color:var(--x-ink);
+        background:var(--x-paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+      .x-app *{box-sizing:border-box}
+      .x-screen{position:relative;max-width:480px;margin:0 auto;min-height:100%;padding:20px 16px 28px}
+      .x-screen:has(.x-lobby){max-width:none;margin:0;padding:0 16px 32px}
+      @media (min-width:900px){.x-screen:has(.x-lobby){padding:0 32px 48px}}
+      /* ---------- lobby ---------- */
+      .x-lobby{max-width:1100px}
+      .x-head{height:56px;display:flex;align-items:center;gap:10px}
+      .x-mark{flex:none;width:30px;height:30px;border-radius:6px;background:var(--x-acc);color:#fff;display:grid;place-items:center;font-size:19px;font-weight:900;line-height:1}
+      .x-word{margin:0;font-size:19px;font-weight:900;line-height:1;white-space:nowrap}
+      .x-slogan{margin:0 0 0 auto;font-size:12px;color:var(--x-mut);white-space:nowrap}
+      .x-intro{margin:0 0 14px;font-size:13px;color:var(--x-mut)}
+      .x-wallbox{container-type:inline-size}
+      .x-wall{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:dense;gap:8px;
+        grid-auto-rows:calc((100vw - 40px)/2);grid-auto-rows:calc((100cqw - 8px)/2)}
+      @media (min-width:900px){.x-wall{grid-template-columns:repeat(4,minmax(0,1fr));
+        grid-auto-rows:calc((min(100vw - 64px,1100px) - 24px)/4);grid-auto-rows:calc((100cqw - 24px)/4)}}
+      .x-cv{position:relative;display:block;margin:0;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--x-chip);cursor:pointer;font:inherit;color:var(--x-ink);
+        transition:transform 120ms var(--x-ease)}
+      .x-cv.is-big{grid-column:span 2;grid-row:span 2}
+      .x-cv.is-wide{grid-column:span 2}
+      .x-cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+      .x-cv:active{transform:scale(.97)}
+      .x-cv:focus-visible{outline:2px solid var(--x-ink);outline-offset:-2px}
+      .x-nm{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);padding:6px 8px;border-radius:4px;background:#fff;color:var(--x-ink);
+        font-size:13px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform 120ms var(--x-ease)}
+      .x-rk{position:absolute;left:8px;top:8px;padding:4px 6px;border-radius:4px;background:#fff;color:var(--x-ink);font-size:12px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+      .x-rk.is-top{background:var(--x-acc)}
+      @media (hover:hover){.x-cv:hover{outline:2px solid var(--x-ink);outline-offset:-2px}.x-cv:hover .x-nm{transform:translateY(-2px)}}
+      .x-sec{margin:40px 0 12px;font-size:17px;font-weight:900;color:var(--x-ink)}
+      .x-rows{list-style:none;margin:0;padding:0;background:#fff;border:1px solid var(--x-line);border-radius:10px;overflow:hidden}
+      .x-rows li+li{border-top:1px solid var(--x-line)}
+      .x-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 12px;border:0;background:#fff;font:inherit;color:var(--x-ink);text-align:left;cursor:pointer}
+      .x-row:active{background:var(--x-chip)}
+      .x-row:focus-visible{outline:2px solid var(--x-ink);outline-offset:-2px}
+      .x-row img{flex:none;width:44px;height:44px;border-radius:6px;object-fit:cover}
+      .x-row__t{flex:1;min-width:0}
+      .x-row__t b{display:block;font-size:15px;font-weight:800;line-height:1.3}
+      .x-row__t span{display:block;margin-top:2px;font-size:13px;color:var(--x-mut);line-height:1.4}
+      .x-row svg{flex:none;width:16px;height:16px;color:var(--x-mut)}
+      /* ---------- shared chrome ---------- */
+      .x-btn{display:block;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--x-ink);border-radius:8px;background:#fff;color:var(--x-ink);
+        font:inherit;font-size:14px;font-weight:700;line-height:1.25;cursor:pointer}
+      .x-btn:active{background:var(--x-ink);color:#fff}
+      .x-btn small{display:block;margin-top:2px;font-size:12px;font-weight:500;color:var(--x-mut)}
+      .x-btn:active small{color:#fff}
+      .x-btn.is-off,.x-btn.is-off:active{border-color:#CFC8BC;background:#fff;color:var(--x-mut)}
+      .x-btn.is-off:active small{color:var(--x-mut)}
+      .x-foot{text-align:center;font-size:12px;color:var(--x-mut);margin:20px 0 0;line-height:1.5}
+      .x-lobby .x-foot{text-align:left;margin-top:32px}
+      .x-top{display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:20;height:52px;
+        margin:-20px calc(50% - 50vw) 16px;padding:0 calc(50vw - 50%);background:#fff;border-bottom:1px solid var(--x-line)}
+      .x-back{flex:none;min-height:44px;margin-left:-8px;padding:0 8px;border:0;border-radius:8px;background:none;font:inherit;font-size:15px;font-weight:700;color:var(--x-ink);cursor:pointer;white-space:nowrap}
+      .x-back:active{background:var(--x-chip)}
+      .x-lv{flex:1;min-width:0;text-align:center;font-size:12px;color:var(--x-mut);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .x-lv::before{content:var(--x-gn,"");display:block;font-size:16px;font-weight:900;color:var(--x-ink)}
+      .x-left{flex:none;min-width:60px;text-align:center;padding:6px 10px;border-radius:99px;background:var(--x-chip);color:var(--x-ink);font-weight:700;font-size:13px;white-space:nowrap}
+      @media (prefers-reduced-motion:reduce){.x-cv,.x-nm{transition:none}.x-cv:active{transform:none}}
+      .x-boardwrap{background:#BDE59A;color:#2A2118;border:1px solid var(--x-line);border-radius:10px;padding:12px}
+      .x-board{position:relative;width:100%}
+      .x-tile{position:absolute;display:grid;place-items:center;border:0;padding:0;border-radius:18%;cursor:pointer;color:#2A2118;
+        background:#FFFDF6;box-shadow:inset 0 0 0 1.5px #C8BFA9,0 3px 0 #8CB868;transition:background-color .2s,transform .1s}
+      .x-tile span{font-size:min(7vw,30px);line-height:1}
+      .x-tile.is-blk{background:#E4DED2;cursor:default}
+      .x-tile.is-blk span{opacity:.55}
+      .x-tile:not(.is-blk):active{transform:scale(.9)}
+      .x-hold{display:flex;justify-content:center;gap:6px;min-height:52px;margin:12px 0 8px}
+      .x-hold .x-tile,.x-bar .x-tile{position:relative;width:44px;height:44px}
+      .x-bar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px;border-radius:10px;background:#9C6A3E}
+      .x-slot{aspect-ratio:1;border-radius:8px;background:rgba(0,0,0,.18);display:grid;place-items:center}
+      .x-bar .x-tile{width:100%;height:100%;cursor:default;box-shadow:inset 0 0 0 1.5px #D9BE8E,0 2px 0 #6E4523}
+      .x-bar .x-tile span{font-size:min(6vw,26px)}
+      .x-bar .x-tile.is-pop{animation:x-pop .28s ease-in forwards}
+      @keyframes x-pop{40%{transform:scale(1.25)}100%{transform:scale(0);opacity:0}}
+      .x-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+      .x-tools .x-btn{font-size:14px}
+      .x-fly{position:fixed;z-index:50;display:grid;place-items:center;border-radius:18%;color:#2A2118;background:#FFFDF6;box-shadow:inset 0 0 0 1.5px #C8BFA9,0 3px 0 #8CB868;
+        transition:left .22s cubic-bezier(.3,.7,.4,1),top .22s cubic-bezier(.3,.7,.4,1),width .22s,height .22s;pointer-events:none}
+      .x-fly span{font-size:min(7vw,30px)}
+      .x-mask{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:24px;font-family:var(--x-font);color:var(--x-ink)}
+      .x-mask *{box-sizing:border-box}
+      .x-pop{position:relative;width:min(320px,100%);background:#fff;border:1px solid var(--x-line);border-radius:12px;padding:24px 20px 20px;text-align:center}
+      .x-pop .big{display:none}
+      .x-pop h3{margin:0 0 6px;font-size:24px;font-weight:900;color:var(--x-ink);line-height:1.25}
+      .x-pop p{margin:0 0 18px;font-size:14px;color:var(--x-mut);line-height:1.5}
+      .x-pop .x-btn{margin-top:10px}
+      .x-pop .x-btn.o{border-color:var(--x-acc);background:var(--x-acc);color:#fff;font-size:19px;font-weight:800;min-height:50px}
+      .x-pop .x-btn.o:active{border-color:#C83A12;background:#C83A12}
+      .x-jar{background:#FFD3A0;border:1px solid var(--x-line);border-radius:10px;padding:10px}
+      .x-jar canvas{display:block;margin:0 auto;border-radius:8px;background:#FFF8EC;touch-action:none;cursor:pointer}
+      .x-cele{position:fixed;left:50%;top:36%;z-index:65;transform:translate(-50%,-50%);text-align:center;pointer-events:none;font-family:var(--x-font)}
+      .x-cele p{margin:0;font-size:80px;line-height:1}
+      .x-cele h3{display:inline-block;margin:8px 0 6px;padding:8px 14px;border:1px solid var(--x-line);border-radius:8px;background:#fff;font-size:26px;font-weight:900;color:var(--x-ink);white-space:nowrap}
+      .x-cele small{display:block;width:fit-content;margin:0 auto;padding:6px 12px;border-radius:8px;background:var(--x-ink);font-size:14px;font-weight:700;color:#fff}
+      .x-rack{position:relative;display:grid;justify-content:center;gap:40px 12px;padding:48px 12px 24px;border:1px solid var(--x-line);border-radius:10px;background:#D9EEF8}
+      .x-tube{position:relative;width:46px;height:168px;padding:0;border:0;background:none;cursor:pointer;transform-origin:50% 0;transition:transform .3s cubic-bezier(.3,.7,.4,1)}
+      .x-tube.is-up{transform:translateY(-18px)}
+      .x-tube.is-pour{z-index:5}
+      .x-tube.is-no{animation:x-shake .3s}
+      @keyframes x-shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+      .x-tube::before{content:"";position:absolute;z-index:2;left:-5px;right:-5px;top:-4px;height:9px;border-radius:99px;background:linear-gradient(180deg,#fff,#d3eafa);box-shadow:0 2px 3px rgba(30,90,160,.25)}
+      .x-glass{position:absolute;inset:0;overflow:hidden;border:3px solid rgba(255,255,255,.95);border-radius:6px 6px 23px 23px;background:linear-gradient(90deg,rgba(255,255,255,.4),rgba(255,255,255,.12) 45%,rgba(255,255,255,.45));box-shadow:0 6px 12px rgba(30,90,160,.22),inset 0 0 0 1px rgba(70,140,210,.25);transition:box-shadow .3s}
+      .x-glass::after{content:"";position:absolute;z-index:1;top:10px;bottom:16px;left:5px;width:7px;border-radius:99px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.2));pointer-events:none}
+      .x-liq{position:absolute;left:0;right:0;bottom:0;top:14px;display:flex;flex-direction:column-reverse}
+      .x-seg{display:block;flex:none;height:0;background-image:linear-gradient(90deg,rgba(0,0,0,.14),rgba(255,255,255,.22) 32%,rgba(255,255,255,0) 60%,rgba(0,0,0,.12));transition:height .4s ease-in-out}
+      .x-rack.no-anim .x-seg{transition:none}
+      .x-tube.is-done .x-glass{box-shadow:0 0 0 3px #E8B21E}
+      .x-tube.is-done::after{content:"✨";position:absolute;left:50%;top:-38px;font-size:22px;transform:translateX(-50%);animation:x-twinkle 1.2s ease-in-out infinite;pointer-events:none}
+      @keyframes x-twinkle{50%{transform:translateX(-50%) scale(1.3) rotate(15deg);opacity:.7}}
+      .x-stream{position:absolute;z-index:4;width:7px;border-radius:4px;transform-origin:50% 0;animation:x-flow .15s ease-out;pointer-events:none}
+      @keyframes x-flow{from{transform:scaleY(0)}}
+      .x-star{position:absolute;z-index:6;font-size:18px;font-style:normal;pointer-events:none;animation:x-star .7s ease-out forwards}
+      @keyframes x-star{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.1);opacity:0}}
+      .x-arrows{display:block;width:100%;height:auto;overflow:visible;touch-action:manipulation}
+      .x-arw{cursor:pointer;outline:none}
+      .x-halo{opacity:0;transition:opacity .2s}
+      .x-arw.is-hint .x-halo{animation:x-glow .7s ease-in-out infinite alternate}
+      .x-arw.is-hit .x-halo{fill:#ff4d4d;opacity:.75}
+      .x-arw:focus-visible .x-halo{opacity:.6}
+      @keyframes x-glow{from{opacity:.25}to{opacity:1}}
+      .x-lot{position:relative;overflow:hidden;padding:16px;border:1px solid var(--x-line);border-radius:10px;background:#A4AAB4}
+      .x-lot::before{content:"";position:absolute;inset:6px;border:2px dashed rgba(255,255,255,.8);border-radius:6px;pointer-events:none}
+      .x-park{display:block;width:100%;height:auto;overflow:visible;touch-action:manipulation}
+      .x-car{cursor:pointer;outline:none}
+      .x-car.is-hint .x-halo{animation:x-glow .7s ease-in-out infinite alternate}
+      .x-car.is-hit .x-halo{fill:#ff4d4d;opacity:.75}
+      .x-car:focus-visible .x-halo{opacity:.6}
+      .x-stars{font-size:34px;letter-spacing:4px;margin:2px 0 6px}
+      .x-stars span{filter:grayscale(1);opacity:.35}
+      .x-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;max-width:calc(100vw - 32px);
+        background:#1A1A1A;color:#fff;font-family:var(--x-font);font-weight:700;font-size:14px;line-height:1.4;padding:12px 16px;border-radius:8px;white-space:nowrap;pointer-events:none}
+      .x-scbox{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
+      .x-tb{display:flex;gap:5px;padding:8px 10px;border-radius:16px;border:3px solid rgba(255,255,255,.8);transition:opacity .3s,transform .3s}
+      .x-tb.is-out{opacity:0;transform:scale(.7) translateY(-10px)}
+      .x-hole{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:inset 0 2px 3px rgba(0,0,0,.25)}
+      .x-spare{display:flex;gap:6px;width:fit-content;margin:0 auto 12px;padding:6px 10px;border-radius:99px;background:#fff;border:1px solid var(--x-line)}
+      .x-spare .x-hole{background:var(--x-chip)}
+      .x-scb{position:relative;height:min(88vw,400px);border:1px solid var(--x-line);border-radius:10px;background:#EAE4D9;overflow:hidden}
+      .x-pl{position:absolute;border-radius:18px;border:2px solid rgba(255,255,255,.85);box-shadow:0 2px 0 rgba(0,0,0,.12);transition:opacity .35s,transform .35s}
+      .x-pl.is-gone{opacity:0;transform:translateY(40px) rotate(8deg);pointer-events:none}
+      .x-sw{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;padding:0;border:0;background:none;cursor:pointer}
+      .x-sw i{display:block;position:relative;width:30px;height:30px;margin:7px;border-radius:50%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 2px 4px rgba(0,0,0,.3)}
+      .x-sw i::before,.x-sw i::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:4px;margin:-2px 0 0 -8px;border-radius:2px;background:rgba(0,0,0,.4)}
+      .x-sw i::after{transform:rotate(90deg)}
+      .x-sw.is-spin i{animation:x-spin .3s ease-in forwards}
+      .x-sw.is-no i{animation:x-shake .3s}
+      @keyframes x-spin{to{transform:rotate(540deg) scale(1.3);opacity:0}}
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <div class="x-app" id="app">
+        <div hidden id="x-imgs">
+          <img data-k="sheep" src="cover_sheep.jpg" alt="" />
+          <img data-k="melon" src="cover_melon.jpg" alt="" />
+          <img data-k="water" src="cover_water.jpg" alt="" />
+          <img data-k="arrow" src="cover_arrow.jpg" alt="" />
+          <img data-k="car" src="cover_car.jpg" alt="" />
+          <img data-k="screw" src="cover_screw.jpg" alt="" />
+        </div>
+        <div class="x-screen" id="screen"></div>
+      </div>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+(function(){
+const $s=document.getElementById("screen");
+const toast=m=>{const t=document.createElement("div");t.className="x-toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1300)};
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- 羊了个羊 ---------- */
+const sheep=(()=>{
+  const EM=["🥕","🌽","🥬","🍄","🔥","🌸","🧤","🪵","🍀","🥛","🧶","🔔"];
+  let root,lv,W,H,board,bar,hold,hist,tools,busy,uid;
+  function build(n){
+    const ts=[];const add=(x,y,z)=>ts.push({id:uid++,x,y,z});
+    if(n===1){W=6;H=5;
+      for(let r=0;r<4;r++)for(let c=0;c<5;c++)add(.5+c,.5+r,0);
+      for(let r=0;r<3;r++)for(let c=0;c<4;c++)add(1+c,1+r,1);
+    }else{W=7;H=8.4;
+      for(let L=0;L<7;L++){const o=L%2?1:.5,n2=L%2?5:6;
+        for(let r=0;r<n2;r++)for(let c=0;c<n2;c++)if(Math.random()<.72)add(o+c,o+r,L)}
+      for(let i=0;i<9;i++){add(.3+i*.12,7.2,i);add(5.7-i*.12,7.2,i)}
+    }
+    ts.sort((a,b)=>a.z-b.z);ts.length-=ts.length%3;
+    const k=n===1?5:12,types=[];
+    for(let i=0;i<ts.length/3;i++){const t=i%k;types.push(t,t,t)}
+    shuf(types);ts.forEach((t,i)=>t.t=types[i]);return ts;
+  }
+  const blocked=a=>board.some(b=>b.z>a.z&&Math.abs(b.x-a.x)<.98&&Math.abs(b.y-a.y)<.98);
+  function load(n){lv=n;uid=0;board=build(n);bar=[];hold=[];hist=[];tools={out:1,undo:1,mix:1};busy=false;render()}
+  const tileHTML=(t,cls,st)=>`<button class="x-tile ${cls||""}" data-id="${t.id}" ${st||""} aria-label="${EM[t.t]}"><span>${EM[t.t]}</span></button>`;
+  function render(){
+    const left=board.length+hold.length+bar.length;
+    root.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">第${lv}关</div><div class="x-left">剩 ${left}</div></div>
+    <div class="x-boardwrap"><div class="x-board" style="aspect-ratio:${W}/${H}">${board.map(t=>tileHTML(t,blocked(t)?"is-blk":"",`style="left:${t.x/W*100}%;top:${t.y/H*100}%;width:${100/W}%;height:${100/H}%;z-index:${t.z+1}"`)).join("")}</div></div>
+    <div class="x-hold">${hold.map(t=>tileHTML(t)).join("")}</div>
+    <div class="x-bar">${Array.from({length:7},(_,i)=>`<div class="x-slot">${bar[i]?tileHTML(bar[i],bar[i].pop?"is-pop":"",bar[i].fly?'style="visibility:hidden"':""):""}</div>`).join("")}</div>
+    <div class="x-tools">
+      <button class="x-btn b ${tools.out?"":"is-off"}" data-a="out">移出<small>剩${tools.out}次</small></button>
+      <button class="x-btn o ${tools.undo?"":"is-off"}" data-a="undo">撤回<small>剩${tools.undo}次</small></button>
+      <button class="x-btn ${tools.mix?"":"is-off"}" data-a="mix">洗牌<small>剩${tools.mix}次</small></button></div>`;
+  }
+  function pick(id){
+    if(busy)return;let t=board.find(x=>x.id==id),from="board";
+    if(!t){t=hold.find(x=>x.id==id);from="hold"}
+    if(!t||bar.find(x=>x.id==id)||(from==="board"&&blocked(t))||bar.length>=7)return;
+    busy=true;const src=root.querySelector(`.x-board [data-id="${id}"],.x-hold [data-id="${id}"]`).getBoundingClientRect();
+    (from==="board"?board:hold).splice((from==="board"?board:hold).indexOf(t),1);
+    let at=bar.length;for(let i=bar.length-1;i>=0;i--)if(bar[i].t===t.t){at=i+1;break}
+    t.fly=true;bar.splice(at,0,t);hist.push({t,from});render();
+    const dst=root.querySelector(`.x-bar [data-id="${id}"]`).getBoundingClientRect();
+    const f=document.createElement("div");f.className="x-fly";f.innerHTML=`<span>${EM[t.t]}</span>`;
+    Object.assign(f.style,{left:src.left+"px",top:src.top+"px",width:src.width+"px",height:src.height+"px"});
+    document.body.appendChild(f);f.offsetWidth;
+    Object.assign(f.style,{left:dst.left+"px",top:dst.top+"px",width:dst.width+"px",height:dst.height+"px"});
+    setTimeout(()=>{f.remove();t.fly=false;const same=bar.filter(x=>x.t===t.t);
+      if(same.length>=3){same.slice(0,3).forEach(x=>x.pop=true);render();
+        setTimeout(()=>{bar=bar.filter(x=>!x.pop);busy=false;render();
+          if(!board.length&&!hold.length&&!bar.length)popup(true)},280)}
+      else{render();busy=false;if(bar.length>=7)popup(false)}},230);
+  }
+  function tool(a){
+    if(busy)return;if(!tools[a])return toast("道具已用完");
+    if(a==="out"){if(!bar.length)return toast("槽里还没有牌");hold=hold.concat(bar.splice(0,3))}
+    if(a==="undo"){const h=hist[hist.length-1];if(!h||!bar.includes(h.t))return toast("没有可撤回的牌");
+      hist.pop();bar.splice(bar.indexOf(h.t),1);(h.from==="board"?board:hold).push(h.t);if(h.from==="board")board.sort((x,y)=>x.z-y.z)}
+    if(a==="mix"){const ty=shuf(board.map(x=>x.t));board.forEach((x,i)=>x.t=ty[i])}
+    tools[a]--;render();
+  }
+  function popup(win){
+    const m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">${win?"🐑🎉":"🐑💦"}</p><h3>${win?"恭喜过关！":"槽位满啦！"}</h3><p>${win?`第${lv}关通关，你就是羊村之光`:"差一点点，再来一把就过了"}</p>
+    ${win?`<button class="x-btn o" data-a="next">下一关</button>`:`<button class="x-btn o" data-a="again">再来一次</button>`}<button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m);
+  }
+  function onClick(e){const b=e.target.closest("[data-a],[data-id]");if(!b)return;const a=b.dataset.a;
+    if(!a){if(!b.closest(".x-bar")&&!b.closest(".x-mask"))pick(b.dataset.id);return}
+    if(a==="home")return goHome();if(a==="next")return load(lv+1);if(a==="again")return load(lv);tool(a)}
+  return{id:"sheep",start(c){root=c;c.addEventListener("click",onClick);load(1)},stop(){if(root){root.removeEventListener("click",onClick);root.innerHTML="";document.querySelectorAll(".x-fly").forEach(f=>f.remove())}root=null}};
+})();
+
+/* ---------- 合成大西瓜 ---------- */
+const melon=(()=>{
+  const FR=[["🫐","葡萄",15,"#7b5cd6"],["🍒","樱桃",20,"#ff4d6d"],["🍊","橘子",26,"#ff9f1c"],["🍋","柠檬",32,"#ffe066"],["🥝","猕猴桃",38,"#9ccc65"],
+    ["🍅","番茄",45,"#ff5a3c"],["🍑","桃",52,"#ffb4a2"],["🍍","菠萝",60,"#ffd43b"],["🥥","椰子",68,"#a1887f"],["🍈","半个西瓜",78,"#8fd16a"],["🍉","大西瓜",90,"#2fb35a"]];
+  const W=360,H=560,LINE=104,DROPY=46,G=1900,TOP=10,EF='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  const CONF=["#ff5f6d","#ffa04d","#ffe066","#5ee07a","#6ec8ff","#d4a5ff"];
+  let root,cv,ctx,raf,last,k=1,dpr=1,fruits,parts,texts,score,best=0,curF,nextF,aimX,aiming,canDrop,dead,danger,clock,elScore,elNext;
+  const rnd=()=>Math.random()*5|0;
+  const clampX=x=>{const r=FR[curF][2];return Math.max(r,Math.min(W-r,x))};
+  function hud(){elScore.textContent=score;elNext.textContent=FR[nextF][0];elNext.title=FR[nextF][1]}
+  function reset(){fruits=[];parts=[];texts=[];score=0;curF=rnd();nextF=rnd();aimX=W/2;aiming=false;canDrop=0;dead=false;danger=0;clock=0;
+    root.querySelectorAll(".x-mask").forEach(m=>m.remove());hud()}
+  function size(){
+    const app=document.getElementById("app"),wrap=cv.parentNode;
+    const aw=wrap.clientWidth-20,top=wrap.getBoundingClientRect().top+app.scrollTop;
+    const ah=Math.max(320,innerHeight-top-48);
+    const w=Math.max(200,Math.min(aw,ah*W/H));dpr=window.devicePixelRatio||1;k=w/W;
+    cv.style.width=w+"px";cv.style.height=w*H/W+"px";cv.width=Math.round(w*dpr);cv.height=Math.round(w*H/W*dpr);
+  }
+  function burst(x,y,c,r,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=120+Math.random()*260;
+    parts.push({x:x+Math.cos(a)*r*.5,y:y+Math.sin(a)*r*.5,vx:Math.cos(a)*s,vy:Math.sin(a)*s-120,c,life:.6,max:.6,sz:3+Math.random()*r*.12,g:900})}}
+  function cele(){
+    for(let i=0;i<70;i++)parts.push({x:Math.random()*W,y:-10-Math.random()*80,vx:(Math.random()-.5)*160,vy:Math.random()*120,c:CONF[i%CONF.length],life:2.2,max:2.2,sz:4+Math.random()*4,g:420,sq:true,rot:Math.random()*6});
+    const c=document.createElement("div");c.className="x-cele";c.innerHTML="<p>🍉</p><h3>合成大西瓜！</h3><small>额外 +100 分</small>";
+    document.body.appendChild(c);setTimeout(()=>c.remove(),2000);
+  }
+  function merge(a,b){
+    const l=a.l+1,gain=(l+1)*2+(l===10?100:0);
+    fruits.splice(fruits.indexOf(a),1);fruits.splice(fruits.indexOf(b),1);
+    const f={x:(a.x+b.x)/2,y:(a.y+b.y)/2,vx:(a.vx+b.vx)/2,vy:Math.min(0,(a.vy+b.vy)/2)-60,r:FR[l][2],l,a:0,born:clock,t0:Math.min(a.t0,b.t0)};
+    fruits.push(f);score+=gain;hud();
+    burst(f.x,f.y,FR[a.l][3],f.r,14+l*2);parts.push({ring:true,x:f.x,y:f.y,r:f.r,c:FR[l][3],life:.35,max:.35});
+    texts.push({x:f.x,y:f.y-f.r*.4,t:"+"+gain,life:.9});
+    if(l===10)cele();
+  }
+  function step(h){
+    for(const f of fruits){
+      f.vy+=G*h;const dmp=1-.4*h;f.vx*=dmp;f.vy*=dmp;f.x+=f.vx*h;f.y+=f.vy*h;
+      if(f.x-f.r<0){f.x=f.r;if(f.vx<0)f.vx*=-.2;f.vy-=f.vy*Math.min(1,4*h)}
+      if(f.x+f.r>W){f.x=W-f.r;if(f.vx>0)f.vx*=-.2;f.vy-=f.vy*Math.min(1,4*h)}
+      if(f.y+f.r>H){f.y=H-f.r;if(f.vy>0)f.vy*=-.15;f.vx-=f.vx*Math.min(1,6*h)}
+      f.a+=f.vx*h/f.r;
+    }
+    const mg=[],used=new Set();
+    for(let it=0;it<2;it++)for(let i=0;i<fruits.length;i++)for(let j=i+1;j<fruits.length;j++){
+      const a=fruits[i],b=fruits[j];if(used.has(a)||used.has(b))continue;
+      let dx=b.x-a.x,dy=b.y-a.y;const min=a.r+b.r,d2=dx*dx+dy*dy;if(d2>=min*min)continue;
+      if(a.l===b.l&&a.l<10){used.add(a);used.add(b);mg.push([a,b]);continue}
+      let d=Math.sqrt(d2);if(d<1e-4){dx=.01;dy=1;d=1}
+      const nx=dx/d,ny=dy/d,ov=min-d,ma=a.r*a.r,mb=b.r*b.r,ia=1/ma,ib=1/mb,s=ov/(ia+ib)*.9;
+      a.x-=nx*s*ia;a.y-=ny*s*ia;b.x+=nx*s*ib;b.y+=ny*s*ib;
+      const rvx=b.vx-a.vx,rvy=b.vy-a.vy,vn=rvx*nx+rvy*ny;
+      if(vn<0){const jn=-(1.15*vn)/(ia+ib);a.vx-=jn*nx*ia;a.vy-=jn*ny*ia;b.vx+=jn*nx*ib;b.vy+=jn*ny*ib;
+        const tx=-ny,ty=nx,vt=rvx*tx+rvy*ty;let jt=-vt/(ia+ib);const lim=.3*jn;jt=Math.max(-lim,Math.min(lim,jt));
+        a.vx-=jt*tx*ia;a.vy-=jt*ty*ia;b.vx+=jt*tx*ib;b.vy+=jt*ty*ib}
+    }
+    for(const [a,b] of mg)merge(a,b);
+  }
+  function check(dt){
+    danger=0;
+    for(const f of fruits){
+      if(clock-f.t0>1&&f.y-f.r<LINE&&Math.hypot(f.vx,f.vy)<60){f.ov=(f.ov||0)+dt;danger=Math.max(danger,f.ov)}else f.ov=0;
+    }
+    if(danger>=2)over();
+  }
+  function over(){
+    dead=true;aiming=false;best=Math.max(best,score);
+    const m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">🍉💦</p><h3>水果堆满啦！</h3><p>本局得分 ${score} · 最高 ${best}</p><button class="x-btn o" data-a="again">再来一局</button><button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m);
+  }
+  function drop(){
+    if(dead||canDrop>0)return;aimX=clampX(aimX);
+    fruits.push({x:aimX,y:DROPY,vx:0,vy:0,r:FR[curF][2],l:curF,a:0,born:-1,t0:clock});
+    curF=nextF;nextF=rnd();canDrop=.55;aimX=clampX(aimX);hud();
+  }
+  function fruit(x,y,r,l,ang,s,al){
+    ctx.save();ctx.globalAlpha=al;ctx.translate(x,y);ctx.scale(s,s);
+    ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=FR[l][3];ctx.fill();
+    ctx.lineWidth=2.5;ctx.strokeStyle="rgba(0,0,0,.14)";ctx.stroke();
+    ctx.beginPath();ctx.ellipse(-r*.35,-r*.42,r*.32,r*.18,-.6,0,Math.PI*2);ctx.fillStyle="rgba(255,255,255,.45)";ctx.fill();
+    ctx.rotate(ang);ctx.font=`${Math.round(r*1.15)}px ${EF}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(FR[l][0],0,r*.07);
+    ctx.restore();
+  }
+  function draw(){
+    ctx.setTransform(dpr*k,0,0,dpr*k,0,0);ctx.clearRect(0,0,W,H);
+    const blink=danger>0?.45+.55*Math.abs(Math.sin(clock*10)):.7;
+    ctx.save();ctx.globalAlpha=blink;ctx.strokeStyle="#ff3b3b";ctx.lineWidth=danger>0?3:2;ctx.setLineDash([10,7]);
+    ctx.beginPath();ctx.moveTo(0,LINE);ctx.lineTo(W,LINE);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#ff3b3b";ctx.font="900 12px ui-rounded,'PingFang SC',sans-serif";ctx.textAlign="right";ctx.textBaseline="bottom";
+    ctx.fillText(danger>0?`危险！${Math.max(0,2-danger).toFixed(1)}s`:"警戒线",W-TOP,LINE-4);ctx.restore();
+    if(!dead){const r=FR[curF][2],x=clampX(aimX);
+      ctx.save();ctx.strokeStyle="rgba(200,120,40,.35)";ctx.lineWidth=2;ctx.setLineDash([4,8]);ctx.beginPath();ctx.moveTo(x,DROPY+r);ctx.lineTo(x,H);ctx.stroke();ctx.restore();
+      fruit(x,DROPY,r,curF,0,1,canDrop>0?.35:1)}
+    for(const f of fruits){let s=1;if(f.born>=0){const p=Math.min(1,(clock-f.born)/.22);if(p<1){const c=1.70158;s=.55+.45*(1+(c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2))}}
+      fruit(f.x,f.y,f.r,f.l,f.a,s,1)}
+    for(const p of parts){const al=Math.max(0,p.life/p.max);ctx.save();ctx.globalAlpha=al;
+      if(p.ring){ctx.strokeStyle=p.c;ctx.lineWidth=5*al;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1.5-.5*al),0,Math.PI*2);ctx.stroke()}
+      else if(p.sq){ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.fillRect(-p.sz/2,-p.sz,p.sz,p.sz*2)}
+      else{ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz*(.5+.5*al),0,Math.PI*2);ctx.fill()}ctx.restore()}
+    ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="900 22px ui-rounded,'PingFang SC',sans-serif";
+    for(const t of texts){ctx.save();ctx.globalAlpha=Math.min(1,t.life*2);ctx.lineWidth=4;ctx.strokeStyle="#fff";ctx.strokeText(t.t,t.x,t.y);ctx.fillStyle="#ff6a3d";ctx.fillText(t.t,t.x,t.y);ctx.restore()}
+  }
+  function loop(t){
+    raf=requestAnimationFrame(loop);const dt=Math.min(.033,last?(t-last)/1000:0);last=t;
+    clock+=dt;
+    if(!dead){canDrop=Math.max(0,canDrop-dt);for(let i=0;i<6;i++)step(dt/6);check(dt)}
+    for(const p of parts){p.life-=dt;if(!p.ring){p.vy+=p.g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.sq)p.rot+=dt*6}}
+    parts=parts.filter(p=>p.life>0);
+    for(const x of texts){x.life-=dt;x.y-=50*dt}texts=texts.filter(x=>x.life>0);
+    draw();
+  }
+  const toX=e=>{const b=cv.getBoundingClientRect();return (e.clientX-b.left)/b.width*W};
+  function onDown(e){if(dead)return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}aiming=true;aimX=clampX(toX(e))}
+  function onMove(e){if(dead)return;if(aiming||e.pointerType==="mouse")aimX=clampX(toX(e))}
+  function onUp(e){if(!aiming)return;aiming=false;aimX=clampX(toX(e));drop()}
+  function onCancel(){aiming=false}
+  function onKey(e){if(dead||!root||(e.target.closest&&e.target.closest("button")))return;
+    if(e.key==="ArrowLeft"){aimX=clampX(aimX-14);e.preventDefault()}else if(e.key==="ArrowRight"){aimX=clampX(aimX+14);e.preventDefault()}
+    else if(e.key===" "||e.key==="Enter"||e.key==="ArrowDown"){drop();e.preventDefault()}}
+  function onClick(e){const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="home")return goHome();if(a==="again")reset()}
+  return{id:"melon",
+    start(c){root=c;
+      c.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">得分 <span class="x-sc">0</span></div><div class="x-left">下个 <span class="x-nx"></span></div></div>
+      <div class="x-jar"><canvas role="img" aria-label="合成大西瓜：左右拖动瞄准，松手落下水果"></canvas></div><p class="x-foot">拖动瞄准 · 松手落下 · 两个相同水果相碰合成更大的</p>`;
+      document.getElementById("app").scrollTop=0;
+      cv=c.querySelector("canvas");ctx=cv.getContext("2d");elScore=c.querySelector(".x-sc");elNext=c.querySelector(".x-nx");
+      size();reset();last=0;
+      c.addEventListener("click",onClick);cv.addEventListener("pointerdown",onDown);cv.addEventListener("pointermove",onMove);
+      cv.addEventListener("pointerup",onUp);cv.addEventListener("pointercancel",onCancel);
+      window.addEventListener("resize",size);window.addEventListener("keydown",onKey);
+      raf=requestAnimationFrame(loop)},
+    stop(){cancelAnimationFrame(raf);window.removeEventListener("resize",size);window.removeEventListener("keydown",onKey);
+      if(root){root.removeEventListener("click",onClick);
+        if(cv){cv.removeEventListener("pointerdown",onDown);cv.removeEventListener("pointermove",onMove);cv.removeEventListener("pointerup",onUp);cv.removeEventListener("pointercancel",onCancel)}
+        root.innerHTML=""}
+      document.querySelectorAll(".x-cele").forEach(x=>x.remove());root=cv=ctx=null;fruits=[];parts=[];texts=[]}};
+})();
+
+/* ---------- 倒水排序 ---------- */
+const water=(()=>{
+  const COL=["#ff4d6d","#ffa62b","#ffe14d","#4cd964","#3fa9ff","#9b6bff","#ff8fd0"],NM=["红","橙","黄","绿","蓝","紫","粉"];
+  const CAP=4,TH=168,BW=3,SEG=(TH-14-BW*2)/CAP;
+  let root=null,rack,lv=1,nc=3,T=[],init=[],hist=[],extra=1,sel=-1,busy=false,timers=[];
+  const later=(f,ms)=>timers.push(setTimeout(f,ms));
+  const top=t=>t[t.length-1];
+  const run=t=>{let k=0;const c=top(t);for(let i=t.length-1;i>=0&&t[i]===c;i--)k++;return k};
+  const full=t=>t.length===CAP&&run(t)===CAP;
+  const won=()=>T.every(t=>!t.length||full(t));
+  /* 反向倒水生成：从已解状态出发，每步都是某次正向倒水的逆操作，所以一定有解 */
+  const score=S=>S.reduce((s,t)=>s+Math.min(t.length,CAP-t.length),0);
+  function moves(S){const M=[];S.forEach((b,i)=>{if(!b.length)return;const c=top(b),r=run(b);
+    for(let k=1;k<=r;k++){if(!(r>k||b.length===k))continue;
+      S.forEach((a,j)=>{if(j===i||a.length+k>CAP||(a.length&&top(a)===c))return;M.push([i,j,k])})}});return M}
+  const apply=(S,[i,j,k])=>S[j].push(...S[i].splice(S[i].length-k,k));
+  function gen(n){let S;
+    for(let tr=0;tr<400;tr++){S=[];for(let i=0;i<n;i++)S.push(Array(CAP).fill(i));S.push([],[]);
+      for(let s=0;s<n*25;s++){const M=moves(S);if(!M.length)break;apply(S,M[Math.random()*M.length|0])}
+      for(let s=0;s<600&&score(S);s++){const M=moves(S),now=score(S);if(!M.length)break;
+        const good=M.filter(m=>{const C=S.map(t=>t.slice());apply(C,m);return score(C)<now});
+        const P=good.length&&Math.random()<.9?good:M;apply(S,P[Math.random()*P.length|0])}
+      if(score(S))continue;
+      if(S.some(t=>t.some((c,i)=>i>1&&c===t[i-1]&&c===t[i-2])))continue;break}
+    return shuf(S.filter(t=>t.length)).concat(S.filter(t=>!t.length))}
+  function load(n){lv=n;nc=Math.min(7,2*n+1);init=gen(nc);reset()}
+  function reset(){timers.forEach(clearTimeout);timers=[];T=init.map(t=>t.slice());hist=[];extra=1;sel=-1;busy=false;render()}
+  const tube=i=>rack.querySelectorAll(".x-tube")[i];
+  function render(){
+    const n=T.length,cols=n<=5?n:Math.min(5,Math.ceil(n/2));
+    root.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">第${lv}关</div><div class="x-left"></div></div>
+    <div class="x-rack no-anim" style="grid-template-columns:repeat(${cols},46px)">${T.map((_,i)=>`<button class="x-tube" data-t="${i}"><span class="x-glass"><span class="x-liq">${'<i class="x-seg"></i>'.repeat(CAP)}</span></span></button>`).join("")}</div>
+    <div class="x-tools"><button class="x-btn o" data-a="undo">撤回<small>不限次</small></button><button class="x-btn b" data-a="restart">重来<small>回到开局</small></button><button class="x-btn ${extra?"":"is-off"}" data-a="add">加一管<small>剩${extra}次</small></button></div>
+    <p class="x-foot">点一管举起 · 再点另一管倒入 · 同色才能叠，把每管凑成一色</p>`;
+    rack=root.querySelector(".x-rack");T.forEach((_,i)=>paint(i));hud();
+    rack.offsetHeight;rack.classList.remove("no-anim")}
+  function paint(i){const el=tube(i),t=T[i];
+    el.querySelectorAll(".x-seg").forEach((s,j)=>{if(j<t.length){s.style.backgroundColor=COL[t[j]];s.style.height=SEG+"px"}else s.style.height="0"});
+    el.classList.toggle("is-done",full(t));
+    el.setAttribute("aria-label",`第${i+1}管：${t.length?t.map(c=>NM[c]).join("、")+"（自下而上）":"空"}`)}
+  function hud(){root.querySelector(".x-left").textContent=`完成 ${T.filter(full).length}/${nc}`}
+  function sparkle(el){const x=el.offsetLeft+23,y=el.offsetTop+20;
+    for(let i=0;i<7;i++){const s=document.createElement("i"),a=i/7*Math.PI*2;s.className="x-star";s.textContent=i%2?"⭐":"✨";
+      s.style.left=x-9+"px";s.style.top=y-9+"px";s.style.setProperty("--dx",Math.cos(a)*48+"px");s.style.setProperty("--dy",Math.sin(a)*48+"px");
+      rack.appendChild(s);later(()=>s.remove(),720)}}
+  function tap(i){if(busy)return;
+    if(sel<0){if(!T[i].length)return;sel=i;tube(i).classList.add("is-up");return}
+    const s=sel;if(s===i){tube(i).classList.remove("is-up");sel=-1;return}
+    const a=T[s],b=T[i];
+    if(b.length>=CAP||(b.length&&top(b)!==top(a))){tube(s).classList.remove("is-up");sel=-1;const el=tube(i);el.classList.remove("is-no");el.offsetWidth;el.classList.add("is-no");
+      toast(b.length>=CAP?"这管已经满啦":"颜色不一样哦");return}
+    pour(s,i)}
+  function pour(s,d){busy=true;
+    const k=Math.min(run(T[s]),CAP-T[d].length),c=top(T[s]);hist.push(T.map(t=>t.slice()));
+    const se=tube(s),de=tube(d),w=se.offsetWidth,dir=de.offsetLeft>=se.offsetLeft?1:-1;
+    const mx=de.offsetLeft+w/2-dir*10,my=de.offsetTop-30;
+    se.classList.add("is-pour");se.style.transform=`translate(${mx-se.offsetLeft-w/2}px,${my-se.offsetTop}px) rotate(${dir*72}deg)`;
+    let st;
+    later(()=>{st=document.createElement("i");st.className="x-stream";st.style.background=COL[c];
+      st.style.left=mx-3.5+"px";st.style.top=my+"px";st.style.height=de.offsetTop+TH-BW-T[d].length*SEG-my+"px";rack.appendChild(st);
+      T[d].push(...T[s].splice(T[s].length-k,k));paint(s);paint(d)},300);
+    later(()=>{st&&st.remove();se.style.transform="";se.classList.remove("is-up")},720);
+    later(()=>{se.classList.remove("is-pour");sel=-1;busy=false;hud();
+      if(full(T[d]))sparkle(de);if(won()){busy=true;later(popup,550)}},1020)}
+  function tool(a){if(busy)return;
+    if(a==="restart")return reset();
+    if(a==="undo"){if(!hist.length)return toast("没有可撤回的步骤");T=hist.pop();sel=-1;
+      rack.querySelectorAll(".x-tube").forEach((el,i)=>{el.classList.remove("is-up");paint(i)});hud();return}
+    if(a==="add"){if(!extra)return toast("每关只能加一管");extra=0;T.push([]);hist.forEach(h=>h.push([]));sel=-1;render();toast("多了一根空管")}}
+  function popup(){
+    const m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">🧪🎉</p><h3>恭喜过关！</h3><p>第${lv}关通关，${nc}种颜色全部归位</p><button class="x-btn o" data-a="next">下一关</button><button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m)}
+  function onClick(e){const b=e.target.closest("[data-a],[data-t]");if(!b)return;const a=b.dataset.a;
+    if(!a){if(!b.closest(".x-mask"))tap(+b.dataset.t);return}
+    if(a==="home")return goHome();if(a==="next")return load(lv+1);tool(a)}
+  return{id:"water",
+    start(c){root=c;c.addEventListener("click",onClick);document.getElementById("app").scrollTop=0;load(1)},
+    stop(){timers.forEach(clearTimeout);timers=[];if(root){root.removeEventListener("click",onClick);root.innerHTML=""}root=rack=null;T=[];init=[];hist=[];busy=false;sel=-1}};
+})();
+
+/* ---------- 一箭又一箭 ---------- */
+const arrow=(()=>{
+  const COL=["#ff5c8a","#ffa62b","#ffd23f","#4cd964","#3fa9ff","#9b6bff","#ff7ad9","#2ed1c4"];
+  const DK=["#d63a68","#d9820f","#d9a90f","#2fae48","#1f84d6","#7647d9","#d955b5","#1aa69b"];
+  const DIR={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]},DS="udlr",NM={u:"上",d:"下",l:"左",r:"右"};
+  let root=null,svg=null,lv=1,N=5,init=[],A=[],occ=[],hearts=3,hints=3,busy=false,timers=[];
+  const later=(f,ms)=>timers.push(setTimeout(f,ms));
+  const inb=(c,r)=>c>=0&&r>=0&&c<N&&r<N;
+  const grid=()=>Array.from({length:N},()=>Array(N).fill(-1));
+  /* 沿箭头方向看向边缘：返回第一个挡路的箭头和中间空格数 */
+  function ahead(a,g){const[dx,dy]=DIR[a.d];let[c,r]=a.cells[0],gap=0;
+    for(c+=dx,r+=dy;inb(c,r);c+=dx,r+=dy){if(g[r][c]>=0)return{blk:g[r][c],gap};gap++}return{blk:-1,gap}}
+  /* 反向生成：每支新箭放下时，通往边缘的路上不能有之前放的箭；按放置的逆序拔出就一定能清空 */
+  function gen(){let best=null,bs=-1e9;
+    for(let tr=0;tr<25;tr++){const g=grid(),L=[];
+      const put=(c,r,d,len)=>{const[dx,dy]=DIR[d],cells=[];
+        for(let k=0;k<len;k++){const x=c-dx*k,y=r-dy*k;if(!inb(x,y)||g[y][x]>=0)return false;cells.push([x,y])}
+        const a={cells,d};if(ahead(a,g).blk>=0)return false;cells.forEach(([x,y])=>g[y][x]=L.length);L.push(a);return true};
+      for(let k=0;k<N*N*40;k++){const c=Math.random()*N|0,r=Math.random()*N|0;if(g[r][c]>=0)continue;
+        put(c,r,DS[Math.random()*4|0],[1,2,2,3,3,3][Math.random()*6|0])}
+      for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(g[r][c]>=0)continue;
+        let ok=false;for(const len of[3,2,1]){for(const d of shuf([...DS]))if(put(c,r,d,len)){ok=true;break}if(ok)break}}
+      const filled=g.flat().filter(v=>v>=0).length,free=L.filter(a=>ahead(a,g).blk<0).length;
+      const sc=filled*2-free*3-L.filter(a=>a.cells.length===1).length;
+      if(sc>bs){bs=sc;best={L,g}}}
+    const{L,g}=best;
+    L.forEach((a,i)=>{const near=new Set();a.cells.forEach(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,v])=>{
+        const j=inb(x+u,y+v)?g[y+v][x+u]:-1;if(j>=0&&j<i)near.add(L[j].col)}));
+      const ok=COL.map((_,k)=>k).filter(k=>!near.has(k));a.col=(ok.length?ok:COL.map((_,k)=>k))[Math.random()*(ok.length||COL.length)|0]});
+    return L}
+  function load(n){lv=n;N=Math.min(9,3+2*n);init=gen();reset()}
+  function reset(){timers.forEach(clearTimeout);timers=[];
+    A=init.map(a=>({cells:a.cells.map(c=>c.slice()),d:a.d,col:a.col,alive:true,moving:false}));
+    occ=grid();A.forEach((a,i)=>a.cells.forEach(([x,y])=>occ[y][x]=i));hearts=3;hints=3;busy=false;render()}
+  function draw(a,i){const[dx,dy]=DIR[a.d],[hc,hr]=a.cells[0],t=a.cells[a.cells.length-1],len=a.cells.length;
+    const hx=hc*10+5,hy=hr*10+5,sx=len>1?t[0]*10+5-dx*1.5:hx-dx*3.4,sy=len>1?t[1]*10+5-dy*1.5:hy-dy*3.4;
+    const bx=hx-dx*.6,by=hy-dy*.6,px=-dy,py=dx,w=3;
+    const pts=`${hx+dx*3.4},${hy+dy*3.4} ${bx+px*w},${by+py*w} ${bx-px*w},${by-py*w}`;
+    const xs=a.cells.map(c=>c[0]),ys=a.cells.map(c=>c[1]),x0=Math.min(...xs)*10+.6,y0=Math.min(...ys)*10+.6;
+    const rw=(Math.max(...xs)-Math.min(...xs)+1)*10-1.2,rh=(Math.max(...ys)-Math.min(...ys)+1)*10-1.2;
+    const shape=(c,o)=>`<g transform="translate(0,${o})" fill="${c}" stroke="${c}"><line x1="${sx}" y1="${sy}" x2="${hx}" y2="${hy}" stroke-width="4.4" stroke-linecap="round"/><polygon points="${pts}" stroke-width="2.4" stroke-linejoin="round"/></g>`;
+    const[ox,oy]=dy===0?[0,-1]:[-1,0];
+    return`<g class="x-arw" data-i="${i}" role="button" tabindex="0" aria-label="箭头朝${NM[a.d]}，长${len}格"><rect class="x-halo" x="${x0}" y="${y0}" width="${rw}" height="${rh}" rx="3" fill="#fff36b"/><rect x="${x0}" y="${y0}" width="${rw}" height="${rh}" fill="transparent"/>${shape(DK[a.col],1.2)}${shape(COL[a.col],0)}<line x1="${sx+ox}" y1="${sy+oy}" x2="${bx+ox}" y2="${by+oy}" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".55"/></g>`}
+  function render(){let bg="";for(let r=0;r<N;r++)for(let c=0;c<N;c++)bg+=`<rect x="${c*10+.6}" y="${r*10+.6}" width="8.8" height="8.8" rx="2.2" fill="rgba(255,255,255,.45)"/>`;
+    root.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">第${lv}关</div><div class="x-left"></div></div>
+    <div class="x-boardwrap" style="overflow:hidden"><svg class="x-arrows" viewBox="0 0 ${N*10} ${N*10}" role="group" aria-label="${N}×${N}箭头棋盘"><g>${bg}</g><g class="x-trails"></g>${A.map(draw).join("")}</svg></div>
+    <div class="x-tools" style="grid-template-columns:1fr"><button class="x-btn b" data-a="hint">提示<small></small></button></div>
+    <p class="x-foot">点箭头让它飞出 · 前方有箭会撞上扣一颗心 · 清空全部箭头过关</p>`;
+    svg=root.querySelector("svg");hud()}
+  const gEl=i=>svg&&svg.querySelector(`[data-i="${i}"]`);
+  function hud(hit){const l=root.querySelector(".x-left");l.textContent="❤️".repeat(Math.max(0,hearts))+"🤍".repeat(3-Math.max(0,hearts));
+    if(hit)l.animate([{transform:"translateX(0)"},{transform:"translateX(-5px)"},{transform:"translateX(5px)"},{transform:"translateX(0)"}],{duration:300});
+    const b=root.querySelector('[data-a="hint"]');b.classList.toggle("is-off",!hints);b.querySelector("small").textContent=`剩${hints}次`}
+  const clearHint=()=>svg&&svg.querySelectorAll(".is-hint").forEach(e=>e.classList.remove("is-hint"));
+  function trail(a,gap){const[dx,dy]=DIR[a.d],t=a.cells[a.cells.length-1],[hc,hr]=a.cells[0],far=(gap+1.5)*10;
+    const mk=(c,wd,op)=>{const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+      [["x1",t[0]*10+5],["y1",t[1]*10+5],["x2",hc*10+5+dx*far],["y2",hr*10+5+dy*far],["stroke",c],["stroke-width",wd],["stroke-linecap","round"]].forEach(([k,v])=>l.setAttribute(k,v));
+      svg.querySelector(".x-trails").appendChild(l);
+      l.animate([{opacity:op},{opacity:0}],{duration:520,easing:"ease-out",fill:"forwards"});later(()=>l.remove(),560)};
+    mk(COL[a.col],4.4,.45);mk("#fff",1.4,.8)}
+  function tap(i){const a=A[i];if(busy||!a||!a.alive||a.moving)return;clearHint();
+    const{blk,gap}=ahead(a,occ),[dx,dy]=DIR[a.d],el=gEl(i);
+    if(blk<0){a.alive=false;a.cells.forEach(([x,y])=>occ[y][x]=-1);el.style.pointerEvents="none";
+      const dist=(gap+a.cells.length)*10+24,t=220+gap*28;trail(a,gap);
+      el.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${dx*dist*.25}px,${dy*dist*.25}px)`,opacity:1,offset:.35},{transform:`translate(${dx*dist}px,${dy*dist}px)`,opacity:0}],{duration:t,easing:"cubic-bezier(.5,0,.9,.6)",fill:"forwards"});
+      later(()=>el.remove(),t+30);
+      if(A.every(x=>!x.alive)){busy=true;later(()=>popup(true),t+450)}return}
+    a.moving=true;hearts--;const f=gap*10+2.5,dur=380+gap*40;
+    el.classList.add("is-hit");
+    el.animate([{transform:"translate(0,0)"},{transform:`translate(${dx*f}px,${dy*f}px)`,offset:.4},{transform:`translate(${-dx*1.5}px,${-dy*1.5}px)`,offset:.75},{transform:"translate(0,0)"}],{duration:dur,easing:"ease-out"});
+    later(()=>{const b=gEl(blk);if(b){b.classList.add("is-hit");b.animate([{transform:"translate(0,0)"},{transform:`translate(${dx*1.8}px,${dy*1.8}px)`},{transform:"translate(0,0)"}],{duration:220});later(()=>b.classList.remove("is-hit"),300)}},dur*.4);
+    later(()=>{a.moving=false;el.classList.remove("is-hit")},dur);hud(true);
+    if(hearts<=0){busy=true;later(()=>popup(false),dur+400)}}
+  function hint(){if(busy)return;if(!hints)return toast("提示用完啦");
+    const ok=A.map((a,i)=>i).filter(i=>A[i].alive&&!A[i].moving&&ahead(A[i],occ).blk<0);if(!ok.length)return;
+    clearHint();gEl(ok[Math.random()*ok.length|0]).classList.add("is-hint");hints--;hud()}
+  function popup(win){const m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">${win?"🏹🎉":"🏹💔"}</p><h3>${win?"恭喜过关！":"红心用完啦！"}</h3><p>${win?`第${lv}关通关，${init.length}支箭全部飞出`:"看清前方再出手，再来一把就过了"}</p>
+    ${win?`<button class="x-btn o" data-a="next">下一关</button>`:`<button class="x-btn o" data-a="again">再来一次</button>`}<button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m)}
+  function onClick(e){const b=e.target.closest("[data-a],[data-i]");if(!b)return;const a=b.dataset.a;
+    if(!a){if(!b.closest(".x-mask"))tap(+b.dataset.i);return}
+    if(a==="home")return goHome();if(a==="next")return load(lv+1);if(a==="again")return reset();if(a==="hint")return hint()}
+  function onKey(e){if((e.key==="Enter"||e.key===" ")&&e.target.closest&&e.target.closest("[data-i]")){e.preventDefault();tap(+e.target.closest("[data-i]").dataset.i)}}
+  return{id:"arrow",
+    start(c){root=c;c.addEventListener("click",onClick);c.addEventListener("keydown",onKey);document.getElementById("app").scrollTop=0;load(1)},
+    stop(){timers.forEach(clearTimeout);timers=[];if(root){root.removeEventListener("click",onClick);root.removeEventListener("keydown",onKey);root.innerHTML=""}
+      root=svg=null;A=[];init=[];occ=[];busy=false}};
+})();
+
+/* ---------- 挪了下车 ---------- */
+const jam=(()=>{
+  const COL=["#ff6b8b","#ffa940","#ffd84d","#5fd97a","#4fb3ff","#a17bff","#ff8ad8","#35d0c0"];
+  const DK=["#d6466a","#d9821c","#c99d14","#34ad52","#2a8bd6","#7a52d9","#d660b0","#1fa596"];
+  const DIR={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]},DS="udlr",NM={u:"上",d:"下",l:"左",r:"右"};
+  let root=null,svg=null,lv=1,N=6,init=[],C=[],occ=[],hist=[],moves=0,hints=3,busy=false,timers=[],moving=new Set();
+  const later=(f,ms)=>timers.push(setTimeout(f,ms));
+  const inb=(c,r)=>c>=0&&r>=0&&c<N&&r<N;
+  const grid=()=>Array.from({length:N},()=>Array(N).fill(-1));
+  /* 车头在 (c,r)，车身沿反方向延伸 */
+  const cellsOf=a=>{const[dx,dy]=DIR[a.d];return Array.from({length:a.len},(_,k)=>[a.c-dx*k,a.r-dy*k])};
+  function ahead(a,g){const[dx,dy]=DIR[a.d];let c=a.c+dx,r=a.r+dy,gap=0;
+    for(;inb(c,r);c+=dx,r+=dy){if(g[r][c]>=0)return{blk:g[r][c],gap};gap++}return{blk:-1,gap}}
+  /* 反向生成：每辆新车放下时，车头前方到边缘不能有已放的车；按放置逆序开走就一定能清空 */
+  function gen(){let best=null,bs=-1e9;
+    for(let tr=0;tr<30;tr++){const g=grid(),L=[];let filled=0;const target=Math.round(N*N*.8);
+      const put=(c,r,d,len)=>{const a={c,r,d,len},cells=cellsOf(a);
+        if(cells.some(([x,y])=>!inb(x,y)||g[y][x]>=0))return false;if(ahead(a,g).blk>=0)return false;
+        cells.forEach(([x,y])=>g[y][x]=L.length);L.push(a);filled+=len;return true};
+      for(let k=0;k<N*N*60&&filled<target;k++)put(Math.random()*N|0,Math.random()*N|0,DS[Math.random()*4|0],Math.random()<.3?3:2);
+      const free=L.filter(a=>ahead(a,g).blk<0).length,sc=filled*2-free*4;
+      if(sc>bs){bs=sc;best={L,g}}}
+    const{L,g}=best;
+    L.forEach((a,i)=>{const near=new Set();cellsOf(a).forEach(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,v])=>{
+        const j=inb(x+u,y+v)?g[y+v][x+u]:-1;if(j>=0&&j<i)near.add(L[j].col)}));
+      const ok=COL.map((_,k)=>k).filter(k=>!near.has(k));a.col=(ok.length?ok:COL.map((_,k)=>k))[Math.random()*(ok.length||COL.length)|0]});
+    return L}
+  const par=()=>init.length;
+  const stars=()=>moves<=par()?3:moves<=par()+Math.max(2,Math.ceil(par()/4))?2:1;
+  function rebuild(){occ=grid();C.forEach((a,i)=>{if(a.alive)cellsOf(a).forEach(([x,y])=>occ[y][x]=i)})}
+  function load(n){lv=n;N=Math.min(8,5+n);init=gen();C=init.map(a=>({...a,alive:true}));hist=[];moves=0;hints=3;busy=false;render()}
+  function inner(a){const cs=cellsOf(a),xs=cs.map(p=>p[0]),ys=cs.map(p=>p[1]);
+    const x0=Math.min(...xs)*10,y0=Math.min(...ys)*10,w=(Math.max(...xs)-Math.min(...xs)+1)*10,h=(Math.max(...ys)-Math.min(...ys)+1)*10;
+    const T={u:`translate(${x0},${y0})`,d:`translate(${x0+w},${y0+h}) rotate(180)`,r:`translate(${x0+w},${y0}) rotate(90)`,l:`translate(${x0},${y0+h}) rotate(-90)`}[a.d];
+    const Lh=a.len*10,c=COL[a.col],k=DK[a.col],rl=Lh-12.4;
+    const body=`<rect x="1" y=".8" width="8" height="${Lh-1.6}" rx="3.2" fill="${c}" stroke="${k}" stroke-width=".5"/>
+      <rect x="1.8" y="2.2" width="1" height="${Lh-5}" rx=".5" fill="#fff" opacity=".4"/>
+      <circle cx="2.9" cy="2" r="1" fill="#fff7b8" stroke="${k}" stroke-width=".3"/><circle cx="7.1" cy="2" r="1" fill="#fff7b8" stroke="${k}" stroke-width=".3"/>
+      <path d="M2.3 4.4H7.7L7.1 7.2H2.9Z" fill="#d9f3ff" stroke="${k}" stroke-width=".35" stroke-linejoin="round"/><path d="M3.4 5.1L4.4 5.1L4 6.4" fill="none" stroke="#fff" stroke-width=".4" stroke-linecap="round"/>
+      <rect x="2.9" y="7.6" width="4.2" height="${rl}" rx="1.4" fill="#fff" opacity=".3"/>
+      ${a.len>2?`<rect x="4.4" y="7.6" width="1.2" height="${rl}" rx=".6" fill="#fff" opacity=".55"/>`:""}
+      <rect x="3" y="${Lh-4.6}" width="4" height="1.6" rx=".6" fill="#d9f3ff" stroke="${k}" stroke-width=".3"/>
+      <rect x="1.8" y="${Lh-1.9}" width="1.6" height=".8" rx=".4" fill="#ff4d5e"/><rect x="6.6" y="${Lh-1.9}" width="1.6" height=".8" rx=".4" fill="#ff4d5e"/>`;
+    return`<rect class="x-halo" x="${x0+.3}" y="${y0+.3}" width="${w-.6}" height="${h-.6}" rx="3.4" fill="#fff36b"/>
+      <rect x="${x0+1}" y="${y0+1.8}" width="${w-2}" height="${h-2}" rx="3.2" fill="rgba(40,40,100,.28)"/>
+      <g transform="${T}">${body}</g><rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="transparent"/>`}
+  function render(){timers.forEach(clearTimeout);timers=[];moving.clear();rebuild();
+    let bg="";for(let r=0;r<N;r++)for(let c=0;c<N;c++)bg+=`<rect x="${c*10+.8}" y="${r*10+.8}" width="8.4" height="8.4" rx="2" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.4)" stroke-width=".4"/>`;
+    root.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">第${lv}关</div><div class="x-left"></div></div>
+    <div class="x-lot"><svg class="x-park" viewBox="0 0 ${N*10} ${N*10}" role="group" aria-label="${N}×${N}停车场"><g>${bg}</g><g class="x-trails"></g>${C.map((a,i)=>a.alive?`<g class="x-car" data-i="${i}" role="button" tabindex="0" aria-label="车头朝${NM[a.d]}，长${a.len}格">${inner(a)}</g>`:"").join("")}</svg></div>
+    <div class="x-tools" style="grid-template-columns:1fr 1fr"><button class="x-btn o" data-a="undo">撤回<small>不限次</small></button><button class="x-btn b" data-a="hint">提示<small></small></button></div>
+    <p class="x-foot">点车沿车头方向开走 · 前面有车会撞上停在跟前 · ${par()}步内清空得三星</p>`;
+    svg=root.querySelector("svg");hud()}
+  const gEl=i=>svg&&svg.querySelector(`[data-i="${i}"]`);
+  function hud(){root.querySelector(".x-left").textContent=`步数 ${moves}`;
+    const b=root.querySelector('[data-a="hint"]');b.classList.toggle("is-off",!hints);b.querySelector("small").textContent=`剩${hints}次`}
+  const clearHint=()=>svg&&svg.querySelectorAll(".is-hint").forEach(e=>e.classList.remove("is-hint"));
+  function trail(a,gap){const[dx,dy]=DIR[a.d],cs=cellsOf(a),t=cs[cs.length-1],sx=t[0]*10+5-dx*3,sy=t[1]*10+5-dy*3,far=(gap+1.5)*10;
+    const ex=a.c*10+5+dx*far,ey=a.r*10+5+dy*far,box=svg.querySelector(".x-trails");
+    const mk=(c,wd,op,off)=>{const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+      [["x1",sx-dy*off],["y1",sy+dx*off],["x2",ex-dy*off],["y2",ey+dx*off],["stroke",c],["stroke-width",wd],["stroke-linecap","round"]].forEach(([k,v])=>l.setAttribute(k,v));
+      box.appendChild(l);l.animate([{opacity:op},{opacity:0}],{duration:560,easing:"ease-out",fill:"forwards"});later(()=>l.remove(),600)};
+    mk(COL[a.col],5,.4,0);mk("#fff",1,.85,-2.4);mk("#fff",1,.85,2.4);
+    const p=document.createElementNS("http://www.w3.org/2000/svg","text");
+    [["x",sx],["y",sy],["font-size","7"],["text-anchor","middle"],["dominant-baseline","central"]].forEach(([k,v])=>p.setAttribute(k,v));p.textContent="💨";box.appendChild(p);
+    p.animate([{opacity:1,transform:"translate(0,0)"},{opacity:0,transform:`translate(${-dx*5}px,${-dy*5}px)`}],{duration:600,easing:"ease-out",fill:"forwards"});later(()=>p.remove(),640)}
+  function bump(i,blk,gap){const el=gEl(i),[dx,dy]=DIR[C[i].d],f=gap*10,dur=gap?220+gap*80:200;moving.add(i);el.classList.add("is-hit");
+    const tr=v=>`translate(${dx*v}px,${dy*v}px)`,hitAt=gap?.62:.35;
+    const an=el.animate([{transform:tr(0)},{transform:tr(f+1.4),offset:hitAt},{transform:tr(f-.9),offset:hitAt+.15},{transform:tr(f+.5),offset:hitAt+.27},{transform:tr(f)}],{duration:dur,easing:"ease-out",fill:"forwards"});
+    later(()=>{const b=gEl(blk);if(!b)return;b.classList.add("is-hit");
+      b.animate([{transform:"translate(0,0)"},{transform:tr(1.8)},{transform:`translate(${-dy*1.2}px,${dx*1.2}px)`},{transform:`translate(${dy*1.2}px,${-dx*1.2}px)`},{transform:"translate(0,0)"}],{duration:320});
+      later(()=>b.classList.remove("is-hit"),340)},dur*hitAt);
+    later(()=>{if(gap)el.innerHTML=inner(C[i]);an.cancel();el.classList.remove("is-hit");moving.delete(i)},dur+20)}
+  function check(ms){const al=C.filter(a=>a.alive);if(!al.length)return;
+    if(al.every(a=>{const h=ahead(a,occ);return h.blk>=0&&h.gap===0}))later(()=>toast("堵死啦，点撤回试试"),ms)}
+  function tap(i){const a=C[i];if(busy||!a||!a.alive||moving.has(i))return;clearHint();
+    const{blk,gap}=ahead(a,occ),[dx,dy]=DIR[a.d],el=gEl(i);
+    if(blk>=0&&gap===0)return bump(i,blk,0);
+    hist.push({cars:C.map(x=>({c:x.c,r:x.r,alive:x.alive})),moves});moves++;
+    if(blk<0){a.alive=false;rebuild();moving.add(i);el.style.pointerEvents="none";
+      const dist=(gap+a.len)*10+18,t=300+gap*35;trail(a,gap);
+      el.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${-dx*1.2}px,${-dy*1.2}px)`,opacity:1,offset:.12},{transform:`translate(${dx*dist*.3}px,${dy*dist*.3}px)`,opacity:1,offset:.45},{transform:`translate(${dx*dist}px,${dy*dist}px)`,opacity:0}],{duration:t,easing:"cubic-bezier(.5,0,.9,.6)",fill:"forwards"});
+      later(()=>{el.remove();moving.delete(i)},t+30);hud();
+      if(C.every(x=>!x.alive)){busy=true;later(popup,t+450)}else check(t);return}
+    a.c+=dx*gap;a.r+=dy*gap;rebuild();hud();bump(i,blk,gap);check(400)}
+  function undo(){if(busy)return;if(!hist.length)return toast("已经是开局啦");
+    const h=hist.pop();C.forEach((a,k)=>Object.assign(a,h.cars[k]));moves=h.moves;render()}
+  function hint(){if(busy)return;if(!hints)return toast("提示用完啦");
+    const ok=C.map((a,i)=>i).filter(i=>C[i].alive&&!moving.has(i)&&ahead(C[i],occ).blk<0);if(!ok.length)return toast("路都被堵住了，先撤回试试");
+    clearHint();gEl(ok[Math.random()*ok.length|0]).classList.add("is-hint");hints--;hud()}
+  function popup(){const s=stars(),m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">🚗🎉</p><h3>恭喜过关！</h3><div class="x-stars" role="img" aria-label="${s}星">${"⭐".repeat(s)}<span>${"⭐".repeat(3-s)}</span></div><p>第${lv}关 · ${moves}步开走${par()}辆车${s<3?`<br>${par()}步内清空可得三星`:""}</p>
+    <button class="x-btn o" data-a="next">下一关</button><button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m)}
+  function onClick(e){const b=e.target.closest("[data-a],[data-i]");if(!b)return;const a=b.dataset.a;
+    if(!a){if(!b.closest(".x-mask"))tap(+b.dataset.i);return}
+    if(a==="home")return goHome();if(a==="next")return load(lv+1);if(a==="undo")return undo();if(a==="hint")return hint()}
+  function onKey(e){if((e.key==="Enter"||e.key===" ")&&e.target.closest&&e.target.closest("[data-i]")){e.preventDefault();tap(+e.target.closest("[data-i]").dataset.i)}}
+  return{id:"car",
+    start(c){root=c;c.addEventListener("click",onClick);c.addEventListener("keydown",onKey);document.getElementById("app").scrollTop=0;load(1)},
+    stop(){timers.forEach(clearTimeout);timers=[];if(root){root.removeEventListener("click",onClick);root.removeEventListener("keydown",onKey);root.innerHTML=""}
+      root=svg=null;C=[];init=[];occ=[];hist=[];moving.clear();busy=false}};
+})();
+
+/* ---------- 打个螺丝 ---------- */
+const screw=(()=>{
+  const SC=["#ff4d6d","#3fa7ff","#ffc53d","#36c46b","#a66bff"];
+  const PC=["rgba(255,182,206,.78)","rgba(170,220,255,.78)","rgba(255,236,160,.8)","rgba(180,240,200,.78)","rgba(214,190,255,.78)","rgba(255,205,170,.8)"];
+  const SPOT=[[22,28],[78,28],[50,72],[22,72],[78,72]];
+  let root=null,lv=1,P=[],boxes=[],spare=[],busy=false,timers=[];
+  const later=(f,ms)=>timers.push(setTimeout(f,ms));
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+  const left=c=>P.reduce((a,p)=>a+p.s.filter(s=>s.alive&&s.c===c).length,0)+spare.filter(x=>x===c).length;
+  function newBox(i){const ok=SC.map((_,c)=>c).filter(c=>left(c)-boxes.reduce((a,b,j)=>a+(j!==i&&b&&b.c===c?3-b.n:0),0)>0);
+    return ok.length?{c:ok[Math.random()*ok.length|0],n:0}:null}
+  function load(n){lv=n;timers.forEach(clearTimeout);timers=[];busy=false;spare=[];
+    const np=[4,6,8][Math.min(n,3)-1];
+    P=Array.from({length:np},(_,i)=>{const w=rnd(34,56),h=rnd(24,40);return{x:rnd(2,98-w),y:rnd(2,98-h),w,h,c:PC[i%PC.length],alive:true,s:[]}});
+    const cnt=P.map(()=>1+(Math.random()*3|0));let sum=cnt.reduce((a,b)=>a+b,0);
+    while(sum%3){const k=cnt.findIndex(v=>v<3);if(k>=0){cnt[k]++;sum++}else{cnt[0]--;sum--}}
+    const nc=Math.min(SC.length,sum/3),cols=shuf(Array.from({length:sum},(_,i)=>(i/3|0)%nc));let k=0;
+    P.forEach((p,i)=>shuf(SPOT.slice()).slice(0,cnt[i]).forEach(([fx,fy])=>p.s.push({fx,fy,x:p.x+p.w*fx/100,y:p.y+p.h*fy/100,c:cols[k++],alive:true})));
+    boxes=[null,null];boxes[0]=newBox(0);boxes[1]=newBox(1);render()}
+  const hole=c=>`<span class="x-hole"${c==null?"":` style="background:${SC[c]}"`}></span>`;
+  function hud(){
+    root.querySelector(".x-scbox").innerHTML=boxes.map((b,i)=>`<div class="x-tb" data-b="${i}" style="${b?`background:${SC[b.c]}44;border-color:${SC[b.c]}`:""}">${[0,1,2].map(k=>hole(b&&k<b.n?b.c:null)).join("")}</div>`).join("");
+    root.querySelector(".x-spare").innerHTML=Array.from({length:5},(_,k)=>hole(spare[k])).join("");
+    root.querySelector(".x-left").textContent=`剩 ${P.reduce((a,p)=>a+p.s.filter(s=>s.alive).length,0)}`}
+  function render(){
+    root.innerHTML=`<div class="x-top"><button class="x-back" data-a="home">← 大厅</button><div class="x-lv">第${lv}关</div><div class="x-left"></div></div>
+    <div class="x-scbox" aria-label="工具盒"></div><div class="x-spare" aria-label="备用槽"></div>
+    <div class="x-scb">${P.map((p,i)=>`<div class="x-pl" data-p="${i}" style="left:${p.x}%;top:${p.y}%;width:${p.w}%;height:${p.h}%;background:${p.c};z-index:${i+1}">${p.s.map((s,k)=>`<button class="x-sw" data-s="${i}-${k}" style="left:${s.fx}%;top:${s.fy}%" aria-label="螺丝"><i style="background:${SC[s.c]}"></i></button>`).join("")}</div>`).join("")}</div>
+    <div class="x-tools" style="grid-template-columns:1fr"><button class="x-btn o" data-a="again">重来</button></div>
+    <p class="x-foot">点没被挡住的螺丝 · 同色3颗装满工具盒 · 备用槽5格满了就失败</p>`;hud()}
+  const covered=(i,s)=>P.some((q,j)=>j>i&&q.alive&&s.x>q.x-3&&s.x<q.x+q.w+3&&s.y>q.y-3&&s.y<q.y+q.h+3);
+  function tap(id,el){if(busy)return;const[i,k]=id.split("-").map(Number),p=P[i],s=p&&p.s[k];if(!s||!s.alive)return;
+    if(covered(i,s)){el.classList.remove("is-no");el.offsetWidth;el.classList.add("is-no");return toast("被上面的板挡住啦")}
+    busy=true;el.classList.add("is-spin");
+    later(()=>{s.alive=false;el.remove();
+      if(!p.s.some(x=>x.alive)){p.alive=false;const pe=root.querySelector(`[data-p="${i}"]`);pe.classList.add("is-gone");later(()=>pe.remove(),400)}
+      place(s.c)},300)}
+  function place(c){const b=boxes.find(b=>b&&b.c===c&&b.n<3);
+    if(b){b.n++;hud();if(b.n===3)return refill(boxes.indexOf(b))}else{spare.push(c);hud()}
+    end()}
+  function refill(i){later(()=>root.querySelector(`[data-b="${i}"]`).classList.add("is-out"),150);
+    later(()=>{boxes[i]=newBox(i);const b=boxes[i];
+      if(b)while(b.n<3&&spare.includes(b.c)){spare.splice(spare.indexOf(b.c),1);b.n++}
+      hud();if(b&&b.n===3)return refill(i);end()},500)}
+  function end(){const on=P.some(p=>p.s.some(s=>s.alive));
+    if(!on&&!spare.length)return later(()=>popup(true),400);
+    if(spare.length>=5)return later(()=>popup(false),300);busy=false}
+  function popup(win){const m=document.createElement("div");m.className="x-mask";
+    m.innerHTML=`<div class="x-pop"><p class="big">${win?"🔩🎉":"🔩💦"}</p><h3>${win?"恭喜过关！":"备用槽满啦！"}</h3><p>${win?`第${lv}关通关，螺丝全拧完了`:"先拧挡路的板，再来一把"}</p>
+    ${win?`<button class="x-btn o" data-a="next">下一关</button>`:`<button class="x-btn o" data-a="again">再来一次</button>`}<button class="x-btn b" data-a="home">返回大厅</button></div>`;
+    root.appendChild(m)}
+  function onClick(e){const b=e.target.closest("[data-a],[data-s]");if(!b)return;const a=b.dataset.a;
+    if(!a){if(!b.closest(".x-mask"))tap(b.dataset.s,b);return}
+    if(a==="home")return goHome();if(a==="next")return load(lv+1);if(a==="again")return load(lv)}
+  return{id:"screw",
+    start(c){root=c;c.addEventListener("click",onClick);document.getElementById("app").scrollTop=0;load(1)},
+    stop(){timers.forEach(clearTimeout);timers=[];if(root){root.removeEventListener("click",onClick);root.innerHTML=""}
+      root=null;P=[];boxes=[];spare=[];busy=false}};
+})();
+
+/* ---------- 游戏列表（可继续追加） ---------- */
+const GAMES=[
+  {...sheep,name:"羊了个羊",emoji:"🐑",tag:"微信畅玩榜第1",bg:"linear-gradient(135deg,#b6f492,#338b93)"},
+  {...melon,name:"合成大西瓜",emoji:"🍉",tag:"消个水果同款",bg:"linear-gradient(135deg,#ffb199,#ff0844)"},
+  {...water,name:"倒水排序",emoji:"🧪",tag:"倒水类热门",bg:"linear-gradient(135deg,#89f7fe,#66a6ff)"},
+  {...arrow,name:"一箭又一箭",emoji:"🏹",tag:"箭头类爆款",bg:"linear-gradient(135deg,#fddb92,#f6a04d)"},
+  {...jam,name:"挪了下车",emoji:"🚗",tag:"畅玩榜前五",bg:"linear-gradient(135deg,#d4a5ff,#7f53ff)"},
+  {...screw,name:"打个螺丝",emoji:"🔩",tag:"益智消除热门",bg:"linear-gradient(135deg,#fbc2eb,#f78ca0)"}
+];
+let cur=null;
+function goHome(){if(cur){cur.stop();cur=null}
+  const IMG=k=>{const el=document.querySelector(`#x-imgs [data-k="${k}"]`);return el?el.getAttribute("src"):""};
+  const DESC={sheep:"三消堆叠，凑三张就消",melon:"同类水果相撞合成更大",water:"把同色水倒进同一管",arrow:"按顺序射出不撞箭",car:"挪开车辆让出路",screw:"拧下螺丝让板子掉落"};
+  const SPAN={sheep:" is-big",melon:" is-wide"};
+  const rk=i=>String(i+1).padStart(2,"0");
+  $s.innerHTML=`<div class="x-lobby"><header class="x-head"><span class="x-mark" aria-hidden="true">爆</span><h1 class="x-word">爆款小游戏</h1><p class="x-slogan">微信 · 抖音热榜同款</p></header>
+  <p class="x-intro">${GAMES.length} 款热门 · 免安装 · 点开即玩</p>
+  <div class="x-wallbox"><div class="x-wall">${GAMES.map((g,i)=>`<button class="x-cv${SPAN[g.id]||""}" data-g="${i}" aria-label="第${i+1}名 ${g.name}，开始游戏">${IMG(g.id)?`<img src="${IMG(g.id)}" alt="" onerror="this.remove()">`:""}<span class="x-rk${i?"":" is-top"}">${rk(i)}</span><span class="x-nm">${g.name}</span></button>`).join("")}</div></div>
+  <h2 class="x-sec">玩法速览</h2>
+  <ul class="x-rows">${GAMES.map((g,i)=>`<li><button class="x-row" data-g="${i}">${IMG(g.id)?`<img src="${IMG(g.id)}" alt="" onerror="this.remove()">`:""}<span class="x-row__t"><b>${g.name}</b><span>${DESC[g.id]||g.tag}</span></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></li>`).join("")}</ul>
+  <p class="x-foot">爆款小游戏 · 仅供娱乐</p></div>`;
+  document.getElementById("app").scrollTop=0;
+}
+$s.addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(!b)return;const g=GAMES[b.dataset.g];
+  if(!g.start)return toast("即将上线，敬请期待");$s.innerHTML="";const c=document.createElement("div");c.style.setProperty("--x-gn",JSON.stringify(g.name));$s.appendChild(c);cur=g;g.start(c)});
+goHome();
+})();
+    </script>
+  </body>
+</html>

@@ -84,7 +84,7 @@ v2 到 v5 在提交说明里没有明确对应，不要硬凑标签。v20 等 v2
 | `/workspace/built/` | 11 MB | sites 9.6 MB（5 个站点）、widgets 646 KB。执行时逐个确认是否属于 408，不属于就排除 |
 | `/workspace/deploy/vendor/` | 722 KB | 早期的 three.js vendor 文件，已被仓库内的版本取代，可以归档进 archive |
 | `.pnpm-store/` | 386 MB | pnpm 缓存，**不入库** |
-| `.trash/`、`.hark/`、`memory/` | — | 系统目录、回收站、Hark 记忆，**一律不入库** |
+| `.trash/` 与系统目录 | — | 系统目录、回收站，**一律不入库** |
 
 ### 2.3 大文件清单
 
@@ -158,7 +158,7 @@ pluto-da/k408-lab (private)
 - **资料放孤儿分支而不是另开一个仓库**：用户只需记住一个仓库，“全部”都在同一个地方；`git clone` 默认检出 master，不会把 archive 的 LFS 大文件一起下载。
 - **Release 放大体积过程素材**：GitHub 官方文档说明 Release 附件不限总大小、不限带宽，单个文件只要小于 LFS 的单文件上限（Free 计划 2 GB）；LFS 的免费额度（Free 计划 10 GiB 存储，每月 10 GiB 下载带宽）留给真正需要随仓库检出的成片。来源：https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github ，https://docs.github.com/en/billing/concepts/product-billing/git-lfs 。注意：用户说的“LFS 免费 1 GB”是旧额度，现行文档是 10 GiB。
 
-**明确不入库的内容**（写进 archive/README.md 的“未包含”一节，让用户知道它们在哪）：所有 node_modules、dist、`.pnpm-store`、`.trash`、`.hark`、`memory/`；4 本教材 PDF（除非用户另选）；日历 json；ONNX 语音模型（README 里写明下载地址和文件名，可重新获取）；根目录的其他项目文件；生产数据库备份；明文密钥。
+**明确不入库的内容**（写进 archive/README.md 的“未包含”一节，让用户知道它们在哪）：所有 node_modules、dist、`.pnpm-store`、`.trash`、系统目录；4 本教材 PDF（除非用户另选）；日历 json；ONNX 语音模型（README 里写明下载地址和文件名，可重新获取）；根目录的其他项目文件；生产数据库备份；明文密钥。
 
 ---
 

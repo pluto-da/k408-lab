@@ -1,0 +1,15 @@
+import { chromium } from '/workspace/work/pw/node_modules/playwright-core/index.mjs';
+const base = process.argv[2];
+const b = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox','--no-proxy-server'] });
+const ctx = await b.newContext({ viewport:{width:1210,height:800}, isMobile:true, hasTouch:true });
+const p = await ctx.newPage();
+await p.goto(base+'/lab#prop-ds-leaf'); await p.waitForFunction(() => window.__LEGACY_BOOTED__); await p.waitForTimeout(1800);
+const s = () => p.evaluate(()=>Math.round(scrollY));
+console.log('0', await s());
+await p.evaluate(()=>document.documentElement.classList.add('x-toc-lock')); await p.waitForTimeout(300); console.log('lock', await s());
+await p.evaluate(()=>document.documentElement.classList.remove('x-toc-lock')); await p.waitForTimeout(300); console.log('unlock', await s());
+await p.evaluate(()=>{document.getElementById('x-toc').classList.add('is-open')}); await p.waitForTimeout(300); console.log('open class', await s());
+await p.evaluate(()=>{document.getElementById('x-toc').classList.remove('is-open')}); await p.evaluate(()=>scrollTo(0,4816)); await p.waitForTimeout(300); console.log('reset', await s());
+await p.evaluate(()=>document.querySelector('#x-toc .x-toc__root a').focus({preventScroll:true})); await p.waitForTimeout(300); console.log('focus', await s());
+await p.evaluate(()=>scrollTo(0,4816)); await p.evaluate(()=>document.getElementById('x-tocbtn').click()); await p.waitForTimeout(300); console.log('jsclick', await s());
+await b.close();

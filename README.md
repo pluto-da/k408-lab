@@ -1,3 +1,5 @@
+> **新账号请先读 [`handoff/START-HERE.md`](handoff/START-HERE.md)**：把它的全文粘贴成新 Hark 账号的第一条消息即可接手。
+
 # 考研408动画实验室 · 周边资料包（k408-archive）
 
 这是主代码仓库（`k408-lab.bundle`）之外的全部过程资料。代码、部署配置（docker-compose、Caddy、Dockerfile、CI、`.env.example`）和完整 git 历史都在 bundle 里，这里放的是仓库外的东西。
@@ -9,9 +11,14 @@
 | `docs/prompts/` | 每一版的需求 Prompt（md 和 docx）：cn、coos、ds、proc、prop、redesign、ride、ride-layout、ride-ui、rwd、src、toc、todo、pc-orbit、final-check-security、splat-research，以及宣传视频（promo、promo2）和本次打包（github）的 Prompt |
 | `docs/reports/` | 审计报告 `audit.md`/`audit.txt`、安全扫描前后对比 `scan-before.txt`/`scan-after.txt`、各版 REPORT（文件名里的 `__` 代表原来的目录层级），`screenshots/` 里是关键截图 |
 | `docs/reports/v20/` | v20 的审计报告、审计和测试脚本、日志、关键截图（不含防扒指纹清单） |
-| `deploy/` | 部署脚本 d.sh、d2 到 d14、d14-rollback.sh、e.sh；`harden/` 下 7 个服务器加固脚本（h1 备份 → h2 SSH 只允许密钥 → h3 ufw → h4 fail2ban → h5 每日备份 cron → h6 恢复演练，h2-rollback 是回滚）；`rx.py`/`up.py`（paramiko 远程执行和上传，私钥路径已改成环境变量）；`.env.example` 模板 |
+| `deploy/` | 部署脚本 d.sh、d2 到 d15（d15 是 v20 修复部署）、d14-rollback.sh、e.sh；`harden/` 下 7 个服务器加固脚本（h1 备份 → h2 SSH 只允许密钥（**尚未执行**） → h3 ufw → h4 fail2ban → h5 每日备份 cron → h6 恢复演练，h2-rollback 是回滚）；`rx.py`/`up.py`（paramiko 远程执行和上传，私钥路径已改成环境变量）；`.env.example` 模板 |
 | `promo/` | 宣传视频成片 `promo-16x9.mp4`（横屏）、`promo-9x16.mp4`（竖屏），两张封面，`narration.json`（旁白文案和时间轴），`scripts/`（录屏 cap-*.cjs、合成 compose.py、build_timeline.py、混音 mix.py、配乐 music.py、封面 cover.py、TTS gen_tts.py 等），`qa/` 抽帧质检图 |
 | `promo2/` | 第二版宣传视频的 Prompt 和脚本 |
+| `handoff/` | 新账号交接入口：START-HERE.md（第一条消息）、用户画像与偏好、项目状态卡、项目时间线、Prompt 与报告索引、面板重建、服务器与仓库接入、注意事项；`legacy/` 是 v20 上线前写的旧说明（已过时，仅供校验迁移包） |
+| `pages/` | 5 个页面的源文件（只含 index.html 与页面自带素材；Mini Game Arcade 源文件缺失，只能按需求重建） |
+| `panels/` | 2 个首页面板的说明（不含网页原文抓取副本） |
+| `games/` | 爆款小游戏页面的封面与主视觉素材 |
+| `scripts/` | 截图、审计、录屏等工具脚本 |
 | `SECRETS.md` | 每个密钥的用途、存放位置、丢失后怎么重新生成（不含任何值） |
 
 ## 未包含的内容及去向

@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>小游戏大厅</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <link rel="stylesheet" href="hark-charts.css" />
+    <style>
+      .x-app { max-width: 520px; margin: 0 auto; padding: 24px var(--gutter) 48px; }
+      .x-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; min-height: var(--tap); }
+      .x-top h1 { font: var(--type-title); margin: 0; }
+      .x-sub { font: var(--type-small); color: var(--text-secondary); margin: 4px 0 0; }
+      .x-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .x-card { background: var(--fill-tertiary); border-radius: var(--r-l); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 150px; }
+      .x-card.is-off { opacity: .45; }
+      .x-icon { width: 44px; height: 44px; border-radius: var(--r-s); display: grid; place-items: center; font: var(--type-label); background: var(--fill-primary); color: var(--text-primary-on); }
+      .x-card h3 { font: var(--type-heading); margin: 0; }
+      .x-card p { font: var(--type-small); color: var(--text-secondary); margin: 0; flex: 1; }
+      .x-card .btn { align-self: flex-start; min-height: var(--tap); }
+      [hidden] { display: none !important; }
+      .x-scores { display: flex; gap: 8px; }
+      .x-score { background: var(--fill-tertiary); border-radius: var(--r-s); padding: 6px 12px; text-align: center; min-width: 64px; }
+      .x-score small { display: block; font: var(--type-caption); color: var(--text-secondary); }
+      .x-score b { font: var(--type-heading); }
+      .x-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; }
+      .x-bar .btn { min-height: var(--tap); }
+      .x-board { --g: 10px; position: relative; aspect-ratio: 1; background: var(--fill-tertiary); border-radius: var(--r-m); touch-action: none; user-select: none; -webkit-user-select: none; }
+      .x-cell, .x-tile { position: absolute; left: var(--g); top: var(--g); width: calc((100% - 5 * var(--g)) / 4); height: calc((100% - 5 * var(--g)) / 4); border-radius: var(--r-s); transform: translate(calc(var(--x) * (100% + var(--g))), calc(var(--y) * (100% + var(--g)))); }
+      .x-cell { background: var(--stroke-secondary); }
+      .x-tile { transition: transform 110ms var(--ease-out); z-index: 1; }
+      .x-tile span { width: 100%; height: 100%; display: grid; place-items: center; border-radius: inherit; font: var(--type-figure); color: var(--text-primary); background: var(--tc, var(--fill-tertiary)); }
+      .x-tile.is-new span { animation: x-in 160ms 110ms var(--ease-out) both; }
+      .x-tile.is-merged { z-index: 2; }
+      .x-tile.is-merged span { animation: x-pop 200ms 100ms var(--ease-out) both; }
+      .x-tile.d3 span { font: var(--type-title); }
+      .x-tile.d4 span { font: var(--type-heading); }
+      @keyframes x-in { from { transform: scale(0); opacity: 0; } }
+      @keyframes x-pop { 0% { transform: scale(0); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+      .x-over { position: absolute; inset: 0; z-index: 5; border-radius: var(--r-m); background: var(--mat-regular); backdrop-filter: blur(var(--hark-blur)); -webkit-backdrop-filter: blur(var(--hark-blur)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+      .x-over h2 { font: var(--type-title); margin: 0; }
+      .x-over p { font: var(--type-body); color: var(--text-secondary); margin: 0; }
+      .x-hint { font: var(--type-caption); color: var(--text-secondary); text-align: center; margin-top: 14px; }
+      .x-snake { position: relative; aspect-ratio: 1; background: var(--fill-tertiary); border-radius: var(--r-m); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+      .x-snake canvas { display: block; width: 100%; height: 100%; }
+      .x-brk { aspect-ratio: 4 / 5; }
+      .x-pad { display: none; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(2, 64px); gap: 8px; justify-content: center; margin-top: 16px; touch-action: none; user-select: none; -webkit-user-select: none; }
+      .x-pad button { border: 1px solid var(--stroke-secondary); background: var(--fill-tertiary); color: var(--text-primary); border-radius: var(--r-m); font: var(--type-heading); min-width: var(--tap); min-height: var(--tap); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+      .x-pad button:active { background: var(--stroke-secondary); }
+      .x-pad .u { grid-column: 2; grid-row: 1; }
+      @media (hover: none) and (pointer: coarse) { .x-pad { display: grid; } }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <main class="x-app">
+        <section id="lobby">
+          <div class="x-top">
+            <div>
+              <h1>小游戏大厅</h1>
+              <p class="x-sub">随手一局，轻松解压</p>
+            </div>
+          </div>
+          <div class="x-grid" id="cards"></div>
+        </section>
+
+        <section id="stage" hidden>
+          <div class="x-top">
+            <a class="btn" href="#" id="back">← 大厅</a>
+            <div class="x-scores">
+              <div class="x-score"><small>分数</small><b id="score">0</b></div>
+              <div class="x-score"><small>最佳</small><b id="best">0</b></div>
+            </div>
+          </div>
+          <div id="game"></div>
+        </section>
+      </main>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+      (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        var current = null;
+
+        /* ---------- 2048 ---------- */
+        var g2048 = (function () {
+          var best = 0, score, grid, board, over, tiles, busy, uid = 0, keyH, tS;
+          var COLORS = { 2: "var(--fill-tertiary)", 4: "var(--stroke-primary)" };
+          function color(v) {
+            if (COLORS[v]) return COLORS[v];
+            var i = Math.min(7, Math.log2(v) - 2);
+            return "color-mix(in srgb, var(--chart-" + i + ") " + (v >= 2048 ? 95 : 70) + "%, var(--fill-primary-on))";
+          }
+          function setScore() {
+            if (score > best) best = score;
+            $("score").textContent = score; $("best").textContent = best;
+          }
+          function place(t) { t.el.style.setProperty("--x", t.x); t.el.style.setProperty("--y", t.y); }
+          function mk(v, x, y, cls) {
+            var el = document.createElement("div");
+            el.className = "x-tile " + (cls || "") + (v >= 1024 ? " d4" : v >= 128 ? " d3" : "");
+            el.innerHTML = "<span>" + v + "</span>";
+            el.firstChild.style.setProperty("--tc", color(v));
+            var t = { id: uid++, v: v, x: x, y: y, el: el };
+            place(t); tiles.appendChild(el); return t;
+          }
+          function empties() { var e = []; for (var y = 0; y < 4; y++) for (var x = 0; x < 4; x++) if (!grid[y][x]) e.push([x, y]); return e; }
+          function addRandom() {
+            var e = empties(); if (!e.length) return;
+            var c = e[Math.floor(Math.random() * e.length)];
+            grid[c[1]][c[0]] = mk(Math.random() < 0.9 ? 2 : 4, c[0], c[1], "is-new");
+          }
+          function canMove() {
+            if (empties().length) return true;
+            for (var y = 0; y < 4; y++) for (var x = 0; x < 4; x++) {
+              var v = grid[y][x].v;
+              if ((x < 3 && grid[y][x + 1].v === v) || (y < 3 && grid[y + 1][x].v === v)) return true;
+            }
+            return false;
+          }
+          function inB(x, y) { return x >= 0 && x < 4 && y >= 0 && y < 4; }
+          function move(d) {
+            if (busy || !over.hidden) return;
+            var dx = [0, 1, 0, -1][d], dy = [-1, 0, 1, 0][d];
+            var xs = [0, 1, 2, 3], ys = [0, 1, 2, 3];
+            if (dx === 1) xs.reverse(); if (dy === 1) ys.reverse();
+            var moved = false, dying = [], merged = {};
+            ys.forEach(function (y) { xs.forEach(function (x) {
+              var t = grid[y][x]; if (!t) return;
+              var nx = x, ny = y;
+              while (inB(nx + dx, ny + dy) && !grid[ny + dy][nx + dx]) { nx += dx; ny += dy; }
+              var n = inB(nx + dx, ny + dy) ? grid[ny + dy][nx + dx] : null;
+              if (n && n.v === t.v && !merged[n.id]) {
+                grid[y][x] = null; t.x = n.x; t.y = n.y; place(t);
+                var nt = mk(t.v * 2, n.x, n.y, "is-merged");
+                merged[nt.id] = 1; grid[n.y][n.x] = nt; dying.push(t, n);
+                score += nt.v; moved = true;
+              } else if (nx !== x || ny !== y) {
+                grid[y][x] = null; grid[ny][nx] = t; t.x = nx; t.y = ny; place(t); moved = true;
+              }
+            }); });
+            if (!moved) return;
+            busy = true; setScore();
+            setTimeout(function () {
+              dying.forEach(function (t) { t.el.remove(); });
+              busy = false;
+            }, 115);
+            addRandom();
+            if (!canMove()) setTimeout(function () { $("final").textContent = "本局得分 " + score; over.hidden = false; }, 350);
+          }
+          function newGame() {
+            tiles.innerHTML = ""; score = 0; busy = false; over.hidden = true;
+            grid = [0, 1, 2, 3].map(function () { return [null, null, null, null]; });
+            addRandom(); addRandom(); setScore();
+          }
+          return {
+            id: "2048", name: "2048", icon: "2048", desc: "滑动合并数字，冲击 2048",
+            start: function (c) {
+              var cells = "";
+              for (var i = 0; i < 16; i++) cells += '<div class="x-cell" style="--x:' + (i % 4) + ";--y:" + Math.floor(i / 4) + '"></div>';
+              c.innerHTML =
+                '<div class="x-bar"><span class="x-sub">合并相同数字</span><a class="btn" href="#" id="ng">新游戏</a></div>' +
+                '<div class="x-board" id="board">' + cells + '<div id="tiles"></div>' +
+                '<div class="x-over" id="over" hidden><h2>游戏结束</h2><p id="final"></p>' +
+                '<div class="links"><a class="btn" href="#" id="again">再来一局</a><a class="btn" href="#" id="home">返回大厅</a></div></div></div>' +
+                '<p class="x-hint">滑动屏幕或使用方向键</p>';
+              board = $("board"); tiles = $("tiles"); over = $("over");
+              $("ng").onclick = $("again").onclick = function (e) { e.preventDefault(); newGame(); };
+              $("home").onclick = function (e) { e.preventDefault(); showLobby(); };
+              keyH = function (e) {
+                var d = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, ArrowLeft: 3 }[e.key];
+                if (d !== undefined) { e.preventDefault(); move(d); }
+              };
+              document.addEventListener("keydown", keyH);
+              board.addEventListener("touchstart", function (e) { var p = e.touches[0]; tS = [p.clientX, p.clientY]; }, { passive: true });
+              board.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
+              board.addEventListener("touchend", function (e) {
+                if (!tS) return; var p = e.changedTouches[0], ddx = p.clientX - tS[0], ddy = p.clientY - tS[1]; tS = null;
+                if (Math.max(Math.abs(ddx), Math.abs(ddy)) < 24) return;
+                move(Math.abs(ddx) > Math.abs(ddy) ? (ddx > 0 ? 1 : 3) : (ddy > 0 ? 2 : 0));
+              });
+              newGame();
+            },
+            stop: function () { document.removeEventListener("keydown", keyH); }
+          };
+        })();
+
+        /* ---------- 贪吃蛇 ---------- */
+        var gSnake = (function () {
+          var N = 20, best = 0, raf = 0, offs = [], ro = null;
+          var cv, ctx, over, pauseBtn, size = 0, col = {}, frame = 0, last = 0, tS = null;
+          var snake, dir, queue, food, score, step, acc, paused, dead, started, parts, bestAtStart;
+          var DIRS = { u: { x: 0, y: -1 }, d: { x: 0, y: 1 }, l: { x: -1, y: 0 }, r: { x: 1, y: 0 } };
+          function on(t, ty, fn, o) { t.addEventListener(ty, fn, o); offs.push([t, ty, fn, o]); }
+          function resolve() {
+            var p = document.createElement("span"); p.style.display = "none"; cv.parentNode.appendChild(p);
+            ["--fill-system-green", "--fill-system-orange", "--stroke-secondary", "--text-secondary", "--fill-primary-on"].forEach(function (k) {
+              p.style.color = "var(" + k + ")"; col[k] = getComputedStyle(p).color;
+            });
+            p.remove();
+          }
+          function resize() {
+            var r = cv.getBoundingClientRect(); if (!r.width) return;
+            var dpr = window.devicePixelRatio || 1; size = r.width;
+            cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+            ctx.setTransform(cv.width / r.width, 0, 0, cv.height / r.height, 0, 0);
+          }
+          function setScore() {
+            if (score > best) best = score;
+            $("score").textContent = score; $("best").textContent = best;
+          }
+          function placeFood() {
+            if (snake.length >= N * N) { gameOver(); return; }
+            var f;
+            do { f = { x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N) }; }
+            while (snake.some(function (s) { return s.x === f.x && s.y === f.y; }));
+            food = f;
+          }
+          function reset() {
+            snake = [{ x: 9, y: 10 }, { x: 8, y: 10 }, { x: 7, y: 10 }];
+            dir = DIRS.r; queue = []; score = 0; step = 150; acc = 0; parts = [];
+            paused = false; dead = false; started = false; bestAtStart = best;
+            over.hidden = true; pauseBtn.textContent = "暂停";
+            placeFood(); setScore();
+          }
+          function turn(d) {
+            if (dead || paused) return;
+            var ref = queue.length ? queue[queue.length - 1] : dir;
+            if (d.x === -ref.x && d.y === -ref.y) return;
+            started = true;
+            if (d === ref) return;
+            if (queue.length < 3) queue.push(d);
+          }
+          function togglePause() {
+            if (dead) return;
+            paused = !paused; pauseBtn.textContent = paused ? "继续" : "暂停";
+          }
+          function burst(f) {
+            for (var i = 0; i < 16; i++) {
+              var a = Math.random() * Math.PI * 2, sp = 3 + Math.random() * 6;
+              parts.push({ x: f.x + 0.5, y: f.y + 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.55, max: 0.55 });
+            }
+          }
+          function gameOver() {
+            dead = true;
+            $("sk-final").textContent = "本局得分 " + score + (score > bestAtStart ? " · 新纪录" : "");
+            over.hidden = false;
+          }
+          function tick() {
+            if (queue.length) dir = queue.shift();
+            var h = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+            var eat = h.x === food.x && h.y === food.y;
+            var body = eat ? snake : snake.slice(0, -1);
+            if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || body.some(function (s) { return s.x === h.x && s.y === h.y; })) { gameOver(); return; }
+            snake.unshift(h);
+            if (eat) {
+              score += 10; step = Math.max(60, 150 - (snake.length - 3) * 4);
+              burst(food); setScore(); placeFood();
+            } else snake.pop();
+          }
+          function rr(x, y, w, h, r) {
+            ctx.beginPath(); ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+          }
+          function draw(t) {
+            if (!size) return;
+            var c = size / N;
+            ctx.clearRect(0, 0, size, size);
+            ctx.strokeStyle = col["--stroke-secondary"]; ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            for (var i = 1; i < N; i++) { ctx.moveTo(i * c, 0); ctx.lineTo(i * c, size); ctx.moveTo(0, i * c); ctx.lineTo(size, i * c); }
+            ctx.stroke(); ctx.globalAlpha = 1;
+            if (food) {
+              var pr = c * (0.32 + 0.05 * Math.sin(t / 160));
+              ctx.fillStyle = ctx.shadowColor = col["--fill-system-orange"]; ctx.shadowBlur = c * 0.9;
+              ctx.beginPath(); ctx.arc((food.x + 0.5) * c, (food.y + 0.5) * c, pr, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.fillStyle = ctx.shadowColor = col["--fill-system-green"]; ctx.shadowBlur = c * 0.7;
+            for (var j = snake.length - 1; j >= 0; j--) {
+              var s = snake[j], pad = j === 0 ? c * 0.06 : c * 0.12;
+              ctx.globalAlpha = 1 - (j / Math.max(snake.length, 1)) * 0.55;
+              rr(s.x * c + pad, s.y * c + pad, c - pad * 2, c - pad * 2, c * 0.28); ctx.fill();
+            }
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+            var hd = snake[0], ex = (hd.x + 0.5) * c, ey = (hd.y + 0.5) * c;
+            ctx.fillStyle = col["--fill-primary-on"];
+            [-1, 1].forEach(function (k) {
+              ctx.beginPath();
+              ctx.arc(ex + dir.x * c * 0.18 + (dir.y ? k * c * 0.18 : 0), ey + dir.y * c * 0.18 + (dir.x ? k * c * 0.18 : 0), c * 0.08, 0, Math.PI * 2);
+              ctx.fill();
+            });
+            ctx.fillStyle = ctx.shadowColor = col["--fill-system-orange"]; ctx.shadowBlur = c * 0.4;
+            parts.forEach(function (p) {
+              ctx.globalAlpha = Math.max(0, p.life / p.max);
+              ctx.beginPath(); ctx.arc(p.x * c, p.y * c, c * 0.1 * (0.5 + p.life / p.max), 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+            if (!dead && (!started || paused)) {
+              ctx.fillStyle = col["--text-secondary"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+              ctx.font = "500 15px Geist, system-ui, sans-serif";
+              ctx.fillText(paused ? "已暂停" : "滑动或按方向键开始", size / 2, size * 0.3);
+            }
+          }
+          function loop(t) {
+            raf = requestAnimationFrame(loop);
+            var dt = last ? Math.min(0.1, (t - last) / 1000) : 0; last = t;
+            if (!paused && !dead && started) {
+              acc += dt * 1000;
+              while (acc >= step) { acc -= step; tick(); if (dead) break; }
+            }
+            if (!paused) parts = parts.filter(function (p) {
+              p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.92; p.life -= dt; return p.life > 0;
+            });
+            if (++frame % 60 === 0) resolve();
+            draw(t);
+          }
+          return {
+            id: "snake", name: "贪吃蛇", icon: "蛇", desc: "吃得越多，身体越长",
+            start: function (c) {
+              c.innerHTML =
+                '<div class="x-bar"><span class="x-sub">越长越快</span><a class="btn" href="#" id="sk-pause">暂停</a></div>' +
+                '<div class="x-snake" id="sk-wrap"><canvas id="sk-cv" role="img" aria-label="贪吃蛇游戏画面"></canvas>' +
+                '<div class="x-over" id="sk-over" hidden><h2>游戏结束</h2><p id="sk-final"></p>' +
+                '<div class="links"><a class="btn" href="#" id="sk-again">再来一局</a><a class="btn" href="#" id="sk-home">返回大厅</a></div></div></div>' +
+                '<div class="x-pad" aria-label="方向键"><button class="u" data-d="u" aria-label="上">↑</button>' +
+                '<button data-d="l" aria-label="左">←</button><button data-d="d" aria-label="下">↓</button><button data-d="r" aria-label="右">→</button></div>' +
+                '<p class="x-hint">滑动屏幕或使用方向键 · 空格暂停</p>';
+              cv = $("sk-cv"); ctx = cv.getContext("2d"); over = $("sk-over"); pauseBtn = $("sk-pause");
+              var wrap = $("sk-wrap"), pad = c.querySelector(".x-pad");
+              resolve(); resize();
+              if (window.ResizeObserver) { ro = new ResizeObserver(resize); ro.observe(cv); }
+              on(window, "resize", resize);
+              on(pauseBtn, "click", function (e) { e.preventDefault(); togglePause(); });
+              on($("sk-again"), "click", function (e) { e.preventDefault(); reset(); });
+              on($("sk-home"), "click", function (e) { e.preventDefault(); showLobby(); });
+              on(document, "keydown", function (e) {
+                var k = { ArrowUp: "u", ArrowDown: "d", ArrowLeft: "l", ArrowRight: "r", w: "u", s: "d", a: "l", d: "r", W: "u", S: "d", A: "l", D: "r" }[e.key];
+                if (k) { e.preventDefault(); turn(DIRS[k]); }
+                else if (e.key === " " || e.key === "p" || e.key === "P") { e.preventDefault(); togglePause(); }
+              });
+              on(wrap, "touchstart", function (e) { var p = e.touches[0]; tS = [p.clientX, p.clientY]; }, { passive: true });
+              on(wrap, "touchmove", function (e) {
+                if (!over.hidden) return;
+                e.preventDefault(); if (!tS) return;
+                var p = e.touches[0], dx = p.clientX - tS[0], dy = p.clientY - tS[1];
+                if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+                turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? DIRS.r : DIRS.l) : (dy > 0 ? DIRS.d : DIRS.u));
+                tS = [p.clientX, p.clientY];
+              }, { passive: false });
+              on(wrap, "touchend", function () { tS = null; });
+              on(pad, "pointerdown", function (e) {
+                var b = e.target.closest("[data-d]"); if (!b) return;
+                e.preventDefault(); turn(DIRS[b.dataset.d]);
+              });
+              on(document, "visibilitychange", function () { if (document.hidden && started && !dead && !paused) togglePause(); });
+              reset(); last = 0; raf = requestAnimationFrame(loop);
+            },
+            stop: function () {
+              cancelAnimationFrame(raf); raf = 0;
+              offs.forEach(function (o) { o[0].removeEventListener(o[1], o[2], o[3]); }); offs = [];
+              if (ro) { ro.disconnect(); ro = null; }
+              tS = null;
+            }
+          };
+        })();
+
+        /* ---------- 打砖块 ---------- */
+        var gBreak = (function () {
+          var W = 400, H = 500, R = 6, best = 0, raf = 0, offs = [], ro = null;
+          var cv, ctx, wrap, over, pauseBtn, info, col = {}, frame = 0, last = 0, ready = false, dragging = false;
+          var level, lives, score, paddle, balls, bricks, drops, parts, paused, state, keys = {}, bestAtStart;
+          var LEVELS = [
+            ["1111111111", "1111111111", "1111111111", "1111111111", "1111111111"],
+            ["....11....", "...1111...", "..111111..", ".11111111.", "1111111111", "2222222222"],
+            ["2222222222", "1.1.1.1.1.", ".1.1.1.1.1", "1111111111", "2..2..2..2", "1111111111", "2222222222"]
+          ];
+          var TOK = ["--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5", "--chart-6", "--chart-7",
+            "--fill-system-green", "--fill-system-orange", "--text-primary", "--text-secondary", "--fill-primary-on"];
+          function on(t, ty, fn, o) { t.addEventListener(ty, fn, o); offs.push([t, ty, fn, o]); }
+          function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+          function resolve() {
+            var p = document.createElement("span"); p.style.display = "none"; cv.parentNode.appendChild(p);
+            TOK.forEach(function (k) { p.style.color = "var(" + k + ")"; col[k] = getComputedStyle(p).color; });
+            p.remove();
+          }
+          function resize() {
+            var r = cv.getBoundingClientRect(); if (!r.width) return;
+            var dpr = window.devicePixelRatio || 1;
+            cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+            ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ready = true;
+          }
+          function setScore() {
+            if (score > best) best = score;
+            $("score").textContent = score; $("best").textContent = best;
+          }
+          function setInfo() { info.textContent = "第 " + (level + 1) + "/" + LEVELS.length + " 关 · 生命 " + lives; }
+          function speed() { return 290 + level * 40; }
+          function build() {
+            var bw = (W - 32 - 36) / 10, bh = 16;
+            bricks = [];
+            LEVELS[level].forEach(function (row, ry) {
+              for (var cx = 0; cx < 10; cx++) {
+                var ch = row[cx]; if (ch === ".") continue;
+                var hp = +ch, r = Math.random();
+                bricks.push({ x: 16 + cx * (bw + 4), y: 56 + ry * (bh + 5), w: bw, h: bh, hp: hp, max: hp,
+                  c: "--chart-" + ((ry % 7) + 1), drop: r < 0.09 ? "wide" : r < 0.18 ? "multi" : null });
+              }
+            });
+          }
+          function serve() {
+            balls = [{ x: paddle.x, y: paddle.y - paddle.h / 2 - R, vx: 0, vy: 0, stuck: true }];
+            drops = []; paddle.wideT = 0;
+          }
+          function startLevel() {
+            build();
+            paddle = { x: W / 2, y: H - 30, w: 72, h: 10, wideT: 0 };
+            serve(); parts = []; state = "play"; paused = false; keys = {};
+            over.hidden = true; pauseBtn.textContent = "暂停"; setInfo();
+          }
+          function newGame() { level = 0; lives = 3; score = 0; bestAtStart = best; startLevel(); setScore(); }
+          function launch() {
+            if (state !== "play" || paused) return;
+            balls.forEach(function (b) {
+              if (!b.stuck) return;
+              var a = Math.random() * 0.6 - 0.3, s = speed();
+              b.stuck = false; b.vx = s * Math.sin(a); b.vy = -s * Math.cos(a);
+            });
+          }
+          function hasStuck() { return balls.some(function (b) { return b.stuck; }); }
+          function togglePause() {
+            if (state !== "play") return;
+            paused = !paused; keys = {}; dragging = false; pauseBtn.textContent = paused ? "继续" : "暂停";
+          }
+          function burst(x, y, c, n) {
+            for (var i = 0; i < n; i++) {
+              var a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 160;
+              parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, life: 0.6, max: 0.6, c: c });
+            }
+          }
+          function showOver(title, msg, next) {
+            $("bk-title").textContent = title; $("bk-final").textContent = msg;
+            $("bk-next").hidden = !next; over.hidden = false;
+          }
+          function hitBrick(k) {
+            k.hp--; score += 10;
+            if (k.hp <= 0) {
+              score += (k.max - 1) * 10;
+              burst(k.x + k.w / 2, k.y + k.h / 2, k.c, 16);
+              if (k.drop) drops.push({ x: k.x + k.w / 2, y: k.y + k.h / 2, t: k.drop });
+            } else burst(k.x + k.w / 2, k.y + k.h / 2, k.c, 5);
+            setScore();
+          }
+          function loseBall() {
+            lives--; setInfo();
+            if (lives <= 0) {
+              state = "over";
+              showOver("游戏结束", "本局得分 " + score + (score > bestAtStart ? " · 新纪录" : ""), false);
+            } else serve();
+          }
+          function levelClear() {
+            state = "clear"; score += 100 + lives * 50; setScore();
+            var fin = level === LEVELS.length - 1;
+            showOver(fin ? "全部通关" : "第 " + (level + 1) + " 关完成",
+              (fin ? "最终得分 " : "当前得分 ") + score + (fin && score > bestAtStart ? " · 新纪录" : ""), !fin);
+          }
+          function catchDrop(d) {
+            burst(d.x, paddle.y, d.t === "wide" ? "--fill-system-green" : "--fill-system-orange", 10);
+            if (d.t === "wide") { paddle.wideT = 10; return; }
+            var add = [];
+            balls.forEach(function (b) {
+              if (b.stuck) return;
+              [-0.45, 0.45].forEach(function (a) {
+                var c = Math.cos(a), s = Math.sin(a), vy = b.vx * s + b.vy * c;
+                add.push({ x: b.x, y: b.y, vx: b.vx * c - b.vy * s, vy: vy, stuck: false });
+              });
+            });
+            balls = balls.concat(add).slice(0, 12);
+          }
+          function stepBall(b, h) {
+            if (b.stuck) { b.x = paddle.x; b.y = paddle.y - paddle.h / 2 - R; return; }
+            b.x += b.vx * h; b.y += b.vy * h;
+            if (b.x < R) { b.x = R; b.vx = Math.abs(b.vx); }
+            if (b.x > W - R) { b.x = W - R; b.vx = -Math.abs(b.vx); }
+            if (b.y < R) { b.y = R; b.vy = Math.abs(b.vy); }
+            var top = paddle.y - paddle.h / 2, hw = paddle.w / 2;
+            if (b.vy > 0 && b.y + R >= top && b.y - R <= top + paddle.h && b.x >= paddle.x - hw - R && b.x <= paddle.x + hw + R) {
+              var rel = clamp((b.x - paddle.x) / hw, -1, 1), a = rel * 1.05, s = Math.hypot(b.vx, b.vy);
+              b.vx = s * Math.sin(a); b.vy = -s * Math.cos(a); b.y = top - R;
+            }
+            for (var i = 0; i < bricks.length; i++) {
+              var k = bricks[i]; if (k.hp <= 0) continue;
+              var cx = clamp(b.x, k.x, k.x + k.w), cy = clamp(b.y, k.y, k.y + k.h), dx = b.x - cx, dy = b.y - cy;
+              if (dx * dx + dy * dy >= R * R) continue;
+              var vert = (b.x >= k.x && b.x <= k.x + k.w) || (!(b.y >= k.y && b.y <= k.y + k.h) && Math.abs(dy) >= Math.abs(dx));
+              if (vert) b.vy = b.y < k.y + k.h / 2 ? -Math.abs(b.vy) : Math.abs(b.vy);
+              else b.vx = b.x < k.x + k.w / 2 ? -Math.abs(b.vx) : Math.abs(b.vx);
+              var sp = Math.hypot(b.vx, b.vy), cap = speed() * 1.35;
+              if (sp < cap) { b.vx *= 1.006; b.vy *= 1.006; }
+              hitBrick(k); break;
+            }
+            if (Math.abs(b.vy) < 70) b.vy = (b.vy < 0 ? -1 : 1) * 70;
+          }
+          function update(dt) {
+            var tw = paddle.wideT > 0 ? 112 : 72;
+            paddle.w += (tw - paddle.w) * Math.min(1, dt * 10);
+            if (paddle.wideT > 0) paddle.wideT -= dt;
+            if (keys.l) paddle.x -= 460 * dt;
+            if (keys.r) paddle.x += 460 * dt;
+            paddle.x = clamp(paddle.x, paddle.w / 2, W - paddle.w / 2);
+            var n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+            for (var i = 0; i < n; i++) balls.forEach(function (b) { stepBall(b, h); });
+            balls = balls.filter(function (b) { return b.y < H + R * 2; });
+            if (!balls.length) { loseBall(); return; }
+            if (bricks.every(function (k) { return k.hp <= 0; })) { levelClear(); return; }
+            var top = paddle.y - paddle.h / 2, hw = paddle.w / 2;
+            drops = drops.filter(function (d) {
+              d.y += 150 * dt;
+              if (d.y + 9 >= top && d.y - 9 <= top + paddle.h && Math.abs(d.x - paddle.x) <= hw + 17) { catchDrop(d); return false; }
+              return d.y < H + 20;
+            });
+          }
+          function rr(x, y, w, h, r) {
+            ctx.beginPath(); ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+          }
+          function draw(t) {
+            if (!ready) return;
+            ctx.clearRect(0, 0, W, H);
+            bricks.forEach(function (k) {
+              if (k.hp <= 0) return;
+              ctx.globalAlpha = k.hp < k.max ? 0.5 : 1;
+              ctx.fillStyle = col[k.c]; rr(k.x, k.y, k.w, k.h, 4); ctx.fill();
+              if (k.max > 1 && k.hp > 1) {
+                ctx.globalAlpha = 0.45; ctx.strokeStyle = col["--text-primary"]; ctx.lineWidth = 1.5;
+                rr(k.x + 2, k.y + 2, k.w - 4, k.h - 4, 3); ctx.stroke();
+              }
+            });
+            ctx.globalAlpha = 1;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            drops.forEach(function (d) {
+              var c = col[d.t === "wide" ? "--fill-system-green" : "--fill-system-orange"];
+              ctx.fillStyle = ctx.shadowColor = c; ctx.shadowBlur = 10 + 4 * Math.sin(t / 120);
+              rr(d.x - 17, d.y - 9, 34, 18, 9); ctx.fill(); ctx.shadowBlur = 0;
+              ctx.fillStyle = col["--fill-primary-on"]; ctx.font = "600 12px Geist, system-ui, sans-serif";
+              ctx.fillText(d.t === "wide" ? "宽" : "多", d.x, d.y + 1);
+            });
+            var wide = paddle.wideT > 0;
+            ctx.fillStyle = col["--text-primary"];
+            ctx.shadowColor = col[wide ? "--fill-system-green" : "--text-primary"]; ctx.shadowBlur = wide ? 14 : 6;
+            rr(paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h, paddle.h / 2); ctx.fill();
+            ctx.shadowColor = col["--text-primary"]; ctx.shadowBlur = 10;
+            balls.forEach(function (b) { ctx.beginPath(); ctx.arc(b.x, b.y, R, 0, Math.PI * 2); ctx.fill(); });
+            ctx.shadowBlur = 0;
+            parts.forEach(function (p) {
+              ctx.globalAlpha = Math.max(0, p.life / p.max); ctx.fillStyle = col[p.c];
+              var s = 2 + 2.5 * (p.life / p.max); ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+            });
+            ctx.globalAlpha = 1;
+            if (state === "play" && (paused || hasStuck())) {
+              ctx.fillStyle = col["--text-secondary"]; ctx.font = "500 15px Geist, system-ui, sans-serif";
+              ctx.fillText(paused ? "已暂停" : "点击、空格或 ↑ 发球", W / 2, paused ? H / 2 : H * 0.66);
+            }
+          }
+          function loop(t) {
+            raf = requestAnimationFrame(loop);
+            var dt = last ? Math.min(0.05, (t - last) / 1000) : 0; last = t;
+            if (!paused && state === "play") update(dt);
+            if (!paused) parts = parts.filter(function (p) {
+              p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; p.vx *= 0.97; p.life -= dt; return p.life > 0;
+            });
+            if (++frame % 60 === 0) resolve();
+            draw(t);
+          }
+          function pointerX(e) {
+            var r = cv.getBoundingClientRect(); if (!r.width) return;
+            paddle.x = clamp((e.clientX - r.left) / r.width * W, paddle.w / 2, W - paddle.w / 2);
+          }
+          return {
+            id: "breakout", name: "打砖块", icon: "砖", desc: "弹球击碎所有砖块",
+            start: function (c) {
+              c.innerHTML =
+                '<div class="x-bar"><span class="x-sub" id="bk-info"></span><a class="btn" href="#" id="bk-pause">暂停</a></div>' +
+                '<div class="x-snake x-brk" id="bk-wrap"><canvas id="bk-cv" role="img" aria-label="打砖块游戏画面"></canvas>' +
+                '<div class="x-over" id="bk-over" hidden><h2 id="bk-title">游戏结束</h2><p id="bk-final"></p>' +
+                '<div class="links"><a class="btn" href="#" id="bk-next" hidden>下一关</a><a class="btn" href="#" id="bk-again">再来一局</a><a class="btn" href="#" id="bk-home">返回大厅</a></div></div></div>' +
+                '<p class="x-hint">拖动、鼠标或 ←→ 移动挡板 · 宽 = 加长挡板 · 多 = 多球 · P 暂停</p>';
+              cv = $("bk-cv"); ctx = cv.getContext("2d"); over = $("bk-over"); pauseBtn = $("bk-pause"); info = $("bk-info"); wrap = $("bk-wrap");
+              ready = false; resolve(); resize();
+              if (window.ResizeObserver) { ro = new ResizeObserver(resize); ro.observe(cv); }
+              on(window, "resize", resize);
+              on(pauseBtn, "click", function (e) { e.preventDefault(); togglePause(); });
+              on($("bk-next"), "click", function (e) { e.preventDefault(); level++; startLevel(); });
+              on($("bk-again"), "click", function (e) { e.preventDefault(); newGame(); });
+              on($("bk-home"), "click", function (e) { e.preventDefault(); showLobby(); });
+              on(document, "keydown", function (e) {
+                var k = e.key;
+                if (k === "ArrowLeft" || k === "a" || k === "A") { e.preventDefault(); if (!paused) keys.l = true; }
+                else if (k === "ArrowRight" || k === "d" || k === "D") { e.preventDefault(); if (!paused) keys.r = true; }
+                else if (k === "ArrowUp") { e.preventDefault(); launch(); }
+                else if (k === " ") { e.preventDefault(); if (!paused && state === "play" && hasStuck()) launch(); else togglePause(); }
+                else if (k === "p" || k === "P") { e.preventDefault(); togglePause(); }
+              });
+              on(document, "keyup", function (e) {
+                if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.l = false;
+                if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.r = false;
+              });
+              on(wrap, "pointerdown", function (e) {
+                if (!over.hidden || state !== "play" || paused) return;
+                if (e.pointerType === "mouse" && e.button !== 0) return;
+                if (e.pointerType !== "mouse") { dragging = true; pointerX(e); }
+                launch();
+              });
+              on(wrap, "pointermove", function (e) {
+                if (state !== "play" || paused) return;
+                if (e.pointerType === "mouse" || dragging) pointerX(e);
+              });
+              on(window, "pointerup", function () { dragging = false; });
+              on(window, "pointercancel", function () { dragging = false; });
+              on(wrap, "touchmove", function (e) { if (over.hidden) e.preventDefault(); }, { passive: false });
+              on(window, "blur", function () { keys = {}; dragging = false; });
+              on(document, "visibilitychange", function () { if (document.hidden && state === "play" && !paused) togglePause(); });
+              newGame(); last = 0; raf = requestAnimationFrame(loop);
+            },
+            stop: function () {
+              cancelAnimationFrame(raf); raf = 0;
+              offs.forEach(function (o) { o[0].removeEventListener(o[1], o[2], o[3]); }); offs = [];
+              if (ro) { ro.disconnect(); ro = null; }
+              keys = {}; dragging = false;
+            }
+          };
+        })();
+
+        /* ---------- 游戏注册表：新增游戏只需在此追加 ---------- */
+        var GAMES = [
+          g2048,
+          gSnake,
+          gBreak,
+          { id: "runner", name: "跑酷冲刺", icon: "跑", desc: "跳跃闪避，一路狂奔" },
+          { id: "tetris", name: "俄罗斯方块", icon: "块", desc: "拼满一行即可消除" },
+          { id: "mines", name: "扫雷", icon: "雷", desc: "推理排雷，步步为营" }
+        ];
+
+        function showLobby() {
+          if (current) { current.stop(); current = null; }
+          $("game").innerHTML = ""; $("stage").hidden = true; $("lobby").hidden = false;
+        }
+        function play(game) {
+          $("lobby").hidden = true; $("stage").hidden = false;
+          current = game; game.start($("game")); window.scrollTo(0, 0);
+        }
+        $("back").onclick = function (e) { e.preventDefault(); showLobby(); };
+
+        $("cards").innerHTML = GAMES.map(function (g, i) {
+          var live = typeof g.start === "function";
+          return '<div class="x-card' + (live ? "" : " is-off") + '"><div class="x-icon">' + g.icon + "</div><h3>" + g.name + "</h3><p>" + g.desc + "</p>" +
+            (live ? '<a class="btn" href="#" data-i="' + i + '">开始</a>' : '<span class="chip">即将上线</span>') + "</div>";
+        }).join("");
+        $("cards").addEventListener("click", function (e) {
+          var b = e.target.closest("[data-i]"); if (!b) return;
+          e.preventDefault(); play(GAMES[+b.dataset.i]);
+        });
+      })();
+    </script>
+  </body>
+</html>

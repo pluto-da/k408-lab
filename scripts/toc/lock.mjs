@@ -1,0 +1,13 @@
+import { chromium } from '/workspace/work/pw/node_modules/playwright-core/index.mjs';
+const base = process.argv[2];
+const b = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox','--no-proxy-server'] });
+const ctx = await b.newContext({ viewport:{width:1210,height:800}, isMobile:true, hasTouch:true });
+const p = await ctx.newPage();
+await p.goto(base+'/lab#prop-ds-leaf'); await p.waitForFunction(() => window.__LEGACY_BOOTED__); await p.waitForTimeout(1800);
+const s = () => p.evaluate(()=>Math.round(scrollY)+' '+document.querySelector('.x-toc__root > li > a[aria-current]')?.textContent+' '+window.X_TOC.state().open);
+console.log('before click', await s());
+await p.click('#x-tocbtn'); await p.waitForTimeout(500);
+console.log('after open', await s());
+await p.keyboard.press('Escape'); await p.waitForTimeout(500);
+console.log('after close', await s());
+await b.close();

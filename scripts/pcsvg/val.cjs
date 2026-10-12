@@ -1,0 +1,13 @@
+const { JSDOM } = require("/workspace/fullstack-408/apps/web/node_modules/jsdom");
+const fs = require("fs"), vm = require("vm");
+const dom = new JSDOM("<!doctype html><body></body>", { runScripts: "outside-only" });
+const win = dom.window;
+win.X = { reduced: true };
+const D = "/workspace/fullstack-408/apps/web/public/legacy/js/";
+for (const f of ["23-prop-core.js", "25-prop-co.js"]) win.eval(fs.readFileSync(D + f, "utf8"));
+const core = win.PROPU;
+const src = ["08-lab.js","15-lab-cn.js","16-lab-coos.js","19-lab-ds1.js","20-lab-ds2.js","21-lab-ds3.js"].map(f=>fs.readFileSync(D+f,"utf8")).join("\n");
+const labIds=[...src.matchAll(/\bid:\s*"([a-z0-9]+)",\s*name:\s*"[^"]*",\s*color:/g)].map(m=>m[1]);
+const ps=["12-proc-circuit.js","13-proc-co.js","14-proc-os.js","17-proc-cn.js","18-proc-coos.js","22-proc-ds.js"].map(f=>fs.readFileSync(D+f,"utf8")).join("\n");
+const procIds=[...ps.matchAll(/\bid:\s*"([a-z0-9]+)",\s*name:\s*"[^"]*",\s*sub:/g)].map(m=>m[1]);
+console.log(win.PROP.length, core ? core.validate(win.PROP, {labIds, procIds}) : "no core validate");

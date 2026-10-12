@@ -1,0 +1,21 @@
+const { chromium } = require('/workspace/work/pw/node_modules/playwright-core');
+(async () => {
+  const b = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox','--no-proxy-server','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+  const p = await (await b.newContext({ viewport: { width: 1366, height: 900 } })).newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message.slice(0, 200)));
+  await p.route('**/api/**', r => r.fulfill({ status: 200, contentType: 'application/json', body: '{"user":null}' }));
+  await p.goto('http://127.0.0.1:4176/lab'); await p.waitForSelector('.x-lab__tab'); await p.waitForTimeout(800);
+  await p.evaluate(() => window.X_BOARD.open().catch(e => console.log('boardfail', e)));
+  await p.evaluate(() => document.getElementById('links').scrollIntoView());
+  await p.waitForTimeout(9000);
+  const m = () => p.evaluate(() => { const o = {}; const s = document.querySelector('#stage canvas'), g = document.querySelector('.x-graph__stage canvas');
+    if (s) o.board = [s.width, s.parentElement.clientWidth, s.height, s.parentElement.clientHeight]; if (g) o.graph = [g.width, g.parentElement.clientWidth, g.height, g.parentElement.clientHeight];
+    o.ov = document.documentElement.scrollWidth - innerWidth; o.split = !!document.querySelector('.x-lab__panel:not([hidden])') && getComputedStyle(document.querySelector('.x-lab__panel:not([hidden])')).display; return o; });
+  const out = [['1366', await m()]];
+  await p.setViewportSize({ width: 344, height: 882 }); await p.waitForTimeout(800); out.push(['344', await m()]);
+  await p.setViewportSize({ width: 673, height: 841 }); await p.waitForTimeout(800); out.push(['673', await m()]);
+  await p.setViewportSize({ width: 1366, height: 900 }); await p.waitForTimeout(800); out.push(['1366', await m()]);
+  await p.setViewportSize({ width: 1920, height: 1080 }); await p.waitForTimeout(800); out.push(['1920', await m(), await p.evaluate(() => { const s = document.querySelector('#stage canvas').getBoundingClientRect(); const g = document.querySelector('.x-graph__stage canvas').getBoundingClientRect(); return [Math.round(s.width), Math.round(g.width), getComputedStyle(document.querySelector('.x-hero')).zoom]; })]);
+  console.log(JSON.stringify(out), errs);
+  await b.close();
+})();

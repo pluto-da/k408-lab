@@ -1,0 +1,72 @@
+// v18 功能走查：沉浸模式、侧栏收起、手动游走按钮、更多菜单、外壳悬浮（测试构建 4180）
+const { chromium } = require("/workspace/work/pw/node_modules/playwright-core");
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const OUT = "/workspace/work/v18/feat";
+require("node:fs").mkdirSync(OUT, { recursive: true });
+(async () => {
+  const b = await chromium.launch({ executablePath: "/usr/bin/chromium", args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+  const run = async (name, w, h, touch, fn) => {
+    const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1, hasTouch: touch, isMobile: touch && w < 900 });
+    const p = await ctx.newPage();
+    const errs = [];
+    p.on("pageerror", (e) => errs.push(e.message));
+    await p.goto("http://127.0.0.1:4180/pc?ride=access&dpr=1");
+    await p.waitForFunction(() => window.__ride && document.querySelector(".rd-panel"), null, { timeout: 90000 });
+    await sleep(6500);
+    await p.evaluate(() => window.__ride.goTo(1));
+    await sleep(2500);
+    await fn(p);
+    console.log(name, "errors:", errs.length ? errs : "none");
+    await ctx.close();
+  };
+  const probe = (p) => p.evaluate(() => { const r = window.__ride.probe(); return { view: r.view, safe: r.safe, focus: r.focus, font: r.minFontPx && +r.minFontPx.toFixed(1) }; });
+  await run("desktop", 1366, 648, false, async (p) => {
+    await p.keyboard.press("h");
+    await sleep(1500);
+    console.log("immersive", JSON.stringify(await probe(p)), "restore btn:", !!(await p.$(".rd-restore")));
+    await p.screenshot({ path: `${OUT}/desktop-immersive.png` });
+    await p.click(".rd-restore");
+    await sleep(800);
+    await p.click('button[aria-label="收起讲解栏"]');
+    await sleep(1500);
+    console.log("side closed", JSON.stringify(await probe(p)));
+    await p.screenshot({ path: `${OUT}/desktop-side-closed.png` });
+    await p.click('button[aria-label="展开讲解栏"]');
+    await sleep(600);
+    await p.click(".rd-mode");
+    await sleep(1500);
+    console.log("manual pad:", await p.$$eval(".rd-pad__btn", (x) => x.length), JSON.stringify(await probe(p)));
+    await p.screenshot({ path: `${OUT}/desktop-manual.png` });
+    await p.click(".rd-mode");
+    await p.click(".rd-more > button");
+    await sleep(400);
+    console.log("menu items:", await p.$$eval(".rd-menu button", (x) => x.map((e) => e.textContent).join(" | ")));
+    await p.screenshot({ path: `${OUT}/desktop-menu.png` });
+    await p.click('.rd-menu button:has-text("设置")');
+    await sleep(400);
+    await p.click('.rd-card--set label:has-text("悬浮") input');
+    await p.click(".rd-card--set .rd-x");
+    await sleep(1500);
+    console.log("float shell", JSON.stringify(await probe(p)));
+    await p.screenshot({ path: `${OUT}/desktop-float-shell.png` });
+  });
+  await run("phone", 393, 732, true, async (p) => {
+    await p.click('button:has-text("展开")');
+    await sleep(1500);
+    console.log("drawer full", JSON.stringify(await probe(p)));
+    await p.screenshot({ path: `${OUT}/phone-drawer-full.png` });
+    await p.click('button:has-text("收起")');
+    await sleep(500);
+    await p.click(".rd-mode");
+    await sleep(1500);
+    console.log("phone manual", JSON.stringify(await probe(p)));
+    await p.screenshot({ path: `${OUT}/phone-manual.png` });
+  });
+  await run("phone-land", 852, 273, true, async (p) => {
+    await p.click(".rd-more > button");
+    await sleep(400);
+    await p.screenshot({ path: `${OUT}/phone-land-menu.png` });
+    console.log("land menu:", await p.$$eval(".rd-menu button", (x) => x.map((e) => e.textContent).join(" | ")));
+  });
+  await b.close();
+})();

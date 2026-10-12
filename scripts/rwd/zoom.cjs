@@ -1,0 +1,22 @@
+const { chromium } = require('/workspace/work/pw/node_modules/playwright-core');
+(async () => {
+  const b = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox','--no-proxy-server'] });
+  const p = await (await b.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 })).newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message.slice(0, 200)));
+  await p.route('**/api/**', r => r.fulfill({ status: 200, contentType: 'application/json', body: '{"user":null}' }));
+  await p.goto('http://127.0.0.1:4176/lab'); await p.waitForSelector('.x-proc__tab'); await p.waitForTimeout(900);
+  await p.evaluate(() => { document.getElementById('ptab-dns').click(); });
+  await p.waitForTimeout(300);
+  await p.evaluate(() => document.querySelector('.x-zoombtn').scrollIntoView({ block: 'center' }));
+  await p.waitForTimeout(300);
+  await p.screenshot({ path: '/tmp/z0.png' });
+  await p.tap('.x-zoombtn'); await p.waitForTimeout(300);
+  const a = await p.evaluate(() => ({ open: !document.querySelector('.x-zoom').hidden, svgW: document.querySelector('.x-zoom svg').getBoundingClientRect().width, step: document.querySelector('.x-zoom__step').textContent.slice(0, 40) }));
+  await p.tap('[data-z="next"]'); await p.tap('[data-z="next"]'); await p.tap('[data-z="in"]'); await p.tap('[data-z="in"]'); await p.waitForTimeout(200);
+  const b2 = await p.evaluate(() => ({ svgW: document.querySelector('.x-zoom svg').getBoundingClientRect().width, step: document.querySelector('.x-zoom__step').textContent.slice(0, 40), sl: document.querySelector('.x-zoom__view').scrollLeft }));
+  await p.screenshot({ path: '/tmp/z1.png' });
+  await p.tap('[data-z="close"]'); await p.waitForTimeout(200);
+  const c = await p.evaluate(() => ({ open: !document.querySelector('.x-zoom').hidden, back: !!document.querySelector('#x-proc-body .x-proc__stage .x-proc__canvas svg'), meta: document.querySelector('#x-proc-body .x-proc__meta').textContent, svgStyle: document.querySelector('#x-proc-body .x-proc__svg').style.width, htmlCls: document.documentElement.className }));
+  console.log(JSON.stringify({ a, b2, c, errs }));
+  await b.close();
+})();

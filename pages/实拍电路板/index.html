@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>实拍电路板 · 考研408动画实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      .x-lab {
+        --x-paper: #f2efe8;
+        --x-ink: #16181d;
+        --x-ink-2: #55585f;
+        --x-brick: #c2512b;
+        --x-brick-text: #a3401f;
+        --x-line: rgba(22, 24, 29, 0.14);
+        --x-cjk: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        --x-mono: Menlo, Consolas, "Courier New", monospace;
+        min-height: 100vh;
+        background-color: var(--x-paper);
+        background-image:
+          linear-gradient(to right, rgba(22, 24, 29, 0.05) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(22, 24, 29, 0.05) 1px, transparent 1px);
+        background-size: 24px 24px;
+        color: var(--x-ink);
+        font-family: var(--x-cjk);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+      .x-wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+      .x-top {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 20px 0; border-bottom: 2px solid var(--x-ink);
+      }
+      .x-brand { margin: 0; font-weight: 900; font-size: 18px; letter-spacing: 0.02em; }
+      .x-brand b { color: var(--x-brick); font-weight: 900; }
+      .x-tag {
+        font-family: var(--x-mono); font-size: 12px; letter-spacing: 0.08em;
+        border: 1.5px solid var(--x-ink); padding: 4px 10px; margin: 0;
+      }
+      .x-intro { padding: 40px 0 24px; }
+      .x-kicker { font-family: var(--x-mono); font-size: 12px; color: var(--x-brick-text); letter-spacing: 0.1em; margin: 0 0 8px; }
+      .x-intro h1 { margin: 0; font-weight: 900; font-size: clamp(30px, 5vw, 52px); line-height: 1.15; letter-spacing: -0.01em; }
+      .x-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: start; padding-bottom: 48px; }
+      .x-frame {
+        position: relative; height: 70vh; min-height: 360px;
+        background: var(--x-ink); border: 2px solid var(--x-ink);
+        box-shadow: 6px 6px 0 var(--x-brick); overflow: hidden;
+      }
+      .x-frame canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+      .x-frame canvas:active { cursor: grabbing; }
+      #progress { position: absolute; top: 0; left: 0; height: 3px; width: 0; background: var(--x-brick); transition: width 0.2s linear; z-index: 2; }
+      #spinner {
+        position: absolute; left: 16px; top: 16px; margin: 0;
+        font-family: var(--x-mono); font-size: 12px; color: #f2efe8; letter-spacing: 0.06em;
+      }
+      #message {
+        position: absolute; left: 16px; right: 16px; bottom: 16px; margin: 0;
+        font-family: var(--x-mono); font-size: 12px; color: #f0a58a;
+      }
+      #message:empty { display: none; }
+      .x-meta { position: absolute; right: 12px; top: 10px; font-family: var(--x-mono); font-size: 12px; color: rgba(242, 239, 232, 0.6); text-align: right; pointer-events: none; }
+      #camid { display: none; }
+      .x-hint { font-family: var(--x-mono); font-size: 12px; color: var(--x-ink-2); margin: 18px 0 0; letter-spacing: 0.04em; }
+      .x-notes { text-align: left; }
+      .x-notes h2 { margin: 0 0 16px; font-weight: 900; font-size: 24px; line-height: 1.3; padding-bottom: 10px; border-bottom: 2px solid var(--x-ink); }
+      .x-notes dl { margin: 0; }
+      .x-notes dt { font-weight: 900; font-size: 16px; margin: 0; }
+      .x-notes dt span { font-family: var(--x-mono); font-weight: 400; font-size: 12px; color: var(--x-brick-text); margin-left: 6px; }
+      .x-notes dd { margin: 2px 0 16px; color: var(--x-ink-2); font-size: 14px; }
+      .x-what { margin-top: 8px; padding: 14px 16px; border: 1.5px solid var(--x-ink); background: var(--x-paper); }
+      .x-what h3 { margin: 0 0 4px; font-weight: 900; font-size: 16px; }
+      .x-what p { margin: 0; font-size: 14px; color: var(--x-ink-2); }
+      .x-foot { border-top: 1.5px solid var(--x-line); padding: 18px 0 32px; }
+      .x-foot p { margin: 0; font-family: var(--x-mono); font-size: 12px; color: var(--x-ink-2); line-height: 1.7; }
+      @media (max-width: 960px) {
+        .x-grid { grid-template-columns: 1fr; }
+        .x-wrap { padding: 0 16px; }
+        .x-frame { margin: 0 -16px; border-left: 0; border-right: 0; box-shadow: none; }
+        .x-intro { padding: 28px 0 18px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page x-lab" id="top">
+      <div class="x-wrap">
+        <header class="x-top">
+          <p class="x-brand">考研<b>408</b>动画实验室</p>
+          <p class="x-tag">实拍电路板</p>
+        </header>
+
+        <div class="x-intro">
+          <h1>实拍电路板</h1>
+        </div>
+
+        <main class="x-grid">
+          <div>
+            <div class="x-frame">
+              <div id="progress"></div>
+              <canvas id="canvas" aria-label="可旋转的三维电路板实拍模型"></canvas>
+              <p id="spinner">载入中…</p>
+              <p id="message"></p>
+              <div class="x-meta"><div id="fps"></div><div id="camid"></div></div>
+            </div>
+            <p class="x-hint">拖动旋转 · 双指缩放 · 方向键移动</p>
+          </div>
+
+          <aside class="x-notes">
+            <h2>这块板子上的 408</h2>
+            <dl>
+              <dt>芯片<span>组成原理 第1章</span></dt>
+              <dd>集成电路，CPU、存储芯片都是这样封装的。</dd>
+              <dt>铜走线<span>组成原理 第6章</span></dt>
+              <dd>总线的物理形态：地址线、数据线、控制线。</dd>
+              <dt>接口与插针<span>组成原理 第7章</span></dt>
+              <dd>I/O 接口，CPU 通过它们和外设交换数据。</dd>
+            </dl>
+          </aside>
+        </main>
+
+        <footer class="x-foot">
+          <p>电路板模型 © Stephan Buth，CC BY 4.0</p>
+          <!-- Viewer: MIT License © Kevin Kwok -->
+          <!-- Reconstruction: eecorn (SuperSplat) -->
+          <!-- Model: '002 Voltage Controller' -->
+
+        </footer>
+      </div>
+    </div>
+    <script src="hark.js"></script>
+    <script src="pcb-data.js"></script>
+    <script src="splat-viewer-local.js"></script>
+  </body>
+</html>
