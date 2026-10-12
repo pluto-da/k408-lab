@@ -1,6 +1,6 @@
-# tools/pc-splat — 整机拆解模块的模型构建
+# tools/pc-model — 整机拆解模块的模型构建
 
-`/pc` 页面里的整机和每个部件的「打开」状态，都是由这里的脚本**从零程序化建模**、再直接转换成高斯点（splat）文件的。全部原创，不依赖任何外部素材。
+`/pc` 页面里的整机和每个部件的「打开」状态，都是由这里的脚本**从零程序化建模**、再导出为 glb 网格模型的（`export.py` 导出，`pack.mjs` 用 gltfpack 压缩）。下文的高斯点（splat / SOG）流程是早期方案，`splat.py` 仍保留在目录里，但当前页面不再使用。全部原创，不依赖任何外部素材。
 
 ```
 textures.py   程序化贴图（主板走线与丝印、CPU die 布局、盘片磁道/扇区、DRAM Bank、标签等）→ build/tex/*.png
@@ -27,7 +27,7 @@ run.sh        一键全流程（2 核约 4 分钟）
 
 ```bash
 sudo apt-get install -y blender python3-numpy python3-pil python3-scipy   # Debian/Ubuntu
-cd tools/pc-splat && PYTHON=/usr/bin/python3 ./run.sh
+cd tools/pc-model && PYTHON=/usr/bin/python3 ./run.sh
 ```
 
 只改了 manifest 相关的锚点名时，可以 `node pack.mjs --manifest-only` 跳过重新压缩。
