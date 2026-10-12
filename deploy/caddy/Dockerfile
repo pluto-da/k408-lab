@@ -41,7 +41,10 @@ FROM caddy:2-alpine
 COPY --from=caddy-build /usr/bin/caddy /usr/bin/caddy
 COPY deploy/caddy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=web /app/apps/web/dist /srv
-RUN caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile \
+# 去掉二进制上的文件能力（cap_net_bind_service）：容器设置了 no-new-privileges 且 cap_drop ALL，带文件能力的程序会 exec 失败
+# 监听 80/443 靠 compose 里的 net.ipv4.ip_unprivileged_port_start=0
+RUN cp /usr/bin/caddy /tmp/caddy && rm -f /usr/bin/caddy && mv /tmp/caddy /usr/bin/caddy && chmod 755 /usr/bin/caddy \
+  && caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile \
   && addgroup -S -g 10001 web && adduser -S -D -H -u 10001 -G web web \
   && mkdir -p /data/caddy /data/logs /config/caddy \
   && chown -R 10001:10001 /data /config
