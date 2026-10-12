@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import type { RideStation, SceneCue } from "../types";
 import { MEM } from "./layout";
-import { C, Gate, MONO, TextPlate, disposeTree, dust, glowBox, gridFloor, panelBg, rr, text, worldFont, planeCorners, type FocusSpec, type SceneLabel } from "./kit";
+import { C, Gate, MONO, TextPlate, UI, disposeTree, dust, glowBox, gridFloor, panelBg, rr, text, worldFont, planeCorners, type FocusSpec, type SceneLabel } from "./kit";
 
 type Cue<K extends SceneCue["kind"]> = Extract<SceneCue, { kind: K }>;
 
@@ -34,18 +34,20 @@ export class MemWorld {
     this.q = opts.low || opts.phone ? 0.75 : 1;
     this.n = opts.phone || opts.low ? 12 : GRID;
     const s = this.scene;
-    s.background = new THREE.Color(C.bg);
-    s.fog = new THREE.FogExp2(C.bg, 0.03);
-    s.add(dust(opts.phone || opts.low ? 140 : 360, new THREE.Box3(new THREE.Vector3(-14, -6, -6), new THREE.Vector3(50, 20, 20)), C.membus));
+    // 内存区域的环境色：极低饱和度的暖灰
+    s.background = new THREE.Color("#100f0e");
+    s.fog = new THREE.FogExp2(0x100f0e, 0.03);
+    s.add(dust(opts.phone || opts.low ? 50 : 120, new THREE.Box3(new THREE.Vector3(-14, -6, -6), new THREE.Vector3(50, 20, 20)), "#b8ad9a"));
 
     // 楼层
     for (let k = 0; k < 2; k++) {
       const y = MEM.floorY(k);
       const group = new THREE.Group();
-      const slab = glowBox(10, 0.16, 3.2, C.membus, 0.1);
+      const slab = glowBox(10, 0.16, 3.2, "#8a8296", 0.05);
+      (slab.userData.edge as THREE.LineBasicMaterial).opacity = 0.22;
       slab.position.set(0, y - 0.08, 0.6);
       group.add(slab);
-      const grid = gridFloor(14, "#7a63b8", y + 0.001);
+      const grid = gridFloor(14, "#7d766a", y + 0.001);
       grid.scale.set(1, 1, 0.24);
       grid.position.z = 0.6;
       group.add(grid);
@@ -71,9 +73,9 @@ export class MemWorld {
     for (const x of [-0.6, 0.6]) for (const z of [2.8, 4.0]) sp.push(x, MEM.floorY(1) - 1, z, x, MEM.floorY(0) + 6, z);
     const sg = new THREE.BufferGeometry();
     sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
-    this.shaft = new THREE.LineSegments(sg, new THREE.LineBasicMaterial({ color: C.membus, transparent: true, opacity: 0.5 }));
+    this.shaft = new THREE.LineSegments(sg, new THREE.LineBasicMaterial({ color: "#8a8296", transparent: true, opacity: 0.16 }));
     s.add(this.shaft);
-    this.labels.push({ text: "页表基址寄存器 → 0x0010 0000", pos: new THREE.Vector3(-4.6, MEM.floorY(0) + 4.1, 0), color: C.pcie });
+    this.labels.push({ text: "页表基址寄存器 → 0x0010 0000", pos: new THREE.Vector3(-4.6, MEM.floorY(0) + 4.1, 0), color: C.pcie, tag: "floor0" });
 
     // 缺页：警示牌、外存、调页光束
     this.alarm = this.plate(820, 220, 4.2);
@@ -127,7 +129,7 @@ export class MemWorld {
     this.dramPlate.mesh.position.set(X, 3.1 + n * 0.22 + 0.95, 0);
     this.labels.push({ text: "行译码 RAS", pos: new THREE.Vector3(X - n * 0.22 - 1.3, 3.1, 0), color: C.power, tag: "dram" });
     this.labels.push({ text: "行缓冲 → 列选择 CAS", pos: new THREE.Vector3(X, 3.1 - n * 0.22 - 1.05, 0), color: C.pcie, tag: "dram" });
-    s.add(gridFloor(80, "#5b6b8f", -0.6).translateX(X));
+    s.add(gridFloor(80, "#6e685e", -0.6).translateX(X));
   }
 
   private plate(w: number, h: number, worldW: number) {
@@ -154,9 +156,11 @@ export class MemWorld {
     this.diskLabel.pos.y = y - 4.1;
   }
 
-  setGates(floor: number, chosen: string | null, time: number) {
+  setGates(floor: number, chosen: string | null, time: number, show = true) {
     const g = this.gates[floor];
     if (!g) return;
+    g[0]!.show(show && floor === this.count - 1);
+    g[1]!.show(show && floor === this.count - 1);
     g[0]!.set(chosen === null ? "idle" : chosen === "v1" ? "on" : "off", time);
     g[1]!.set(chosen === null ? "idle" : chosen === "v0" ? "on" : "off", time);
   }
@@ -194,9 +198,9 @@ export class MemWorld {
     f.label.text = `第 ${c.floor + 1} 层 · ${c.title}`;
     const cp = this.compact;
     f.plate.draw(`${cp}|${c.addr}|${stage}|${reveal}|${c.rows.map((r) => r.text).join()}`, (g, w, h) => {
-      panelBg(g, w, h, C.membus, 0.9);
+      panelBg(g, w, h, 0.9);
       text(g, "表项地址 = 基址 + 索引 × 4", 40, 50, cp ? 46 : 30, C.dim, 500);
-      text(g, c.addr, 40, 110, cp ? 48 : 38, stage >= 0 ? "#fff" : "rgba(233,234,238,0.5)", 600, "left", MONO);
+      text(g, c.addr, 40, 110, cp ? 48 : 38, stage >= 0 ? "#fff" : "rgba(232,234,240,0.5)", 600, "left", MONO);
       const top = 156;
       const n = Math.max(1, c.rows.length);
       const gap = 12;
@@ -211,14 +215,15 @@ export class MemWorld {
         const lit = hi && stage >= 1;
         const bad = lit && reveal && !row.valid;
         rr(g, 40, y, w - 80, rowH, 12);
-        g.fillStyle = bad ? "rgba(255,90,90,0.22)" : lit ? (reveal ? "rgba(76,227,138,0.24)" : "rgba(176,124,255,0.26)") : "rgba(255,255,255,0.06)";
+        // 当前楼层表项：主色描边；读出后有效为绿、无效为红；索引用青绿（与地址条的索引字段同色）
+        g.fillStyle = bad ? "rgba(229,83,75,0.14)" : lit ? (reveal ? UI.okSoft : UI.accentSoft) : UI.row;
         g.fill();
         g.lineWidth = lit ? 3 : 1.5;
-        g.strokeStyle = bad ? C.bad : lit ? (reveal ? C.ok : C.membus) : "rgba(255,255,255,0.14)";
+        g.strokeStyle = bad ? UI.bad : lit ? (reveal ? UI.ok : UI.accent) : UI.rowLine;
         g.stroke();
-        text(g, row.idx, 72, y + rowH / 2, cp ? 50 : 40, hi ? "#fff" : C.dim, 600, "left", MONO);
+        text(g, row.idx, 72, y + rowH / 2, cp ? 50 : 40, hi ? UI.set : C.dim, 600, "left", MONO);
         const showVal = !hi || reveal || c.floor < c.floors - 1;
-        text(g, showVal ? row.text : "V = ?", w - 72, y + rowH / 2, cp ? 48 : 38, !row.valid && showVal ? C.bad : C.ink, 500, "right", MONO);
+        text(g, showVal ? row.text : "V = ?", w - 72, y + rowH / 2, cp ? 48 : 38, !row.valid && showVal ? UI.badInk : hi ? C.ink : UI.ink2, 500, "right", MONO);
       });
       g.fillStyle = "rgba(255,255,255,0.04)";
       rr(g, 40, top + n * (rowH + gap) + 2, w - 80, 12, 6);
@@ -260,7 +265,7 @@ export class MemWorld {
     this.dramPlate.resize(1100, cp ? 190 : 150, cp ? 7.0 : 5.6);
     this.dramPlate.mesh.position.y = 3.1 + n * 0.22 + (cp ? 0.92 : 0.64);
     this.dramPlate.draw(`${cp}|${c.row}|${c.col}|${rowOn}|${colOn}`, (g, w, h) => {
-      panelBg(g, w, h, "#7aa7ff", 0.9);
+      panelBg(g, w, h, 0.9);
       const f = cp ? 72 : 50;
       text(g, `Bank ${c.bank}`, 40, h / 2, f, C.ink, 600);
       text(g, `行 ${c.row}`, cp ? 400 : 380, h / 2, f, rowOn ? C.power : C.dim, 600);

@@ -7,6 +7,7 @@
  *
  * 环境变量：
  *   RIDE_OUT        截图与结果目录（默认 /tmp/ride-audit）
+ *   RIDE_SETTLE_MS  每站等待“到站且镜头稳定”的上限毫秒数（默认 9000；软件渲染的超大视口可调大）
  *   RIDE_VIEWPORTS  只跑部分视口，按名称匹配，逗号分隔，如 "tablet-land,phone-393"
  *   RIDE_VARIANTS   default,fault（默认两条都跑）
  *   RIDE_SHOTS      key（默认：每个视口第 2 站 TLB、L1 站、页表站、结算卡）| all（每站都截）| none
@@ -21,6 +22,11 @@
  *   5 labels     画面标签两两不相交
  *   6 lines      讲解正文：矮横屏至少 4 行可见，竖屏抽屉默认至少 2 行
  *   7 overflow / errors  无横向溢出，无 JS 报错
+ *   8 contrast   界面文字对其底色的对比度 ≥ 4.5:1（大字 ≥ 3:1；禁用按钮除外）
+ *   9 height     画面浮层与操作区里的按钮高度一致
+ *  10 bottom     画面下半部分没有任何控件（操作全部在讲解栏 / 抽屉里）
+ *  11 unique     「下一站」只有一个入口；进入后网站顶栏不显示，界面上没有亮白色大块
+ *  12 void       电脑 / 平板讲解栏没有超过 40 像素的空洞（讲解区内容已全部展开时除外）
  * 检查接口 window.__ride 只在测试构建里存在；生产构建中没有。
  * 退出码：有任何一项不通过时为 1。
  */
@@ -121,15 +127,105 @@ function pageChecks({ touch }) {
     const visH = Math.max(0, Math.min(sc.bottom, pr.bottom) - Math.max(sc.top, pr.top));
     lines = { visible: Math.floor((visH + 2) / lh), text: Math.round(pr.height / lh) };
   }
+  // 8 对比度：文字颜色对其所在的不透明底色（逐层叠加半透明底色，最底层按页面底色 #0b0d12）
+  const parse = (c) => {
+    const m = /rgba?\(([^)]+)\)/.exec(c || "");
+    if (!m) return null;
+    const v = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+    return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 };
+  };
+  const lum = (c) => {
+    const f = (x) => {
+      x /= 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  };
+  const over = (top, bot) => ({ r: top.r * top.a + bot.r * (1 - top.a), g: top.g * top.a + bot.g * (1 - top.a), b: top.b * top.a + bot.b * (1 - top.a), a: 1 });
+  const bgOf = (el) => {
+    const layers = [];
+    for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
+      const c = parse(getComputedStyle(e).backgroundColor);
+      if (c && c.a > 0) layers.push(c);
+      if (c && c.a >= 1) break;
+    }
+    let base = { r: 11, g: 13, b: 18, a: 1 };
+    for (let i = layers.length - 1; i >= 0; i--) base = over(layers[i], base);
+    return base;
+  };
+  const contrastIssues = [];
+  let minContrast = 99;
+  for (const el of document.querySelectorAll(".rd-root *")) {
+    if (el.closest("svg, .rd-sum, .rd-card, .rd-menu")) continue;
+    const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+    if (!own || !vis(el)) continue;
+    if (el.closest("button:disabled")) continue;
+    const cs = getComputedStyle(el);
+    const fg = parse(cs.color);
+    if (!fg) continue;
+    const bg = bgOf(el);
+    const fgc = fg.a < 1 ? over(fg, bg) : fg;
+    const a = lum(fgc), b = lum(bg);
+    const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    const size = parseFloat(cs.fontSize);
+    const large = size >= 24 || (size >= 18.66 && Number(cs.fontWeight) >= 600);
+    minContrast = Math.min(minContrast, ratio);
+    if (ratio < (large ? 3 : 4.5)) contrastIssues.push(`${name(el)} ${ratio.toFixed(2)}`);
+  }
+  // 9 按钮高度一致（画面浮层 + 操作区）
+  const hs = new Set();
+  for (const el of document.querySelectorAll(".rd-root .rd-tl button, .rd-root .rd-tr button, .rd-root .rd-ctl button")) {
+    const r = vis(el);
+    if (r) hs.add(Math.round(r.h));
+  }
+  // 10 画面下半部分没有控件
+  const stage = document.querySelector(".rd-stage");
+  const sr = stage && stage.getBoundingClientRect();
+  const lowCtl = [];
+  if (sr) for (const el of stage.querySelectorAll("button, a, input, select")) {
+    const r = vis(el);
+    if (r && r.y > sr.top + sr.height / 2) lowCtl.push(name(el));
+  }
+  // 11 「下一站」入口唯一；顶栏隐藏；没有亮白色大块
+  let nextCount = 0;
+  for (const el of document.querySelectorAll(".rd-root button")) {
+    if (el.closest(".rd-card, .rd-menu, .rd-sum")) continue;
+    if (!vis(el)) continue;
+    const t = (el.getAttribute("aria-label") || "") + el.textContent;
+    if (/下一站|到站|看小结/.test(t)) nextCount++;
+  }
+  const bar = document.querySelector(".app-bar");
+  const barShown = !!(bar && vis(bar));
+  const white = [];
+  for (const el of document.querySelectorAll(".rd-root *")) {
+    const c = parse(getComputedStyle(el).backgroundColor);
+    if (!c || c.a < 0.5 || lum(c) < 0.5) continue;
+    const r = vis(el);
+    if (r && r.w * r.h > 1500) white.push(name(el));
+  }
+  // 12 讲解栏空洞：讲解区内容的底到操作区的顶
+  let voidPx = null;
+  let allOpen = true;
+  const sc = document.querySelector(".rd-scroll");
+  if (sc && vis(sc)) {
+    const kids = [...sc.children].filter((k) => vis(k));
+    const last = kids[kids.length - 1];
+    if (last) {
+      const pad = parseFloat(getComputedStyle(sc).paddingBottom) || 0;
+      voidPx = Math.round(sc.getBoundingClientRect().bottom - pad - last.getBoundingClientRect().bottom);
+    }
+    const d = sc.querySelector("details");
+    allOpen = !d || d.open;
+  }
   const overflow = document.documentElement.scrollWidth > window.innerWidth + 1;
   const layout = (document.querySelector(".rd-root")?.className.match(/rd-L--(\w+)/) || [])[1] || "?";
-  return { hud, buttons: buttons.length, btnIssues, lines, overflow, layout };
+  return { hud, buttons: buttons.length, btnIssues, lines, overflow, layout, contrastIssues, minContrast, heights: [...hs], lowCtl, nextCount, barShown, white, voidPx, allOpen };
 }
 
 const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
 const inside = (a, b) => a.x >= b.x - 0.5 && a.y >= b.y - 0.5 && a.x + a.w <= b.x + b.w + 0.5 && a.y + a.h <= b.y + b.h + 0.5;
 
-async function waitSettled(page, i, ms = 9000) {
+async function waitSettled(page, i, ms = Number(process.env.RIDE_SETTLE_MS) || 9000) {
   const t0 = Date.now();
   let pr = null;
   while (Date.now() - t0 < ms) {
@@ -217,6 +313,15 @@ async function waitSettled(page, i, ms = 9000) {
             if (pc.lines.visible < Math.min(need, pc.lines.text)) fails.push(`6 正文只露 ${pc.lines.visible} 行（要 ${need}）`);
           }
           if (pc.overflow) fails.push("7 横向溢出");
+          row.contrast = +pc.minContrast.toFixed(2);
+          if (pc.contrastIssues.length) fails.push(`8 对比度不足：${pc.contrastIssues.slice(0, 3).join("；")}`);
+          if (pc.heights.length > 1) fails.push(`9 按钮高度不一致：${pc.heights.join(" / ")}`);
+          if (pc.lowCtl.length) fails.push(`10 画面下半部分有控件：${pc.lowCtl.slice(0, 3).join("；")}`);
+          if (pc.nextCount !== 1) fails.push(`11 「下一站」入口 ${pc.nextCount} 个`);
+          if (pc.barShown) fails.push("11 网站顶栏仍然显示");
+          if (pc.white.length) fails.push(`11 亮白色大块：${pc.white.slice(0, 2).join("；")}`);
+          row.void = pc.voidPx;
+          if (pc.layout !== "short" && s.kind !== "bus" && pc.voidPx !== null && pc.voidPx > 40 && !pc.allOpen) fails.push(`12 讲解栏空洞 ${pc.voidPx}px`);
           if (wantShot) {
             const f = path.join(OUT, SHOTS === "all" ? `${vname}-${variant}-${String(i + 1).padStart(2, "0")}-${s.id}.png` : `${vname}-${shotKey}.png`);
             await page.screenshot({ path: f });

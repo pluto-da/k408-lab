@@ -15,22 +15,45 @@ export const C = {
   l2: "#28965A",
   l3: "#22AAAA",
   imc: "#965AC8",
-  ok: "#4CE38A",
-  bad: "#FF5A5A",
-  ink: "#E9EAEE",
-  dim: "#7C8290",
+  ok: "#3FBF7F",
+  bad: "#E5534B",
+  ink: "#E8EAF0",
+  dim: "#858C9C",
 };
 
+/** 化身数据的界面语义色：画面里的文字板与讲解栏（ride.css 的 --ride-*）共用同一套 */
+export const UI = {
+  bg: "#0b0d12",
+  plate: "rgba(20,24,33,0.88)",
+  stroke: "rgba(255,255,255,0.12)",
+  row: "rgba(255,255,255,0.035)",
+  rowLine: "rgba(255,255,255,0.10)",
+  ink: "#E8EAF0",
+  ink2: "#A3A9B7",
+  ink3: "#858C9C",
+  accent: "#5B7CFF",
+  accentSoft: "rgba(91,124,255,0.16)",
+  tag: "#E0A43A",
+  set: "#3FB5A0",
+  off: "#5AA9E6",
+  frame: "#9B8CFF",
+  ok: "#3FBF7F",
+  okSoft: "rgba(63,191,127,0.14)",
+  bad: "#E5534B",
+  badInk: "#F0716A",
+};
+
+/** 地址字段的语义色：标记 = 琥珀，组号 / 索引 = 青绿，偏移 = 天蓝，页框号 / 物理地址 = 紫 */
 export const TONE: Record<string, string> = {
-  vpn: C.membus,
-  off: "#46D2FF",
-  tag: C.power,
-  set: C.nic,
-  frame: C.alu,
-  dir: C.pcie,
-  tbl: C.dmi,
-  data: "#F4F5F7",
-  plain: "#F4F5F7",
+  vpn: UI.ink2,
+  off: UI.off,
+  tag: UI.tag,
+  set: UI.set,
+  frame: UI.frame,
+  dir: UI.set,
+  tbl: UI.set,
+  data: UI.ink,
+  plain: UI.ink,
 };
 
 export const FONT = `"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","WenQuanYi Micro Hei",system-ui,sans-serif`;
@@ -143,15 +166,37 @@ export function rr(g: CanvasRenderingContext2D, x: number, y: number, w: number,
   g.closePath();
 }
 
-export function panelBg(g: CanvasRenderingContext2D, w: number, h: number, accent: string, alpha = 0.82) {
+/** 文字板底：统一的深色玻璃屏（细描边、圆角，不再有彩色边条） */
+export function panelBg(g: CanvasRenderingContext2D, w: number, h: number, alpha = 0.88) {
   rr(g, 2, 2, w - 4, h - 4, 18);
-  g.fillStyle = `rgba(14,17,23,${alpha})`;
+  g.fillStyle = `rgba(20,24,33,${alpha})`;
   g.fill();
   g.lineWidth = 2;
-  g.strokeStyle = "rgba(255,255,255,0.14)";
+  g.strokeStyle = UI.stroke;
   g.stroke();
-  g.fillStyle = accent;
-  g.fillRect(2, 18, 6, h - 36);
+}
+
+/** 表头右侧的状态徽章（命中 / 缺失）：文字 + 颜色，不单靠颜色 */
+export function badge(g: CanvasRenderingContext2D, label: string, x: number, y: number, size: number, ok: boolean, align: "left" | "right" = "right") {
+  g.font = `600 ${size}px ${FONT}`;
+  const tw = g.measureText(label).width;
+  const dot = size * 0.34;
+  const padX = size * 0.55;
+  const w = tw + padX * 2 + dot * 2 + size * 0.3;
+  const h = size * 1.55;
+  const x0 = align === "right" ? x - w : x;
+  rr(g, x0, y - h / 2, w, h, h / 2);
+  g.fillStyle = ok ? "rgba(63,191,127,0.16)" : "rgba(229,83,75,0.16)";
+  g.fill();
+  g.lineWidth = 2;
+  g.strokeStyle = ok ? UI.ok : UI.bad;
+  g.stroke();
+  g.beginPath();
+  g.arc(x0 + padX + dot, y, dot, 0, Math.PI * 2);
+  g.fillStyle = ok ? UI.ok : UI.bad;
+  g.fill();
+  text(g, label, x0 + padX + dot * 2 + size * 0.3, y + 1, size, ok ? "#BFF0D4" : "#FFD1CE", 600);
+  return w;
 }
 
 export function text(g: CanvasRenderingContext2D, s: string, x: number, y: number, size: number, color = C.ink, weight = 500, align: CanvasTextAlign = "left", font = FONT) {
@@ -193,7 +238,7 @@ export function gridFloor(size: number, color = "#6b7a99", y = 0): THREE.Mesh {
         float l2 = 1.0 - min(min(g2.x, g2.y), 1.0);
         float d = length(cameraPosition.xz - vW.xz);
         float fade = exp(-d*0.045);
-        gl_FragColor = vec4(uColor, (l*0.16 + l2*0.28) * fade); }`,
+        gl_FragColor = vec4(uColor, (l*0.09 + l2*0.16) * fade); }`,
   });
   const m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), mat);
   m.rotation.x = -Math.PI / 2;
@@ -269,13 +314,18 @@ export class Gate {
     this.text0 = t;
     this.label.draw(`${t}|${this.state}`, (g, w, h) => {
       rr(g, 2, 2, w - 4, h - 4, 16);
-      g.fillStyle = this.state === "on" ? "rgba(20,26,22,0.92)" : "rgba(14,17,23,0.85)";
+      g.fillStyle = "rgba(20,24,33,0.9)";
       g.fill();
       g.lineWidth = 3;
       g.strokeStyle = this.state === "off" ? "rgba(255,255,255,0.12)" : "#" + this.color.getHexString();
       g.stroke();
-      text(g, t, w / 2, h / 2 + 1, 34, this.state === "off" ? "rgba(233,234,238,0.45)" : C.ink, 600, "center");
+      text(g, t, w / 2, h / 2 + 1, 34, this.state === "off" ? "rgba(232,234,240,0.45)" : C.ink, 600, "center");
     });
+  }
+
+  /** 岔路门洞只在相关站显示 */
+  show(v: boolean) {
+    this.group.visible = v;
   }
 
   set(state: "idle" | "on" | "off", time = 0) {
@@ -283,9 +333,9 @@ export class Gate {
       this.state = state;
       this.drawLabel(this.text0);
     }
-    const pulse = state === "on" ? 0.5 + 0.5 * Math.sin(time * 5) : 0;
+    const pulse = state === "on" ? 0.5 + 0.5 * Math.sin(time * 3) : 0;
     this.frame.material.opacity = state === "off" ? 0.18 : state === "on" ? 1 : 0.6;
-    this.glow.material.opacity = state === "on" ? 0.18 + 0.2 * pulse : state === "off" ? 0.02 : 0.08;
+    this.glow.material.opacity = state === "on" ? 0.12 + 0.08 * pulse : state === "off" ? 0.02 : 0.06;
     this.label.mesh.material.opacity = state === "off" ? 0.5 : 1;
   }
 
@@ -309,7 +359,7 @@ export function dust(count: number, box: THREE.Box3, color = "#8aa6ff"): THREE.P
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size: 0.05, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false }));
+  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size: 0.04, transparent: true, opacity: 0.14, depthWrite: false, toneMapped: false }));
 }
 
 export function disposeTree(o: THREE.Object3D) {

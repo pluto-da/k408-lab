@@ -86,6 +86,8 @@ export class RideScene {
   /** 观察窗口（相对画布）与其中不被界面覆盖的安全区（相对观察窗口） */
   private vp: Rect = { x: 0, y: 0, w: 1, h: 1 };
   private safe: Rect = { x: 0, y: 0, w: 1, h: 1 };
+  /** 另一种安全区：画面四角浮层之间的竖条（全高）。取景时两种都试，取焦点更大的一种 */
+  private safeAlt: Rect | null = null;
   private compact = false;
   private focus: FocusSpec | null = null;
   private focusIdx = -1;
@@ -348,11 +350,13 @@ export class RideScene {
    * 观察窗口与安全区：渲染只覆盖观察窗口；到站取景把焦点放进安全区（观察窗口里扣掉贴边按钮的部分）。
    * view 相对画布，safe 相对观察窗口，单位 CSS 像素。
    */
-  setLayout(view: Rect, safe: Rect) {
+  setLayout(view: Rect, safe: Rect, alt: Rect | null = null) {
     const same = (a: Rect, b: Rect) => Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5 && Math.abs(a.w - b.w) < 0.5 && Math.abs(a.h - b.h) < 0.5;
-    if (same(view, this.vp) && same(safe, this.safe)) return;
+    const sameAlt = (alt === null && this.safeAlt === null) || (alt !== null && this.safeAlt !== null && same(alt, this.safeAlt));
+    if (same(view, this.vp) && same(safe, this.safe) && sameAlt) return;
     this.vp = { ...view, w: Math.max(1, view.w), h: Math.max(1, view.h) };
     this.safe = { ...safe, w: Math.max(1, safe.w), h: Math.max(1, safe.h) };
+    this.safeAlt = alt && alt.w > 80 && alt.h > 80 ? { ...alt } : null;
     // 小屏：文字板换大字少列的版本
     const compact = this.safe.w < 640 || this.safe.h < 400;
     if (compact !== this.compact) {
@@ -524,7 +528,7 @@ export class RideScene {
    * 到站取景：沿首选方向后退，求出焦点包围盒完整落在安全区（四周留 8%）的最近距离，
    * 再把镜头朝向偏一点，让焦点中心落在安全区中心。只在到站（或窗口尺寸变化）时算一次。
    */
-  private solveFrame(spec: FocusSpec, fov: number, dir: THREE.Vector3) {
+  private solveFrame(spec: FocusSpec, fov: number, dir: THREE.Vector3, S: Rect = this.safe) {
     const cam = this.tmpCam;
     const W = this.vp.w;
     const H = this.vp.h;
@@ -533,7 +537,6 @@ export class RideScene {
     cam.near = 0.05;
     cam.far = 160;
     cam.updateProjectionMatrix();
-    const S = this.safe;
     const mx = S.w * 0.08;
     const my = S.h * 0.08;
     const inner = { x: S.x + mx, y: S.y + my, w: S.w - 2 * mx, h: S.h - 2 * my };
@@ -574,7 +577,7 @@ export class RideScene {
       d = b;
     }
     place(d);
-    return { pos: cam.position.clone(), quat: cam.quaternion.clone(), cam };
+    return { pos: cam.position.clone(), quat: cam.quaternion.clone(), cam, d };
   }
 
   /** 从镜头向焦点包围盒的采样点发射射线，返回被别的物体挡住的采样点比例与遮挡物 */
@@ -627,12 +630,20 @@ export class RideScene {
     // 首选方向；被挡住时依次试：抬高、左移、右移
     const right = new THREE.Vector3().crossVectors(spec.dir, UP).normalize();
     const dirs = [spec.dir, spec.dir.clone().add(new THREE.Vector3(0, -0.32, 0)).normalize(), spec.dir.clone().addScaledVector(right, -0.35).normalize(), spec.dir.clone().addScaledVector(right, 0.35).normalize()];
-    let best: { pos: THREE.Vector3; quat: THREE.Quaternion; frac: number; hits: THREE.Mesh[] } | null = null;
-    for (const d of dirs) {
-      const f = this.solveFrame(spec, fov, d);
-      const o = this.occlusion(spec, f.pos, scene);
-      if (!best || o.frac < best.frac - 1e-6) best = { pos: f.pos, quat: f.quat, frac: o.frac, hits: o.hits };
-      if (o.frac <= 0.1) break;
+    type Cand = { pos: THREE.Vector3; quat: THREE.Quaternion; frac: number; hits: THREE.Mesh[]; d: number };
+    let best: Cand | null = null;
+    for (const S of this.safeAlt ? [this.safe, this.safeAlt] : [this.safe]) {
+      let bestS: Cand | null = null;
+      for (const d of dirs) {
+        const f = this.solveFrame(spec, fov, d, S);
+        const o = this.occlusion(spec, f.pos, scene);
+        if (!bestS || o.frac < bestS.frac - 1e-6) bestS = { pos: f.pos, quat: f.quat, frac: o.frac, hits: o.hits, d: f.d };
+        if (o.frac <= 0.1) break;
+      }
+      // 两种安全区：取离焦点更近（焦点更大）的一种；仍被挡住的方案打折（遮挡物会被淡化，但不如不挡）
+      const c = bestS as Cand;
+      const score = (x: Cand) => x.d * (x.frac > 0.1 ? 1.5 : 1);
+      if (!best || score(c) < score(best) * 0.97) best = c;
     }
     this.frameP.copy(best!.pos);
     this.frameQ.copy(best!.quat);
@@ -686,6 +697,7 @@ export class RideScene {
         e.on = false;
       }
       const camPos = cam.getWorldPosition(new THREE.Vector3());
+      const stopped = !!st && this.curArrived && this.focusIdx === this.cur && !!this.focus;
       const cands: { lab: SceneLabel; pri: number; x: number; y: number }[] = [];
       for (const lab of list) {
         if (lab.hidden || !lab.text || this.view === "map") continue;
@@ -693,7 +705,10 @@ export class RideScene {
         if (d > 30) continue;
         const v = this.toView(cam, lab.pos);
         if (!v) continue;
-        cands.push({ lab, pri: (st && this.labelMatches(lab.tag, st) ? 0 : 100) + d, x: v.x, y: v.y });
+        const match = !!st && this.labelMatches(lab.tag, st);
+        // 到站后只显示与本站焦点相关的标签；飞行途中按远近显示
+        if (stopped && !match) continue;
+        cands.push({ lab, pri: (match ? 0 : 100) + d, x: v.x, y: v.y });
       }
       cands.sort((a, b) => a.pri - b.pri);
       const taken: Rect[] = [];
@@ -962,7 +977,8 @@ export class RideScene {
     // 到站取景：只在停下时算一次，飞行途中沿曲线前进
     const canFrame = this.view === "first" && !pc;
     if (canFrame && arrived) {
-      const key = `${i}|${Math.round(this.vp.w)}x${Math.round(this.vp.h)}|${Math.round(this.safe.x)},${Math.round(this.safe.y)},${Math.round(this.safe.w)},${Math.round(this.safe.h)}|${this.compact}|${st.id}|${this.plan.routeId}`;
+      const a = this.safeAlt;
+      const key = `${i}|${Math.round(this.vp.w)}x${Math.round(this.vp.h)}|${Math.round(this.safe.x)},${Math.round(this.safe.y)},${Math.round(this.safe.w)},${Math.round(this.safe.h)}|${a ? `${Math.round(a.x)},${Math.round(a.w)},${Math.round(a.h)}` : ""}|${this.compact}|${st.id}|${this.plan.routeId}`;
       if (key !== this.focusKey) {
         this.focusKey = key;
         this.frameStation(i, st, vfov);
@@ -1053,8 +1069,12 @@ export class RideScene {
       if (!s.fork) return;
       const passed = this.s > j + 1 + 1e-6 || (j === i && curDone && this.isRevealed(j));
       const chosen = passed ? s.fork.answer : null;
-      if (s.cue.kind === "pt") this.mem.setGates(s.cue.floor, chosen, time);
-      else this.chip.setGates(s.id, chosen, time);
+      // 门洞只在岔路站揭晓之后、以及驶离这一站的途中显示，其余站隐藏
+      const arrivedHere = this.s >= i + 1 - 1e-6;
+      // 内存里的门洞在两侧、不挡视线：岔路站揭晓后即可显示；CPU 里的门洞贴着画面边缘，只在驶离途中显示
+      const show = (j === i - 1 && !arrivedHere) || (s.cue.kind === "pt" && j === i && curDone && this.isRevealed(j));
+      if (s.cue.kind === "pt") this.mem.setGates(s.cue.floor, chosen, time, show);
+      else this.chip.setGates(s.id, chosen, time, show);
     });
   }
 
