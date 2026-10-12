@@ -74,7 +74,8 @@ html.is-pc body { background: #0a0c10; }
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
 }
 .pc-parts button:hover:not(:disabled), .pc-btn:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.3); color: #fff; }
-.pc-parts button.is-on { background: var(--pc-accent); color: var(--pc-accent-ink); border-color: var(--pc-accent); }
+.pc-parts button.is-on { background: var(--pc-accent); color: var(--pc-accent-ink); border-color: var(--pc-accent); transition: none; } /* 选中时底色立即切换，避免渐变途中深字压在深底上 */
+.pc-parts button.is-on:hover:not(:disabled) { color: var(--pc-accent-ink); border-color: var(--pc-accent); }
 .pc-parts button:disabled, .pc-btn:disabled { opacity: 0.45; cursor: default; }
 .pc-btn--back { background: #f4f5f7; color: #0a0c10; border-color: #f4f5f7; }
 .pc-btn--back:hover:not(:disabled) { background: #fff; color: #0a0c10; }
@@ -122,6 +123,7 @@ html.is-pc body { background: #0a0c10; }
 .pc-parts--static button { color: var(--text); background: var(--card); border-color: var(--line-2); -webkit-backdrop-filter: none; backdrop-filter: none; min-height: 44px; }
 .pc-parts--static button.is-on { background: var(--primary-soft); color: var(--primary-ink); border-color: var(--primary); }
 .pc-panel--static { position: static; width: auto; background: #16191f; }
+.pc-copy { margin: 18px 0 0; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px; color: rgba(240, 241, 244, 0.62); }
 
 @media (max-width: 1023.98px) {
   .pc-parts { max-width: none; right: 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; bottom: 12px; }
@@ -281,7 +283,7 @@ html.is-pc body { background: #0a0c10; }
   .pc-explode input { width: 96px; }
   .pc-rgb { top: 56px; left: auto; right: calc(12px + env(safe-area-inset-right, 0px)); max-width: calc(100% - 24px); flex-wrap: nowrap; overflow-x: auto; }
   .pc-panel--sheet { left: auto; right: calc(10px + env(safe-area-inset-right, 0px)); top: 54px; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); width: min(320px, 44vw); max-height: none; }
-  .pc-journey { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 10px 14px; width: min(560px, calc(100% - 24px)); }
+  .pc-journey { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; width: min(560px, calc(100% - 20px)); }
   .pc-journey p { font-size: 13px; line-height: 1.5; }
   .pc-journey__nav { margin-top: 6px; }
   .pc-dhud { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
@@ -293,14 +295,15 @@ html.is-pc body { background: #0a0c10; }
 /* 触控设备：按钮、开关、链接点击区域 ≥ 44px */
 @media (pointer: coarse) {
   .pc-parts button, .pc-btn, .pc-switch, .pc-explode { min-height: 44px; }
-  .pc-seg button { min-height: 40px; }
+  .pc-seg button { min-height: 44px; }
   .pc-switch input { width: 18px; height: 18px; }
-  .pc-rgb button { min-height: 40px; min-width: 40px; }
+  .pc-rgb button { min-height: 44px; min-width: 44px; }
   .pc-rgb .pc-sw { width: 40px; height: 40px; border-width: 3px; background-clip: content-box; padding: 6px; }
   .pc-chapters a { min-height: 44px; }
   .pc-journey__nav .pc-btn { min-height: 44px; }
-  .pc-journey__dots { gap: 2px; }
-  .pc-journey__dots button { flex: 1 1 0; max-width: 48px; height: 40px; background: transparent; position: relative; }
+  /* 每个点的点击区不小于 44 × 44：窄屏放不下一行时换行，不压缩 */
+  .pc-journey__dots { gap: 0; flex-wrap: wrap; }
+  .pc-journey__dots button { flex: 1 0 44px; min-width: 44px; max-width: 48px; height: 44px; background: transparent; position: relative; }
   .pc-journey__dots button::before { content: ""; position: absolute; left: 3px; right: 3px; top: 18px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); transition: background 0.3s; }
   .pc-journey__dots button.is-done::before { background: rgba(255, 255, 255, 0.45); }
   .pc-journey__dots button.is-on::before { background: var(--pc-accent); }

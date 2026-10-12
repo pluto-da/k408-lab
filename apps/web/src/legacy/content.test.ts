@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
  * - 讲解文字里不再出现栏目式归纳（“结论一”）、口诀、“教材 / 课本”这类对照某本书的说法；
  * - 默认数据换成本站自拟后，银行家算法默认状态的安全序列与手算一致。
  */
-const DIR = resolve(__dirname, "../../public/legacy/js");
+const DIR = resolve(__dirname, "../../legacy-src/js");
 const files = readdirSync(DIR).filter((f) => f.endsWith(".js"));
 const src = (f: string) => readFileSync(resolve(DIR, f), "utf8");
 

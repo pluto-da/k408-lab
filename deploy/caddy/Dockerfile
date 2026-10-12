@@ -1,5 +1,13 @@
 # 构建上下文为仓库根目录：docker build -f deploy/caddy/Dockerfile .
-# 第一阶段构建前端静态文件，第二阶段由 Caddy 托管并反向代理 /api
+# 第一阶段编译带频率限制插件的 Caddy；第二阶段构建前端静态文件；第三阶段由 Caddy 托管并反向代理 /api
+
+# ---- 1. 自定义 Caddy（caddy-ratelimit 插件）。国内服务器可设 GOPROXY=https://goproxy.cn,direct
+FROM caddy:2-builder-alpine AS caddy-build
+ARG GOPROXY=https://proxy.golang.org,direct
+ENV GOPROXY=$GOPROXY
+RUN xcaddy build --with github.com/mholt/caddy-ratelimit
+
+# ---- 2. 前端
 FROM node:20-bookworm-slim AS web
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 ARG NPM_REGISTRY=https://registry.npmjs.org/
@@ -22,8 +30,19 @@ ENV VITE_ICP_BEIAN=$VITE_ICP_BEIAN
 # 运营者联系邮箱，显示在用户协议与隐私政策中
 ARG VITE_CONTACT_EMAIL=
 ENV VITE_CONTACT_EMAIL=$VITE_CONTACT_EMAIL
-RUN pnpm --filter @k408/web build
+# 混淆旧版模块需要较多内存（约 1 GB）
+ENV NODE_OPTIONS=--max-old-space-size=1536
+RUN pnpm --filter @k408/web build \
+  && test -z "$(find apps/web/dist -name '*.map')" \
+  && test ! -e apps/web/dist/legacy/manifest.json
 
+# ---- 3. 运行：非 root 用户（uid 10001），配置在构建时校验
 FROM caddy:2-alpine
+COPY --from=caddy-build /usr/bin/caddy /usr/bin/caddy
 COPY deploy/caddy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=web /app/apps/web/dist /srv
+RUN caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile \
+  && addgroup -S -g 10001 web && adduser -S -D -H -u 10001 -G web web \
+  && mkdir -p /data/caddy /data/logs /config/caddy \
+  && chown -R 10001:10001 /data /config
+USER 10001:10001

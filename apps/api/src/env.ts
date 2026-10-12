@@ -18,6 +18,8 @@ const schema = z.object({
   /** 每 IP 每分钟的登录/注册次数。单账号另有“连错 10 次锁 15 分钟”，这里放宽以免宿舍/校园网共用出口 IP 时误伤 */
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
   AUTH_RATE_LIMIT_WINDOW: z.string().default("1 minute"),
+  /** 每 IP 每小时最多注册几个账号（防批量注册；宿舍共用出口 IP 时一小时内一般不会超过） */
+  REGISTER_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 
@@ -32,6 +34,7 @@ export type Env = {
   trustProxy: boolean;
   AUTH_RATE_LIMIT_MAX: number;
   AUTH_RATE_LIMIT_WINDOW: string;
+  REGISTER_RATE_LIMIT_MAX: number;
   LOG_LEVEL: "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "silent";
 };
 
@@ -57,6 +60,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     trustProxy: e.TRUST_PROXY ?? e.NODE_ENV === "production",
     AUTH_RATE_LIMIT_MAX: e.AUTH_RATE_LIMIT_MAX,
     AUTH_RATE_LIMIT_WINDOW: e.AUTH_RATE_LIMIT_WINDOW,
+    REGISTER_RATE_LIMIT_MAX: e.REGISTER_RATE_LIMIT_MAX,
     LOG_LEVEL: e.LOG_LEVEL,
   };
 }

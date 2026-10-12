@@ -11,6 +11,7 @@
  * 词表以 Unicode 转义书写，这样本脚本自身不会出现敏感词原文。
  */
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
+import { inflateRawSync } from "node:zlib";
 import { join, relative, resolve, extname, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,7 +32,7 @@ const RULES = [
   ["教材对照类说法", new RegExp(u("\u6559\u6750(?:\u53e3\u5f84|\u5199\u6cd5|\u753b\u6cd5|\u4f8b\u9898|\u4f8b|\u5e8f\u5217|\u811a\u672c|\u7ed9\u51fa\u7684)"))],
 ];
 
-const SRC_TARGETS = ["apps/web/public", "apps/web/src", "apps/web/index.html", "apps/api/src", "packages"];
+const SRC_TARGETS = ["apps/web/public", "apps/web/legacy-src", "apps/web/src", "apps/web/index.html", "apps/api/src", "packages"];
 const SKIP_DIRS = new Set(["node_modules", ".git", ".turbo", "coverage"]);
 const TEXT_EXT = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".htm", ".css", ".json", ".md", ".txt", ".svg", ".xml", ".webmanifest", ".map", ".yml", ".yaml", ".sql"]);
 
@@ -51,11 +52,59 @@ const explicit = args.filter((a) => !a.startsWith("--"));
 const targets = explicit.length ? explicit.map((p) => resolve(p)) : SRC_TARGETS.map((p) => join(ROOT, p));
 if (!explicit.length && withDist) targets.push(join(ROOT, "apps/web/dist"));
 
-let hits = 0, files = 0;
+/*
+ * 构建产物里的文字不是明文：
+ *  - 旧版模块的文字表（.bin）：按清单里的密钥解码后再扫描；
+ *  - 混淆分块的字符串数组（变体 base64，小写字母在前）：逐个解码后附在文件内容后面一起扫描。
+ */
+const B64_STD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+const B64_OBF = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=";
+function decodeObfStrings(code) {
+  const out = [];
+  for (const m of code.matchAll(/'([A-Za-z0-9+/=]{4,})'/g)) {
+    const std = [...m[1]].map((c) => B64_STD[B64_OBF.indexOf(c)]).join("");
+    const t = Buffer.from(std, "base64").toString("utf8");
+    if (/[\u4e00-\u9fff]|[a-z]{3}/i.test(t) && !t.includes("\ufffd")) out.push(t);
+  }
+  return out;
+}
+function decodeTextTables(dir) {
+  const out = [];
+  for (const f of walk(dir)) {
+    if (extname(f) !== ".json") continue;
+    let m;
+    try { m = JSON.parse(readFileSync(f, "utf8")); } catch { continue; }
+    if (!m || !m.text || !m.text.f || !m.text.k) continue;
+    const bin = join(dirname(f), m.text.f);
+    if (!existsSync(bin)) continue;
+    const key = Buffer.from(m.text.k, "base64");
+    const enc = readFileSync(bin);
+    const dec = Buffer.alloc(enc.length);
+    for (let i = 0; i < enc.length; i++) dec[i] = enc[i] ^ key[i % key.length] ^ ((i * 31) & 0xff);
+    out.push({ f: bin, text: JSON.parse(inflateRawSync(dec).toString("utf8")).join("\n") });
+  }
+  return out;
+}
+
+let hits = 0, files = 0, decoded = 0;
+const scanText = (f, text) => {
+    const lines = text.split(/\r?\n/);
+    lines.forEach((line, i) => {
+      for (const [name, re] of RULES) {
+        const m = line.match(re);
+        if (!m) continue;
+        hits++;
+        const at = Math.max(0, (m.index ?? 0) - 30);
+        console.log(`${relative(ROOT, f)}:${i + 1}  [${name}]  …${line.slice(at, at + 90).trim()}…`);
+      }
+    });
+};
 for (const t of targets) {
+  if (existsSync(t) && statSync(t).isDirectory()) for (const d of decodeTextTables(t)) { files++; decoded++; scanText(d.f + "（解码）", d.text); }
   for (const f of walk(t)) {
     if (!TEXT_EXT.has(extname(f).toLowerCase())) continue;
     files++;
+    if (extname(f) === ".js") { const ds = decodeObfStrings(readFileSync(f, "utf8")); if (ds.length) { decoded++; scanText(f + "（字符串数组解码）", ds.join("\n")); } }
     const lines = readFileSync(f, "utf8").split(/\r?\n/);
     lines.forEach((line, i) => {
       for (const [name, re] of RULES) {
@@ -68,5 +117,5 @@ for (const t of targets) {
     });
   }
 }
-console.log(`\ncheck-sources：扫描 ${files} 个文件，命中 ${hits} 处。`);
+console.log(`\ncheck-sources：扫描 ${files} 个文件（其中 ${decoded} 个解码后扫描），命中 ${hits} 处。`);
 process.exit(hits ? 1 : 0);

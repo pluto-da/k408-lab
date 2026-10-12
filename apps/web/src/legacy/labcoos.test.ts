@@ -33,7 +33,7 @@ interface LabU {
 interface Lab { id: string; color: string; name: string; mount: unknown }
 
 function load() {
-  const file = resolve(__dirname, "../../public/legacy/js/16-lab-coos.js");
+  const file = resolve(__dirname, "../../legacy-src/js/16-lab-coos.js");
   const win: Record<string, unknown> = { LAB: [] };
   const ctx: Record<string, unknown> = { window: win, Error, Object, Array, JSON, Math, Number, String, parseInt, parseFloat, isNaN, isFinite };
   win.X = { reduced: true };

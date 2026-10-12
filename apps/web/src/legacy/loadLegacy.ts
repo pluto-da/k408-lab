@@ -1,8 +1,9 @@
 /**
  * 实验室旧模块（章节考点、39 个实验、36 个过程图解、56 条性质、立体结构图、流程演示、跨科连线）以“遗留模块”方式挂载：
- * public/legacy/ 下的 body.html + 原样脚本：脚本并行下载、按原页面顺序执行（async=false）。
+ * 源码在 legacy-src/（body.html + 脚本 + 样式）。生产构建由 build/protect.ts 合并、压缩、混淆，文件名与清单名都是内容哈希，
+ * 中文文字抽成一个编码后的文字表；开发环境直接读源码目录。脚本并行下载、按顺序执行（async=false）。
  * 首屏只加载章节与实验脚本；立体结构图（3D 库 + 主板模型）与跨科连线立体图分组按需加载，
- * 由旧模块通过 window.__LEGACY_LOAD__(组名) 触发（见 public/legacy/js/09-tool.js）。
+ * 由旧模块通过 window.__LEGACY_LOAD__(组名) 触发（见 legacy-src/js/09-tool.js）。
  * 脚本只能执行一次，所以离开 /lab 时整页刷新（见 pages/Lab.tsx）。
  */
 interface LazyGroup {
@@ -17,7 +18,42 @@ interface LazyGroup {
 interface Manifest {
   css: string[];
   scripts: string[];
+  /** 页面骨架（构建后为哈希文件名；开发环境缺省为 body.html） */
+  body?: string;
+  /** 编码后的文字表：f 文件名，k 密钥（base64） */
+  text?: { f: string; k: string };
   lazy?: Record<string, LazyGroup>;
+}
+
+/** 组名 → 清单里的键；与 build/protect.ts 的 groupKey 同一算法（开发环境清单直接用原名） */
+function groupKey(name: string): string {
+  let x = 0x811c9dc5;
+  for (let i = 0; i < name.length; i++) {
+    x ^= name.charCodeAt(i);
+    x = Math.imul(x, 0x01000193) >>> 0;
+  }
+  return "g" + x.toString(36);
+}
+
+/** deflate 解压：浏览器自带 DecompressionStream 时用它，旧浏览器按需加载一个小解压库 */
+async function inflate(b: Uint8Array): Promise<Uint8Array> {
+  if (typeof DecompressionStream === "function") {
+    const s = new Blob([b]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Uint8Array(await new Response(s).arrayBuffer());
+  }
+  const { inflateSync } = await import("fflate");
+  return inflateSync(b);
+}
+
+/** 下载文字表并解码，供旧模块通过 _$t(i) 取用 */
+async function loadText(t: { f: string; k: string }): Promise<void> {
+  const r = await fetchOk(v(t.f));
+  const enc = new Uint8Array(await r.arrayBuffer());
+  const key = Uint8Array.from(atob(t.k), (c) => c.charCodeAt(0));
+  const out = new Uint8Array(enc.length);
+  for (let i = 0; i < enc.length; i++) out[i] = enc[i]! ^ key[i % key.length]! ^ ((i * 31) & 0xff);
+  const table = JSON.parse(new TextDecoder().decode(await inflate(out))) as string[];
+  Object.defineProperty(window, "_$t", { value: (i: number) => table[i], configurable: false, enumerable: false, writable: false });
 }
 
 const BASE = "/legacy/";
@@ -121,16 +157,16 @@ async function fetchOk(url: string): Promise<Response> {
 const lazyDone = new Map<string, Promise<void>>();
 
 /** 按需加载一组脚本（含依赖组与模型）；同一组只加载一次 */
-function loadGroup(manifest: Manifest, name: string, onProgress?: (f: number) => void): Promise<void> {
+function loadGroup(manifest: Manifest, name: string, onProgress?: (f: number) => void, isKey = false): Promise<void> {
   const hit = lazyDone.get(name);
   if (hit) return hit;
-  const g = manifest.lazy?.[name];
+  const g = isKey ? manifest.lazy?.[name] : (manifest.lazy?.[groupKey(name)] ?? manifest.lazy?.[name]);
   if (!g) return Promise.reject(new Error(`未知的模块组：${name}`));
   const p = (async () => {
     // 依赖组与本组的模型、脚本同时下载，执行仍按顺序
     g.scripts.forEach(preloadScript);
     const glbP = g.glb ? fetchGlb(v(g.glb), g.glbBytes, (f) => onProgress?.(0.85 * f)) : Promise.resolve(null);
-    for (const dep of g.needs ?? []) await loadGroup(manifest, dep);
+    for (const dep of g.needs ?? []) await loadGroup(manifest, dep, undefined, true);
     if (g.glb) window.MB_GLB_BUF = await glbP;
     onProgress?.(0.85);
     const total = g.scripts.length;
@@ -156,9 +192,9 @@ export async function bootLegacy(container: HTMLElement, onProgress?: (p: number
     onProgress?.(p);
   };
   try {
-    manifest = (await fetchOk(v("manifest.json")).then((r) => r.json())) as Manifest;
+    manifest = (await fetchOk(v(__LEGACY_MANIFEST__)).then((r) => r.json())) as Manifest;
     manifest.scripts.forEach(preloadScript);
-    [html] = await Promise.all([fetchOk(v("body.html")).then((r) => r.text()), ...manifest.css.map(loadCss)]);
+    [html] = await Promise.all([fetchOk(v(manifest.body ?? "body.html")).then((r) => r.text()), manifest.text ? loadText(manifest.text) : Promise.resolve(), ...manifest.css.map(loadCss)]);
   } catch (e) {
     // 还没执行任何旧脚本：允许重试
     bootedInto = null;

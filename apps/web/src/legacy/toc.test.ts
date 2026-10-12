@@ -29,7 +29,7 @@ type Win = Window & {
   X_OPEN_CHAPTER?: (c: string, i: number) => boolean;
 };
 
-const LEGACY = resolve(__dirname, "../../public/legacy");
+const LEGACY = resolve(__dirname, "../../legacy-src");
 const SRC = readFileSync(resolve(LEGACY, "js/29-toc.js"), "utf8");
 const BODY = readFileSync(resolve(LEGACY, "body.html"), "utf8");
 

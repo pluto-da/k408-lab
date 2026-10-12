@@ -23,3 +23,9 @@ onlyBuiltDependencies:
   - embedded-postgres
   - "@embedded-postgres/linux-x64"
   - "@embedded-postgres/linux-arm64"
+
+# 全仓统一 vite 版本（vitest 默认会解析到旧的 vite 5）
+overrides:
+  vite: "^6.4.4"
+  # 测试运行器依赖的线程池（开发依赖）修复高危漏洞
+  tinypool: "^2.1.2"

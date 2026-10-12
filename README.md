@@ -23,7 +23,7 @@
 │   │   ├── test/             # 接口集成测试（vitest + 真实 PostgreSQL）
 │   │   └── Dockerfile
 │   └── web/                  # React 前端
-│       ├── public/legacy/    # 旧版实验室模块（原样拆分的脚本、样式、主板模型）
+│       ├── legacy-src/    # 旧版实验室模块（原样拆分的脚本、样式、主板模型）
 │       ├── public/fonts/     # 本地字体 Geist / Geist Mono
 │       └── src/              # 页面、事件桥接、遗留模块加载器
 ├── packages/shared/          # 前后端共用的目录数据与 zod 校验
@@ -43,7 +43,7 @@
 
 ### 旧版实验室如何接入
 
-v1 不重写 3D 和实验。原单页里的内联脚本和样式被拆成 `apps/web/public/legacy/` 下的独立文件，
+v1 不重写 3D 和实验。原单页里的内联脚本和样式被拆成 `apps/web/legacy-src/` 下的独立文件，
 `/lab` 页面（`src/pages/Lab.tsx`）把 `body.html` 注入容器后按原顺序串行加载脚本，行为与原页面一致。
 主板模型改为直接加载 `legacy/assets/motherboard.glb`（不再用 base64 数据文件）。
 

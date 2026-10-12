@@ -18,7 +18,7 @@
   --x-toc-bg: var(--x-bg);   /* 顶栏吸顶时的底色（侧栏 = 页面底色，面板 = 白） */
 }
 @media (pointer: coarse) {
-  :root { --x-toc-row: 44px; --x-toc-row-2: 44px; --x-toc-row-3: 44px; --x-toc-bar-h: 40px; }
+  :root { --x-toc-row: 44px; --x-toc-row-2: 44px; --x-toc-row-3: 44px; --x-toc-bar-h: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   :root { --x-toc-dur: 0ms; }
@@ -194,4 +194,13 @@
 /* 横屏手机：目录面板贴近屏幕顶部，收起状态一屏放下 */
 @media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
   .x-toc.x-toc--grp { top: 8px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); }
+}
+
+/* ---------- 触控设备：所有可点控件的点击区域 ≥ 44 × 44 ---------- */
+@media (pointer: coarse) {
+  .x-toc { --x-toc-bar-h: 44px; }
+  .x-toc__jump { width: 44px; height: 44px; }
+  .x-toc__q, .x-toc__all, .x-toc__clr { height: 44px; }
+  .x-toc__all, .x-toc__clr { min-width: 44px; }
+  .x-chips a, .x-chips button, .x-tool button, .x-tool a, .x-proc__tab, .x-prop__sub, .x-prop__item, .x-pq__btn, .x-toc__labs a, .x-lab__btn, .x-setbtn { min-height: 44px; }
 }

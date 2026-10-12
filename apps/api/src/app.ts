@@ -35,6 +35,8 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     global: true,
     max: 300,
     timeWindow: "1 minute",
+    // 安全事件：限流触发时记一条日志（只记 IP 与路径，不记请求体）
+    onExceeded: (req) => req.log.warn({ evt: "rate_limited", ip: req.ip, url: req.url.split("?")[0] }, "限流触发"),
     errorResponseBuilder: (_req, ctx) => ({
       statusCode: ctx.statusCode,
       error: { code: "RATE_LIMITED", message: `操作太频繁，请 ${Math.ceil(ctx.ttl / 1000)} 秒后再试` },
@@ -73,7 +75,8 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
       const first = err.issues[0];
       const field = first?.path.join(".");
       return reply.code(400).send({
-        error: { code: "VALIDATION", message: first ? `${field ? field + "：" : ""}${first.message}` : "参数错误", issues: err.issues },
+        // 只返回第一条可读的提示，不回传校验库的内部结构
+        error: { code: "VALIDATION", message: first ? `${field ? field + "：" : ""}${first.message}` : "参数错误" },
       });
     }
     const e = err as { statusCode?: number; message?: string };
@@ -90,7 +93,7 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
   await app.register(
     async (api) => {
       await api.register(healthRoutes);
-      await api.register(authRoutes, { prefix: "/auth", rateMax: env.AUTH_RATE_LIMIT_MAX, rateWindow: env.AUTH_RATE_LIMIT_WINDOW });
+      await api.register(authRoutes, { prefix: "/auth", rateMax: env.AUTH_RATE_LIMIT_MAX, rateWindow: env.AUTH_RATE_LIMIT_WINDOW, registerMax: env.REGISTER_RATE_LIMIT_MAX });
       await api.register(meRoutes);
     },
     { prefix: "/api" },

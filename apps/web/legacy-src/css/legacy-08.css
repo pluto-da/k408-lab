@@ -26,7 +26,7 @@
   display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 6px;
   border: 1px solid var(--x-line-2); border-radius: 4px; background: #fff; font: 700 14px/1 var(--x-mono); color: var(--x-ink);
 }
-.x-d2-cell.is-top { background: var(--x-ds); border-color: var(--x-ds); color: #fff; }
+.x-d2-cell.is-top { background: #367a6c; border-color: #367a6c; color: #fff; }
 .x-d2-empty { font: 400 13px/30px var(--x-head); color: var(--x-ink-2); }
 .x-d2-edge {
   display: inline-flex; align-items: baseline; gap: 4px; padding: 5px 7px; border: 1px solid var(--x-line-2); border-radius: 4px;

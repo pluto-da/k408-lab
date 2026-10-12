@@ -432,6 +432,7 @@ export default function PcPage() {
               </ul>
             </>
           )}
+          <p className="pc-copy">© 2026 考研408动画实验室 保留所有权利</p>
         </aside>
       )}
     </div>

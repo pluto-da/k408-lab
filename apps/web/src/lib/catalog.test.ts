@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { COMMON_LABS, LAB_COUNT, LABS_BY_SUBJECT, PROC_COUNT, PROP_COUNT } from "./catalog";
 
 /** 从旧模块源码里把实验、图解、性质重新数一遍，防止首页文案和实际内容脱节 */
-const DIR = resolve(__dirname, "../../public/legacy/js");
+const DIR = resolve(__dirname, "../../legacy-src/js");
 const files = readdirSync(DIR).filter((f) => f.endsWith(".js"));
 const read = (re: RegExp) => files.filter((f) => re.test(f)).map((f) => readFileSync(resolve(DIR, f), "utf8"));
 

@@ -1,8 +1,19 @@
 # SITE_ADDRESS 由 docker-compose 传入：
 #   设置了 DOMAIN（如 k408.example.com）→ Caddy 自动申请并续期 HTTPS 证书（需 80/443 端口可达、DNS 已指向本机）
 #   未设置 DOMAIN → 退化为 ":80"，用服务器 IP 走 http 访问
+# 本镜像带 caddy-ratelimit 插件（见 Dockerfile），用于静态资源防整站下载的频率限制。
 {
 	admin off
+	order rate_limit before basic_auth
+}
+
+(guard) {
+	@grabber header_regexp User-Agent (?i)(httrack|wget|curl|python-requests|python-urllib|aiohttp|httpx|scrapy|go-http-client|java/|okhttp|libwww-perl|lwp-|webcopier|webzip|webripper|teleport|offline explorer|sitesucker|webcopy|website downloader|axel|aria2|node-fetch|undici|headlesschrome|phantomjs)
+	@noua not header User-Agent *
+	@hotlink expression `{http.request.header.Referer} != "" && !{http.request.header.Referer}.matches("^https?://" + {http.request.host} + "(:[0-9]+)?(/|$)")`
+	error @grabber 403
+	error @noua 403
+	error @hotlink 403
 }
 
 {$SITE_ADDRESS::80} {
@@ -20,7 +31,6 @@
 			header Content-Type image/x-icon*
 			header Content-Type application/wasm*
 			header Content-Type model/gltf-binary*
-			header Content-Type application/octet-stream*
 		}
 	}
 
@@ -30,26 +40,72 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
 		Cross-Origin-Opener-Policy "same-origin"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob:; worker-src 'self' blob:; manifest-src 'self'; media-src 'self'; object-src 'none'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
 		-Server
 	}
 
+	# ---------------------------------------------------------------- 防整站下载
+	# 受保护的静态资源（旧版实验室模块、构建产物）在各自的 handle 里先 import guard：
+	# 1. 常见整站下载工具与脚本库的默认 User-Agent、空 User-Agent → 403（页面本身照常返回）
+	# 2. 防盗链：Referer 来自其他站点 → 403（空 Referer 放行：收藏夹、微信内置浏览器、直接打开不受影响）
+	# 3. 频率限制（按客户端 IP，滑动窗口 1 分钟）。阈值约为一次完整浏览全站请求数的 5 倍，
+	#    兼顾宿舍、学校等多人共用一个出口 IP 的情况；超出返回 429 和中文提示
+	rate_limit {
+		zone legacy {
+			match {
+				path /legacy/*
+			}
+			key {remote_host}
+			events 120
+			window 1m
+		}
+		zone models {
+			match {
+				path *.glb
+			}
+			key {remote_host}
+			events 150
+			window 1m
+		}
+		zone assets {
+			match {
+				path /assets/*
+			}
+			key {remote_host}
+			events 1200
+			window 1m
+		}
+	}
+
 	handle /api/* {
+		header Cache-Control "no-store"
 		reverse_proxy api:3000
 	}
 
 	# 带哈希的构建产物：长期缓存；不存在时返回 404（不回落到 index.html）
 	handle /assets/* {
+		import guard
 		root * /srv
 		header Cache-Control "public, max-age=31536000, immutable"
+		header Cross-Origin-Resource-Policy "same-origin"
 		file_server
 	}
 
-	# 旧版实验室模块、字体、图标与 PWA 清单（旧模块通过 ?v=构建号 刷新）；不存在时返回真 404
-	@static path /legacy/* /fonts/* /icons/* /favicon.svg /favicon.ico /apple-touch-icon.png /manifest.webmanifest
+	# 旧版实验室模块（文件名为内容哈希，通过 ?v=构建号 刷新）
+	handle /legacy/* {
+		import guard
+		root * /srv
+		header Cache-Control "public, max-age=86400"
+		header Cross-Origin-Resource-Policy "same-origin"
+		file_server
+	}
+
+	# 字体、图标与 PWA 清单；不存在时返回真 404
+	@static path /fonts/* /icons/* /favicon.svg /favicon.ico /apple-touch-icon.png /manifest.webmanifest
 	handle @static {
 		root * /srv
 		header Cache-Control "public, max-age=86400"
+		header Cross-Origin-Resource-Policy "same-origin"
 		# Caddy 不认识 .webmanifest 扩展名，补上标准类型（配合 nosniff）
 		header /manifest.webmanifest Content-Type "application/manifest+json; charset=utf-8"
 		file_server
@@ -82,8 +138,33 @@
 		}
 	}
 
+	# 被拒绝 / 被限流时的中文提示（其余错误码照常由 Caddy 返回）
+	handle_errors {
+		@denied expression {err.status_code} == 403
+		@limited expression {err.status_code} == 429
+		header Content-Type "text/plain; charset=utf-8"
+		header Cache-Control "no-store"
+		handle @denied {
+			respond "禁止访问" 403
+		}
+		handle @limited {
+			header Retry-After "60"
+			respond "访问太频繁了，请稍等一分钟再试。" 429
+		}
+	}
+
+	# 访问日志：写入数据卷，按大小轮转，保留 30 天；不记录 Cookie、Authorization、Set-Cookie
 	log {
-		output stdout
-		format console
+		output file /data/logs/access.log {
+			roll_size 10MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+		format filter {
+			wrap json
+			request>headers>Cookie delete
+			request>headers>Authorization delete
+			resp_headers>Set-Cookie delete
+		}
 	}
 }

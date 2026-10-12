@@ -14,7 +14,8 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "check:sources": "node scripts/check-sources.mjs --dist",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:sources",
+    "audit:ui": "pnpm --filter @k408/web audit:ui",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:sources && pnpm audit:ui",
     "db:migrate": "pnpm --filter @k408/api db:migrate"
   },
   "devDependencies": {

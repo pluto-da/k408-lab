@@ -43,7 +43,7 @@ interface Demo { step(): boolean; reset(): void; done(): boolean }
 interface KObj { opts: HTMLElement; stage: HTMLElement; out: HTMLElement; restart: () => void }
 interface Lab { id: string; name: string; color: string; note: string; mount: (panel: HTMLElement, K: KObj) => Demo }
 
-const SRC = readFileSync(resolve(__dirname, "../../public/legacy/js/19-lab-ds1.js"), "utf8");
+const SRC = readFileSync(resolve(__dirname, "../../legacy-src/js/19-lab-ds1.js"), "utf8");
 
 function load(withDom: boolean) {
   const win: Record<string, unknown> = { LAB: [] };

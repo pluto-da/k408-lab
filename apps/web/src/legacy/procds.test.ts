@@ -22,7 +22,7 @@ interface DSU {
 }
 
 function load(): { PROC: Proc[]; DS: DSU } {
-  const dir = resolve(__dirname, "../../public/legacy/js");
+  const dir = resolve(__dirname, "../../legacy-src/js");
   const win: Record<string, unknown> = { __LEGACY_LOADER__: true, addEventListener: () => undefined };
   const ctx: Record<string, unknown> = { window: win, document: { readyState: "complete" }, setTimeout, Math, Number, String, parseInt, isNaN, Error, Object, Array, JSON, Infinity, Boolean, RegExp };
   win.X = { reduced: true };

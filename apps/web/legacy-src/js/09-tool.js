@@ -35,6 +35,10 @@
           if (toc.classList.contains("is-open") && !toc.contains(e.target) && !tocBtn.contains(e.target)) setToc(false);
         });
         toc.addEventListener("click", function (e) {
+          if (e.target === toc) { /* 点在面板外的遮罩上 */
+            var r = toc.getBoundingClientRect();
+            if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { setToc(false); return; }
+          }
           var a = e.target.closest("a"); if (!a) return;
           var lab = a.getAttribute("data-lab");
           if (lab && window.X_OPEN_LAB) { e.preventDefault(); window.X_OPEN_LAB(lab); }

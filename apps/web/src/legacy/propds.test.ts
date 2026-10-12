@@ -55,7 +55,7 @@ interface Prop {
   demo: (box: HTMLElement) => { destroy: () => void };
 }
 
-const DIR = resolve(__dirname, "../../public/legacy/js");
+const DIR = resolve(__dirname, "../../legacy-src/js");
 
 function load(): { PROP: Prop[]; DS: DSU } {
   const win: Record<string, unknown> = { __LEGACY_LOADER__: true, addEventListener: () => undefined };

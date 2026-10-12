@@ -283,6 +283,42 @@ export default function RideMode({ engine, route, onExit }: Props) {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     setWhatOpen(false);
   }, [idx]);
+  // 讲解区：只有下方还有内容时才显示底部渐隐；结论卡片出现而未完整可见时，自动滚到结论卡片
+  useLayoutEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const upd = () => sc.classList.toggle("is-more", sc.scrollHeight - sc.clientHeight - sc.scrollTop > 2);
+    upd();
+    sc.addEventListener("scroll", upd, { passive: true });
+    const ro = new ResizeObserver(upd);
+    ro.observe(sc);
+    Array.from(sc.children).forEach((c) => ro.observe(c));
+    return () => {
+      sc.removeEventListener("scroll", upd);
+      ro.disconnect();
+    };
+  });
+  const concludeNow = !!st?.result && arrived && phase === "ride" && (judge ? !!answers[idx] || !st.fork : cueDone.has(idx));
+  useLayoutEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc || !concludeNow) return;
+    const card = sc.querySelector<HTMLElement>(".rd-concl");
+    if (!card) return;
+    // 卡片刚出现时带 translateY 入场动画：量位置时扣掉当前的位移，按最终位置滚动
+    const tf = getComputedStyle(card).transform;
+    const dy = tf && tf !== "none" ? new DOMMatrixReadOnly(tf).m42 : 0;
+    const r0 = card.getBoundingClientRect();
+    const r = { top: r0.top - dy, bottom: r0.bottom - dy };
+    const b = sc.getBoundingClientRect();
+    const pad = 4;
+    if (r.bottom > b.bottom - pad || r.top < b.top) {
+      const fade = parseFloat(getComputedStyle(sc).getPropertyValue("--rd-fade")) || 28;
+      const top = sc.scrollTop + (r.bottom - (b.bottom - pad)) + fade + 8;
+      const lim = sc.scrollTop + (r.top - b.top) - pad;
+      sc.scrollTo({ top: Math.max(0, Math.min(top, lim)), behavior: cfgRef.current.reduced ? "auto" : "smooth" });
+    }
+  }, [concludeNow, idx, layout, drawer]);
+
   // 讲解区内容少、下方留出超过 40 像素的空白时，把「展开看」直接展开，填上有用的内容
   useLayoutEffect(() => {
     const sc = scrollRef.current;
@@ -319,7 +355,7 @@ export default function RideMode({ engine, route, onExit }: Props) {
         setParams(p);
         void startRide(p, false);
       },
-      stations: () => planRef.current.stations.map((s) => ({ id: s.id, title: s.title, kind: s.cue.kind, stop: s.stop })),
+      stations: () => planRef.current.stations.map((s) => ({ id: s.id, title: s.title, kind: s.cue.kind, stop: s.stop, result: !!s.result })),
     };
     return () => {
       delete w.__ride;
@@ -531,6 +567,13 @@ export default function RideMode({ engine, route, onExit }: Props) {
   const nextLabel = arrived && idx === N - 1 ? "看小结" : arrived ? "下一站" : "到站";
   const note = shellNote(st, arrived);
   const vis = stationVisual(st, arrived, showResult);
+  // 自动判断模式：结论卡片出现后，岔路的“判断结果”并入结论卡片（只留另一条通道的去向），操作区不再重复一张卡片
+  const forkAlt = (() => {
+    const f = st?.fork;
+    if (!f) return null;
+    const other = f.options.find((o) => o.id !== f.answer);
+    return other ? `若${/^[A-Za-z]/.test(other.label) ? " " : ""}${other.label.replace(" → ", "：")}` : null;
+  })();
   const viewName = VIEWS.find((v) => v.id === view)!.label;
   const openPanel = (p: Panel) => {
     setMenu(null);
@@ -651,6 +694,8 @@ export default function RideMode({ engine, route, onExit }: Props) {
   const steps = (
     <div
       className="rd-steps"
+      // 进度条是辅助的跳站入口，夹在站名与讲解之间放不下 44 像素高的点击区；同样的操作由“上一站 / 下一站”按钮（≥ 44 像素）提供
+      data-touch-alt="1"
       role="slider"
       tabIndex={0}
       aria-label="路线进度"
@@ -733,11 +778,11 @@ export default function RideMode({ engine, route, onExit }: Props) {
 
   // ---------------- 岔路：自动判断时一张判断结果卡片；「我来判断」时两个大选项卡片
   const fork =
-    forkNow && st?.fork ? (
+    forkNow && st?.fork && !(!judge && showResult) ? (
       <div className="rd-fork" role="group" aria-label={st.fork.question}>
         <div className="rd-fork__q">{st.fork.question}</div>
         {!judge ? (
-          cueDone.has(idx) ? (
+          showResult ? null : cueDone.has(idx) ? (
             (() => {
               const right = st.fork.options.find((o) => o.id === st.fork!.answer)!;
               const other = st.fork.options.find((o) => o.id !== st.fork!.answer);
@@ -793,6 +838,7 @@ export default function RideMode({ engine, route, onExit }: Props) {
             </span>
           )}
           {showResult && <p>{st.result}</p>}
+          {showResult && !judge && forkAlt && <small className="rd-concl__f">{forkAlt}</small>}
           {vis.formula && (
             <>
               {!showResult && <span className="rd-concl__k">表项地址 = 基址 + 索引 × 4</span>}

@@ -1,7 +1,7 @@
 import type { Subject } from "@k408/shared";
 
 /**
- * 实验室规模（首页、SEO 描述共用）。实验、图解、性质都定义在 public/legacy/js 的旧模块里，
+ * 实验室规模（首页、SEO 描述共用）。实验、图解、性质都定义在 legacy-src/js 的旧模块里，
  * catalog.test.ts 会从那些文件里重新数一遍，数量变了测试就会提醒同步这里。
  */
 export const LAB_COUNT = 39;

@@ -445,6 +445,7 @@
             cur = PROC[i]; mode = 0; inp = {};
             body.setAttribute("aria-labelledby", "ptab-" + cur.id);
             body.style.setProperty("--c", SUBJ[cur.sub].c);
+            body.style.setProperty("--c-ink", "var(--x-" + cur.sub + "-ink)");
             var ul = body.querySelector(".x-proc__note ul");
             ul.innerHTML = "";
             (cur.note || []).forEach(function (t) { ul.appendChild(el("li", {}, "")).textContent = t; });

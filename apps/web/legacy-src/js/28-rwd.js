@@ -99,6 +99,7 @@
         function unwide(p) {
           var out = p.querySelector(".x-lab__out"), side = p.querySelector(".x-lab__side"), note = p.querySelector(".x-lab__note");
           p.classList.remove("is-wideout");
+          if (p.classList.contains("is-split3")) return;
           if (out && side && out.parentNode !== side) side.insertBefore(out, note && note.parentNode === side ? note : null);
         }
         /* 平板竖屏（768–1023）：画布下方分两列；输出表格较宽的实验（WIDE 名单或实际放不下）输出区仍整宽 */
@@ -111,12 +112,28 @@
           if (WIDE.indexOf(id) >= 0) p.classList.add("is-wide2");
           else if (!p.classList.contains("is-wide2") && tooWide(p.querySelector(".x-lab__out"))) p.classList.add("is-wide2");
         }
+        /* 横屏手机（640–1023 宽、高 ≤ 520）：控制条吸顶在画布右侧；输出与考点移出 .x-lab__top，放到下方整宽 */
+        var splitMq = mm("(orientation: landscape) and (max-height: 520px) and (min-width: 640px) and (max-width: 1023px)");
+        function splitCheck(p) {
+          var side = p.querySelector(".x-lab__side"), out = p.querySelector(".x-lab__out"), note = p.querySelector(".x-lab__note");
+          if (!side || !p.querySelector(".x-lab__top")) return;
+          if (splitMq.matches) {
+            if (note && note.parentNode !== p) p.appendChild(note);
+            if (out && out.parentNode !== p) p.insertBefore(out, note && note.parentNode === p ? note : null);
+            p.classList.add("is-split3");
+          } else if (p.classList.contains("is-split3")) {
+            p.classList.remove("is-split3");
+            if (note) side.appendChild(note);
+            if (out && !p.classList.contains("is-wideout")) side.insertBefore(out, note || null);
+          }
+        }
         function wideCheck() {
           var p = visPanel(); if (!p) return;
+          splitCheck(p);
           tabCheck(p);
           compactCheck(p);
           if (!wideMq.matches) { if (p.classList.contains("is-wideout")) unwide(p); return; }
-          if (p.classList.contains("is-wideout")) return;
+          if (p.classList.contains("is-wideout") || p.classList.contains("is-split3")) return;
           var out = p.querySelector(".x-lab__side .x-lab__out");
           if (WIDE.indexOf(p.id.replace(/^lab-/, "")) >= 0 || tooWide(out)) { p.classList.add("is-wideout"); p.appendChild(out); }
         }
@@ -126,6 +143,7 @@
           wideCheck();
         }
         if (tabMq.addEventListener) tabMq.addEventListener("change", resetWide);
+        if (splitMq.addEventListener) splitMq.addEventListener("change", wideCheck);
 
         /* ---------- 2b. 横屏手机：实验选项收进“设置”按钮，点开从右侧滑出浮层 ---------- */
         var landMq = mm("(orientation: landscape) and (max-height: 500px)");

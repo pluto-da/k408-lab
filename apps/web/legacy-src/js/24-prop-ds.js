@@ -786,6 +786,7 @@
           g.setAttribute("tabindex", "0");
           g.setAttribute("role", "button");
           g.setAttribute("aria-label", "结点 " + i);
+          g.setAttribute("data-touch-alt", ""); /* 手机上结点较小：上方的编号输入框是同等功能的输入方式 */
           (function (v, el) {
             K.on(el, "click", function () { sel = v; inp.value = String(v); draw(); });
             K.on(el, "keydown", function (e) { if (e.key === "Enter" || e.key === " ") { sel = v; inp.value = String(v); draw(); } });

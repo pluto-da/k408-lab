@@ -55,7 +55,7 @@ interface OsU {
   matrix(s: string, name: string): Err & { v?: number[][] };
 }
 
-const JS = resolve(__dirname, "../../public/legacy/js");
+const JS = resolve(__dirname, "../../legacy-src/js");
 const SRC = readFileSync(resolve(JS, "26-prop-os.js"), "utf8");
 
 function load(withDom: boolean) {

@@ -46,7 +46,7 @@ interface Prop {
   demo: (box: HTMLElement) => { destroy: () => void };
 }
 
-const DIR = resolve(__dirname, "../../public/legacy/js");
+const DIR = resolve(__dirname, "../../legacy-src/js");
 const SRC = readFileSync(resolve(DIR, "25-prop-co.js"), "utf8");
 
 function load() {

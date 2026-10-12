@@ -32,7 +32,7 @@ interface K { opts: HTMLElement; stage: HTMLElement; out: HTMLElement; restart: 
 interface Lab { id: string; color: string; name: string; note: string; mount: (panel: HTMLElement, k: K) => Demo }
 
 function load() {
-  const file = resolve(__dirname, "../../public/legacy/js/20-lab-ds2.js");
+  const file = resolve(__dirname, "../../legacy-src/js/20-lab-ds2.js");
   const win: Record<string, unknown> = { LAB: [] };
   const NS = "http://www.w3.org/2000/svg";
   const X = {

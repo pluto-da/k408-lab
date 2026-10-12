@@ -221,7 +221,7 @@
           });
           var lab = el("label", { class: "x-toc__qw" });
           lab.appendChild(el("span", { class: "x-vh" }, "筛选目录"));
-          var q = el("input", { type: "search", class: "x-toc__q", placeholder: "筛选目录", autocomplete: "off", enterkeyhint: "search" });
+          var q = el("input", { type: "search", class: "x-toc__q", placeholder: "筛选", autocomplete: "off", enterkeyhint: "search" });
           lab.appendChild(q);
           var all = el("button", { type: "button", class: "x-toc__all" }, "全部收起");
           bar.appendChild(jump); bar.appendChild(lab); bar.appendChild(all); bar.appendChild(menu);

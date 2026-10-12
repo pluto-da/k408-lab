@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把旧版单页 index.html 拆成 apps/web/public/legacy/ 下的独立文件（一次性迁移工具）。
+"""把旧版单页 index.html 拆成 apps/web/legacy-src/ 下的独立文件（一次性迁移工具）。
 
 注意：拆分后在 js/ 中手工加入了学习事件钩子（LAB_EMIT，见 js/00-bridge.js 及各文件中
 “LAB_EMIT” 处）和按 GLB 文件加载主板模型的改动；另外手工删除了流程答题模式
@@ -27,7 +27,7 @@ html = open(os.path.join(src_dir, "index.html"), encoding="utf-8").read()
 head, body = html.split("<body>", 1)
 body = body.rsplit("</body>", 1)[0]
 
-# 注意：这是最初拆分旧版单页时用的一次性脚本。public/legacy 之后已有多处手工修改与压缩
+# 注意：这是最初拆分旧版单页时用的一次性脚本。legacy-src 之后已有多处手工修改与压缩
 #（模型压缩、移除无用样式与已下线模块等），重新运行会覆盖这些修改，仅作留档。
 css = ["css/hark.css"]
 for f in ("hark.css",):

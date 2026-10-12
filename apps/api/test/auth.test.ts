@@ -23,7 +23,7 @@ describe("账号", () => {
     const res = await ctx.app.inject({
       method: "POST",
       url: "/api/auth/register",
-      payload: { username: "Kaoyan_408", password: "password123", nickname: "小王" },
+      payload: { username: "Kaoyan_408", password: "Lab408-pass", nickname: "小王" },
     });
     expect(res.statusCode).toBe(201);
     const setCookie = String(res.headers["set-cookie"]);
@@ -38,7 +38,7 @@ describe("账号", () => {
   });
 
   it("密码以 argon2id 存储", async () => {
-    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "hash_user", password: "password123" } });
+    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "hash_user", password: "Lab408-pass" } });
     const u = await ctx.prisma.user.findUniqueOrThrow({ where: { username: "hash_user" } });
     expect(u.passwordHash.startsWith("$argon2id$")).toBe(true);
   });
@@ -47,28 +47,28 @@ describe("账号", () => {
     const reg = await ctx.app.inject({
       method: "POST",
       url: "/api/auth/register",
-      payload: { username: "both", email: "Me@Example.com", password: "password123" },
+      payload: { username: "both", email: "Me@Example.com", password: "Lab408-pass" },
     });
     expect(reg.statusCode).toBe(201);
     expect(reg.json().user.email).toBe("me@example.com");
     for (const account of ["me@example.com", "ME@example.com", "both", "BOTH"]) {
-      const res = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account, password: "password123" } });
+      const res = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account, password: "Lab408-pass" } });
       expect(res.statusCode, account).toBe(200);
     }
   });
 
   it("只用邮箱注册时昵称取邮箱前缀", async () => {
-    const reg = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { email: "zhang@qq.com", password: "password123" } });
+    const reg = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { email: "zhang@qq.com", password: "Lab408-pass" } });
     expect(reg.statusCode).toBe(201);
     expect(reg.json().user).toMatchObject({ nickname: "zhang", username: null });
   });
 
   it("重复用户名 / 邮箱返回 409 中文提示", async () => {
-    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "dup", email: "d@x.cn", password: "password123" } });
-    const a = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "DUP", password: "password123" } });
+    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "dup", email: "d@x.cn", password: "Lab408-pass" } });
+    const a = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "DUP", password: "Lab408-pass" } });
     expect(a.statusCode).toBe(409);
     expect(a.json().error.message).toBe("该用户名已被占用");
-    const b = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { email: "d@x.cn", password: "password123" } });
+    const b = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { email: "d@x.cn", password: "Lab408-pass" } });
     expect(b.statusCode).toBe(409);
     expect(b.json().error.message).toBe("该邮箱已注册");
   });
@@ -77,19 +77,19 @@ describe("账号", () => {
     const short = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "abc", password: "123" } });
     expect(short.statusCode).toBe(400);
     expect(short.json().error.message).toContain("密码至少 8 位");
-    const none = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { password: "password123" } });
+    const none = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { password: "Lab408-pass" } });
     expect(none.statusCode).toBe(400);
     expect(none.json().error.message).toContain("至少填写一个");
-    const bad = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "a b!", password: "password123" } });
+    const bad = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "a b!", password: "Lab408-pass" } });
     expect(bad.statusCode).toBe(400);
     expect(bad.json().error.message).toContain("用户名只能包含");
-    const blank = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "blank_ok", email: "", nickname: "", password: "password123" } });
+    const blank = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "blank_ok", email: "", nickname: "", password: "Lab408-pass" } });
     expect(blank.statusCode).toBe(201);
     expect(blank.json().user.nickname).toBe("blank_ok");
   });
 
   it("错误密码 / 不存在账号统一返回 401", async () => {
-    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "pw", password: "password123" } });
+    await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "pw", password: "Lab408-pass" } });
     const wrong = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: "pw", password: "nope-nope" } });
     const ghost = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: "ghost", password: "nope-nope" } });
     expect(wrong.statusCode).toBe(401);
@@ -98,7 +98,7 @@ describe("账号", () => {
   });
 
   it("退出登录清除 Cookie；伪造 token 无效", async () => {
-    const res = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "bye", password: "password123" } });
+    const res = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "bye", password: "Lab408-pass" } });
     const out = await ctx.app.inject({ method: "POST", url: "/api/auth/logout", headers: { cookie: cookieOf(res) } });
     expect(String(out.headers["set-cookie"])).toMatch(/k408_session=;/);
     const forged = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: "k408_session=abc.def.ghi" } });
@@ -115,7 +115,7 @@ describe("账号", () => {
   });
 
   it("修改昵称", async () => {
-    const res = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "nick", password: "password123" } });
+    const res = await ctx.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "nick", password: "Lab408-pass" } });
     const cookie = cookieOf(res);
     const p = await ctx.app.inject({ method: "PATCH", url: "/api/me", headers: { cookie }, payload: { nickname: "  上岸选手 " } });
     expect(p.statusCode).toBe(200);
@@ -143,7 +143,7 @@ describe("账号", () => {
 
   it("退出所有设备：旧会话全部失效，可重新登录", async () => {
     const { cookie, username } = await registerUser(ctx.app);
-    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "Lab408-pass" } });
     const other = cookieOf(login);
     const anon = await ctx.app.inject({ method: "POST", url: "/api/auth/logout-all", payload: {} });
     expect(anon.statusCode).toBe(401);
@@ -154,7 +154,7 @@ describe("账号", () => {
       const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: c } });
       expect(me.json().user).toBeNull();
     }
-    const again = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    const again = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "Lab408-pass" } });
     expect(again.statusCode).toBe(200);
     const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie: cookieOf(again) } });
     expect(me.json().user.username).toBe(username);
@@ -164,14 +164,14 @@ describe("账号", () => {
     const { cookie, username } = await registerUser(ctx.app);
     const wrong = await ctx.app.inject({ method: "DELETE", url: "/api/me", headers: { cookie }, payload: { password: "nope-nope" } });
     expect(wrong.statusCode).toBe(403);
-    const anon = await ctx.app.inject({ method: "DELETE", url: "/api/me", payload: { password: "password123" } });
+    const anon = await ctx.app.inject({ method: "DELETE", url: "/api/me", payload: { password: "Lab408-pass" } });
     expect(anon.statusCode).toBe(401);
-    const ok = await ctx.app.inject({ method: "DELETE", url: "/api/me", headers: { cookie }, payload: { password: "password123" } });
+    const ok = await ctx.app.inject({ method: "DELETE", url: "/api/me", headers: { cookie }, payload: { password: "Lab408-pass" } });
     expect(ok.statusCode).toBe(200);
     expect((await ctx.prisma.user.count({ where: { username } }))).toBe(0);
     const me = await ctx.app.inject({ method: "GET", url: "/api/me", headers: { cookie } });
     expect(me.json().user).toBeNull();
-    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "password123" } });
+    const login = await ctx.app.inject({ method: "POST", url: "/api/auth/login", payload: { account: username, password: "Lab408-pass" } });
     expect(login.statusCode).toBe(401);
     await registerUser(ctx.app, username);
   });
@@ -181,6 +181,43 @@ describe("账号", () => {
     expect(res.statusCode).toBe(501);
     const m = await ctx.app.inject({ method: "GET", url: "/api/auth/methods" });
     expect(m.json()).toEqual({ password: true, sms: false });
+  });
+});
+
+describe("弱密码与注册限流", () => {
+  let c: Ctx;
+  let lim: Ctx;
+  beforeAll(async () => {
+    c = await makeApp();
+    lim = await makeApp({ REGISTER_RATE_LIMIT_MAX: "2" });
+  });
+  afterAll(async () => {
+    await c.app.close();
+    await lim.app.close();
+  });
+  beforeEach(async () => resetDb(c.prisma));
+
+  it("常见弱密码、重复字符、包含用户名的密码被拒绝", async () => {
+    for (const password of ["password123", "12345678", "aaaaaaaa", "weakuser-1"]) {
+      const r = await c.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "weakuser", password } });
+      expect(r.statusCode).toBe(400);
+      expect(r.json().error.code).toBe("WEAK_PASSWORD");
+    }
+  });
+
+  it("校验失败的响应不带内部结构", async () => {
+    const r = await c.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "a", password: "x" } });
+    expect(r.statusCode).toBe(400);
+    expect(r.json().error.issues).toBeUndefined();
+  });
+
+  it("同一 IP 每小时注册次数有上限", async () => {
+    const codes: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const r = await lim.app.inject({ method: "POST", url: "/api/auth/register", payload: { username: `batch_${i}`, password: "Lab408-pass" } });
+      codes.push(r.statusCode);
+    }
+    expect(codes).toEqual([201, 201, 429]);
   });
 });
 

@@ -52,7 +52,7 @@ interface CnU {
   tcpWalk(x: number, y: number, lens: number[]): Seg[];
 }
 
-const DIR = resolve(__dirname, "../../public/legacy/js");
+const DIR = resolve(__dirname, "../../legacy-src/js");
 
 function load() {
   const win: Record<string, unknown> = {};

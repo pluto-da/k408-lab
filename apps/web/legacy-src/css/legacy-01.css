@@ -132,11 +132,11 @@ html.is-searching .x-3d { display: none; }
 .x-ch button[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--c); }
 .x-ch button:focus-visible { outline: 2px solid var(--x-primary); outline-offset: -2px; }
 .x-ch__no { font: 400 13px/1 var(--x-head); color: var(--x-ink-2); font-variant-numeric: tabular-nums; }
-.x-ch__star { font: 400 11px/1 var(--x-head); letter-spacing: .02em; color: var(--x-os-ink); white-space: nowrap; }
-.x-ch__star i { font-style: normal; color: #c9cbd0; }
+.x-ch__star { font: 400 12px/1 var(--x-head); letter-spacing: .02em; color: var(--x-os-ink); white-space: nowrap; }
+.x-ch__star i { font-style: normal; color: #858993; }
 .x-card { padding: clamp(18px, 3vw, 28px); min-width: 0; }
 .x-card__tag { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font: 400 13px/1.4 var(--x-head); color: var(--x-ink-2); }
-.x-card__tag i { font-style: normal; color: #c9cbd0; }
+.x-card__tag i { font-style: normal; color: #858993; }
 .x-card h3 { margin: 4px 0 14px !important; font: 600 clamp(19px, 2.4vw, 22px)/1.35 var(--x-head); }
 .x-card__sub { font: 600 13px/1.4 var(--x-head); color: var(--x-ink-2); margin-bottom: 4px !important; }
 .x-pts { margin: 0; list-style: none; counter-reset: pt; }

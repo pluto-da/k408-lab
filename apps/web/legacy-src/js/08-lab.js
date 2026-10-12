@@ -29,14 +29,14 @@
             grps[gk].appendChild(tab);
             var p = X.el("div", { class: "x-lab__panel", role: "tabpanel", id: "lab-" + d.id, "aria-labelledby": "tab-" + d.id, style: "--c:" + d.color },
               /* 布局：main（选项 + 画布）与 side（控制条、统计与步骤、考点）。宽屏左右两栏，窄屏 side 展开成画布下方的几行（见 legacy-15.css） */
-              '<div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div></div>' +
+              '<div class="x-lab__top"><div class="x-lab__main"><div class="x-lab__opts"></div><div class="x-lab__stage"></div></div>' +
               '<div class="x-lab__side"><div class="x-lab__ctrl"><button type="button" class="x-lab__btn" data-a="reset">重置</button>' +
               '<button type="button" class="x-lab__btn x-lab__btn--main" data-a="play" aria-pressed="false">播放</button>' +
               '<button type="button" class="x-lab__btn" data-a="step">下一步</button>' +
               '<label class="x-lab__speed">速度 <input type="range" min="1" max="10" value="5" aria-label="播放速度"></label></div>' +
               '<p class="x-lab__hint" role="status" hidden></p>' +
               '<div class="x-lab__out"></div>' +
-              '<details class="x-lab__note" open><summary><b>考点</b></summary><p></p></details></div>');
+              '<details class="x-lab__note" open><summary><b>考点</b></summary><p></p></details></div></div>');
             p.querySelector(".x-lab__note p").textContent = d.note || "";
             /* 手机竖屏：考点默认折叠，点开再看 */
             if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches) p.querySelector(".x-lab__note").removeAttribute("open");

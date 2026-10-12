@@ -11,7 +11,7 @@ interface Mode { name: string; make?: (inp: Record<string, string>) => Spec; cir
 interface Proc { id: string; sub: string; name: string; note?: string[]; inputs?: { k: string; value: string }[]; modes: Mode[] }
 
 function load() {
-  const dir = resolve(__dirname, "../../public/legacy/js");
+  const dir = resolve(__dirname, "../../legacy-src/js");
   const win: Record<string, unknown> = { __LEGACY_LOADER__: true, addEventListener: () => undefined };
   const ctx: Record<string, unknown> = { window: win, document: { readyState: "complete" }, setTimeout, Math, Number, String, parseInt, isNaN, Error, Object, Array, JSON };
   win.X = { reduced: true };

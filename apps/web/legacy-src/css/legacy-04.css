@@ -101,7 +101,7 @@
 .x-c__swb { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px 0 14px; border: 1px solid var(--x-line-2); border-radius: 999px; background: #fff; color: var(--x-ink); font: 600 14px/1 var(--x-head); cursor: pointer; }
 .x-c__swb b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #e8e9ec; font: 700 14px/1 var(--x-mono); color: var(--x-ink-2); transition: background-color .15s; }
 .x-c__swb[aria-checked="true"] { border-color: var(--c, var(--x-primary)); }
-.x-c__swb[aria-checked="true"] b { background: var(--c, var(--x-primary)); color: #fff; }
+.x-c__swb[aria-checked="true"] b { background: var(--c-ink, var(--c, var(--x-primary))); color: #fff; }
 .x-c__bits { display: grid; gap: 8px; margin-bottom: 12px; }
 .x-c__brow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .x-c__bl { width: 40px; font: 600 14px/1 var(--x-head); color: var(--x-ink-2); }

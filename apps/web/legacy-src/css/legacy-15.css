@@ -75,11 +75,14 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .x-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .x-tocbtn { display: inline-flex; }
   .x-toc {
-    position: fixed; z-index: 40; display: none; padding: 8px;
+    /* 层级高于网站顶栏（z-index 50）：横屏手机在页面顶部打开时，目录面板顶部不被顶栏压住 */
+    position: fixed; z-index: 60; display: none; padding: 8px;
     background: #fff; border: 1px solid var(--x-line); box-shadow: var(--x-sh-2), 0 0 0 100vmax rgba(20, 22, 26, .28);
     overscroll-behavior: contain;
   }
   .x-toc.is-open { display: block; }
+  /* 打开时铺一层透明遮罩接住面板外的点击（点遮罩关闭），面板下方的按钮不再露出可点 */
+  .x-toc.is-open::after { content: ""; position: fixed; inset: 0; z-index: -1; }
   .x-toc a { min-height: 44px; }
   .x-toc__labs a { min-height: 40px; }
 }
@@ -190,6 +193,17 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .x-lab__panel.is-wideout .x-lab__side { grid-column: 2; grid-row: 1 / span 2; }
   .x-lab__panel.is-wideout > .x-lab__out { display: block; grid-column: 1 / -1; grid-row: 3; padding: 16px clamp(16px, 2vw, 24px) clamp(16px, 2vw, 24px); border-top: 1px solid var(--x-line); background: #fff; }
 }
+/* 画布与侧栏包在 .x-lab__top 里（平时 display: contents，不影响排版）。输出整宽时由它单独成两栏网格：
+   吸顶的侧栏只能在这一块里移动，滚到下方整宽输出区时不会盖住输出 */
+.x-lab__top { display: contents; }
+@media (min-width: 1024px) {
+  .x-lab__panel.is-wideout { display: block; background: #fff; }
+  .x-lab__panel.is-wideout > .x-lab__top {
+    display: grid; grid-template-columns: minmax(0, 1fr) 38%; align-items: start;
+    background: linear-gradient(to right, #fff 0 62%, var(--x-line) 62% calc(62% + 1px), #fafaf8 calc(62% + 1px) 100%);
+  }
+  .x-lab__panel.is-wideout .x-lab__main, .x-lab__panel.is-wideout .x-lab__side { grid-row: auto; }
+}
 
 /* 横屏手机：工具栏不吸顶，画布高度不超过一屏，保证画布与“下一步”同屏 */
 @media (orientation: landscape) and (max-height: 520px) {
@@ -215,6 +229,8 @@ html.is-lab { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .x-lab__panel .x-lab__ctrl { grid-column: 2; grid-row: 1; align-self: start; position: sticky; top: 8px; padding: 12px; }
   .x-lab__panel .x-lab__out, .x-lab__panel.is-wideout > .x-lab__out { grid-column: 1 / -1; grid-row: 2; padding: 12px 14px; border-top: 1px solid var(--x-line); background: #fff; }
   .x-lab__panel .x-lab__note { grid-column: 1 / -1; grid-row: 3; padding: 10px 14px; background: #fafaf8; }
+  /* 画布与控制条单独成一块（输出、考点由 28-rwd.js 移到这一块下方）：吸顶的控制条只在这一块里移动，不会盖住下方整宽的输出 */
+  .x-lab__panel > .x-lab__top { display: grid; grid-column: 1 / -1; grid-row: 1; grid-template-columns: minmax(0, 1fr) 38%; align-items: start; }
 }
 
 /* 画布：需要滚动时允许横向滑动（宽表格 / 计算类实验） */
@@ -405,7 +421,7 @@ html.x-zoom-open, html.x-zoom-open body { overflow: hidden; }
 @media (orientation: landscape) and (max-height: 500px) {
   .x-lab__panel.is-compact .x-lab__main > .x-lab__opts { display: none; }
   .x-lab__panel.is-compact .x-lab__main { padding-top: 52px; }
-  .x-lab__panel.is-compact .x-setbtn { display: inline-flex; position: absolute; top: 8px; right: 14px; z-index: 4; min-height: 40px; padding: 0 14px; }
+  .x-lab__panel.is-compact .x-setbtn { display: inline-flex; position: absolute; top: 8px; right: 14px; z-index: 4; min-height: 44px; padding: 0 14px; }
   .x-lab__panel.is-compact .x-setbtn[hidden] { display: none; }
 }
 .x-sheet__mask { position: fixed; inset: 0; z-index: 190; background: rgba(20, 22, 26, .32); opacity: 0; transition: opacity .2s; }
@@ -463,8 +479,10 @@ html.x-sheet-open, html.x-sheet-open body { overflow: hidden; }
     display: flex; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 0 0 4px; overflow-x: auto; scrollbar-width: thin;
     border-bottom: 1px solid var(--x-line);
   }
-  .x-proc__body.is-bar .x-proc__steps li { flex: none; max-width: 15em; }
-  .x-proc__body.is-bar .x-proc__steps button { min-height: 44px; padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 15em; font-size: 13px; }
+  /* 步骤名较长时换成两行显示，不用省略号截断 */
+  .x-proc__body.is-bar .x-proc__steps { align-items: stretch; }
+  .x-proc__body.is-bar .x-proc__steps li { flex: none; max-width: 15em; display: flex; }
+  .x-proc__body.is-bar .x-proc__steps button { min-height: 44px; padding: 6px 10px; white-space: normal; max-width: 15em; width: max-content; font-size: 13px; line-height: 1.35; }
   .x-proc__body.is-bar .x-proc__steps .is-cur button { box-shadow: inset 0 -3px 0 var(--c, var(--x-primary)); }
   .x-proc__body.is-bar .x-proc__ctrl { grid-column: 1 / -1; grid-row: 2; margin-top: 0; }
   .x-proc__body.is-bar .x-proc__hint { grid-column: 1 / -1; grid-row: 3; margin: 0; }

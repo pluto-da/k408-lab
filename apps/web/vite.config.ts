@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
+import { protect } from "./build/protect";
 
 const BUILD_ID = process.env.BUILD_ID ?? new Date().toISOString().replace(/\D/g, "").slice(0, 12);
 
@@ -14,7 +15,8 @@ function seoFiles(): Plugin {
     name: "k408-seo-files",
     apply: "build",
     generateBundle() {
-      const robots = ["User-agent: *", "Allow: /", "Disallow: /api/", "Disallow: /login", "Disallow: /register", "Disallow: /profile"];
+      // 页面允许收录；接口、构建产物与旧版实验室模块不允许抓取
+      const robots = ["User-agent: *", "Allow: /", "Disallow: /api/", "Disallow: /assets/", "Disallow: /legacy/", "Disallow: /login", "Disallow: /register", "Disallow: /profile"];
       if (SITE_URL) {
         robots.push("", `Sitemap: ${SITE_URL}/sitemap.xml`);
         const today = new Date().toISOString().slice(0, 10);
@@ -31,7 +33,7 @@ function seoFiles(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), seoFiles()],
+  plugins: [react(), seoFiles(), protect()],
   // 整机拆解模块的压缩模型文件，作为带哈希的静态资源输出
   assetsInclude: ["**/*.sog"],
   define: {

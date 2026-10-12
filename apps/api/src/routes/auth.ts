@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { burnPasswordCheck, hashPassword, verifyPassword } from "../lib/password";
+import { burnPasswordCheck, hashPassword, verifyPassword, weakPasswordReason } from "../lib/password";
 import { conflict, HttpError } from "../lib/errors";
 import { toPublicUser } from "../plugins/auth";
 import { LoginGuard } from "../lib/login-guard";
@@ -35,12 +35,18 @@ const loginSchema = z.object({
   password: z.string().min(1, "请输入密码").max(72),
 });
 
-const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string; loginGuard?: LoginGuard }> = async (app, opts) => {
+const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string; registerMax?: number; loginGuard?: LoginGuard; ipGuard?: LoginGuard }> = async (app, opts) => {
   const limited = { config: { rateLimit: { max: opts.rateMax, timeWindow: opts.rateWindow } } };
+  // 注册：同一 IP 每小时最多 registerMax 个（另受每分钟 rateMax 限制，取更严的一个）
+  const registerLimited = { config: { rateLimit: { max: Math.min(opts.registerMax ?? 10, opts.rateMax * 60), timeWindow: "1 hour" } } };
+  // 两个维度的连续失败锁定：同一账号 10 次 / 15 分钟；同一 IP 30 次 / 15 分钟（宿舍共用出口放宽）。再次被锁时长逐次翻倍
   const guard = opts.loginGuard ?? new LoginGuard();
+  const ipGuard = opts.ipGuard ?? new LoginGuard({ maxFailures: 30 });
 
-  app.post("/register", limited, async (req, reply) => {
+  app.post("/register", registerLimited, async (req, reply) => {
     const body = registerSchema.parse(req.body);
+    const weak = weakPasswordReason(body.password, body.username, body.email);
+    if (weak) throw new HttpError(400, "WEAK_PASSWORD", weak);
     const nickname = body.nickname ?? body.username ?? body.email!.split("@")[0]!.slice(0, 20);
     try {
       const user = await app.prisma.user.create({
@@ -67,18 +73,27 @@ const authRoutes: FastifyPluginAsync<{ rateMax: number; rateWindow: string; logi
     const key = account.toLowerCase();
     const wait = guard.lockedFor(key);
     if (wait > 0) {
+      req.log.warn({ evt: "login_locked", ip: req.ip }, "账号暂时锁定");
       throw new HttpError(429, "ACCOUNT_LOCKED", `该账号密码错误次数过多，请 ${Math.ceil(wait / 60_000)} 分钟后再试`);
     }
+    const ipWait = ipGuard.lockedFor(req.ip);
+    if (ipWait > 0) {
+      req.log.warn({ evt: "login_ip_locked", ip: req.ip }, "IP 暂时锁定");
+      throw new HttpError(429, "IP_LOCKED", `登录失败次数过多，请 ${Math.ceil(ipWait / 60_000)} 分钟后再试`);
+    }
+    const failed = () => {
+      guard.fail(key);
+      ipGuard.fail(req.ip);
+      // 安全事件：认证失败（不记录账号原文与密码）
+      req.log.warn({ evt: "login_failed", ip: req.ip }, "登录失败");
+      return new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
+    };
     const user = await app.prisma.user.findUnique({ where: key.includes("@") ? { email: key } : { username: key } });
     if (!user) {
       await burnPasswordCheck(password);
-      guard.fail(key);
-      throw new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
+      throw failed();
     }
-    if (!(await verifyPassword(user.passwordHash, password))) {
-      guard.fail(key);
-      throw new HttpError(401, "BAD_CREDENTIALS", "账号或密码错误");
-    }
+    if (!(await verifyPassword(user.passwordHash, password))) throw failed();
     guard.succeed(key);
     await app.issueSession(reply, user);
     return { user: toPublicUser(user) };

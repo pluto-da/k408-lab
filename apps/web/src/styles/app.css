@@ -10,7 +10,7 @@
   --line-2: rgba(0, 0, 0, 0.14);
   --text: #1a1c20;
   --text-2: #5b606b;
-  --text-3: #6e7380; /* 弱文字：在 --bg 与白底上均 ≥ 4.5:1 */
+  --text-3: #676c78; /* 弱文字：在 --bg 与白底上均 ≥ 4.5:1 */
   --primary: #2f5bea;
   --primary-ink: #2149cc;
   --primary-soft: #edf1fd;

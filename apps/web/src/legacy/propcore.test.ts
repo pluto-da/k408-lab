@@ -33,7 +33,7 @@ interface PropU {
 }
 type Win = Window & { PROC?: unknown; PROP?: Prop[]; PROPU?: PropU; X_PROP?: Api; X_OPEN_PROP?: (id: string) => boolean; X_OPEN_LAB?: (id: string) => void; X_OPEN_PROC?: (id: string) => boolean; __LEGACY_LOADER__?: boolean };
 
-const SRC = readFileSync(resolve(__dirname, "../../public/legacy/js/23-prop-core.js"), "utf8");
+const SRC = readFileSync(resolve(__dirname, "../../legacy-src/js/23-prop-core.js"), "utf8");
 
 /** 无 DOM：只给一个空 window */
 function loadNode(): PropU {

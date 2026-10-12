@@ -16,6 +16,7 @@ export async function makeApp(overrides: Record<string, string> = {}): Promise<C
     DATABASE_URL: url,
     JWT_SECRET: "test-secret-test-secret-test-secret-123",
     AUTH_RATE_LIMIT_MAX: "1000",
+    REGISTER_RATE_LIMIT_MAX: "1000",
     LOG_LEVEL: "silent",
     ...overrides,
   });
@@ -45,7 +46,7 @@ export async function registerUser(app: FastifyInstance, name?: string, nickname
   const res = await app.inject({
     method: "POST",
     url: "/api/auth/register",
-    payload: { username, password: "password123", nickname: nickname ?? username },
+    payload: { username, password: "Lab408-pass", nickname: nickname ?? username },
   });
   if (res.statusCode !== 201) throw new Error(`注册失败 ${res.statusCode} ${res.body}`);
   const body = res.json() as { user: { id: string } };

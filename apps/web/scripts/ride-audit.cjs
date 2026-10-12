@@ -20,13 +20,14 @@
  *   3 font       焦点文字板上最小字的屏幕字号 ≥ 12 CSS 像素
  *   4 buttons    可见按钮两两不相交、间距 ≥ 8；触控视口每个 ≥ 44 × 44
  *   5 labels     画面标签两两不相交
- *   6 lines      讲解正文：矮横屏至少 4 行可见，竖屏抽屉默认至少 2 行
+ *   6 lines      讲解正文：矮横屏至少 4 行可见，竖屏抽屉默认至少 2 行（到站出现结论卡片且讲解区放不下两者时，以 13 项为准）
  *   7 overflow / errors  无横向溢出，无 JS 报错
  *   8 contrast   界面文字对其底色的对比度 ≥ 4.5:1（大字 ≥ 3:1；禁用按钮除外）
  *   9 height     画面浮层与操作区里的按钮高度一致
  *  10 bottom     画面下半部分没有任何控件（操作全部在讲解栏 / 抽屉里）
  *  11 unique     「下一站」只有一个入口；进入后网站顶栏不显示，界面上没有亮白色大块
  *  12 void       电脑 / 平板讲解栏没有超过 40 像素的空洞（讲解区内容已全部展开时除外）
+ *  13 concl      有结论的站：结论卡片到站后无需手动滚动即完整可见（不被讲解区底部、渐隐区裁掉）
  * 检查接口 window.__ride 只在测试构建里存在；生产构建中没有。
  * 退出码：有任何一项不通过时为 1。
  */
@@ -125,7 +126,7 @@ function pageChecks({ touch }) {
     const pr = p.getBoundingClientRect();
     const sc = (body.parentElement && body.parentElement.classList.contains("rd-scroll") ? body.parentElement : body).getBoundingClientRect();
     const visH = Math.max(0, Math.min(sc.bottom, pr.bottom) - Math.max(sc.top, pr.top));
-    lines = { visible: Math.floor((visH + 2) / lh), text: Math.round(pr.height / lh) };
+    lines = { visible: Math.floor((visH + 2) / lh), text: Math.round(pr.height / lh), lh, room: sc.height };
   }
   // 8 对比度：文字颜色对其所在的不透明底色（逐层叠加半透明底色，最底层按页面底色 #0b0d12）
   const parse = (c) => {
@@ -217,9 +218,18 @@ function pageChecks({ touch }) {
     const d = sc.querySelector("details");
     allOpen = !d || d.open;
   }
+  // 13 结论卡片完整可见
+  let concl = null;
+  const cc = document.querySelector(".rd-scroll .rd-concl");
+  if (cc && cc.querySelector("p") && sc && vis(sc)) {
+    const r = cc.getBoundingClientRect();
+    const b = sc.getBoundingClientRect();
+    const fade = sc.classList.contains("is-more") ? parseFloat(getComputedStyle(sc).getPropertyValue("--rd-fade")) || 28 : 0;
+    concl = { ok: r.top >= b.top - 0.5 && r.bottom <= b.bottom - fade + 0.5, top: Math.round(r.top - b.top), cut: Math.round(r.bottom - (b.bottom - fade)), h: Math.round(r.height), fade };
+  }
   const overflow = document.documentElement.scrollWidth > window.innerWidth + 1;
   const layout = (document.querySelector(".rd-root")?.className.match(/rd-L--(\w+)/) || [])[1] || "?";
-  return { hud, buttons: buttons.length, btnIssues, lines, overflow, layout, contrastIssues, minContrast, heights: [...hs], lowCtl, nextCount, barShown, white, voidPx, allOpen };
+  return { hud, buttons: buttons.length, btnIssues, lines, overflow, layout, contrastIssues, minContrast, heights: [...hs], lowCtl, nextCount, barShown, white, voidPx, allOpen, concl };
 }
 
 const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
@@ -275,6 +285,11 @@ async function waitSettled(page, i, ms = Number(process.env.RIDE_SETTLE_MS) || 9
           const shotKey = SHOT_IDS[s.id] || (s.kind === "pt" && s.id !== "ptDir" ? "pt" : null);
           const wantShot = SHOTS === "all" || (SHOTS === "key" && variant === "default" && shotKey);
           if (wantShot || s.kind === "tlb" || s.kind === "cache") await sleep(2400); // 本站动画播完
+          if (s.result) {
+            // 等结论卡片出现，再给自动滚动留出时间
+            for (let k = 0; k < 40 && !(await page.$(".rd-scroll .rd-concl p")); k++) await sleep(150);
+            await sleep(700);
+          }
           const pc = await page.evaluate(pageChecks, { touch });
           const fails = [];
           const pr2 = (await page.evaluate(() => window.__ride.probe())) || pr;
@@ -310,7 +325,12 @@ async function waitSettled(page, i, ms = Number(process.env.RIDE_SETTLE_MS) || 9
           if (pc.lines && s.kind !== "bus") {
             row.lines = pc.lines.visible;
             const need = pc.layout === "short" ? 4 : pc.layout === "tall" ? 2 : 3;
-            if (pc.lines.visible < Math.min(need, pc.lines.text)) fails.push(`6 正文只露 ${pc.lines.visible} 行（要 ${need}）`);
+            // 到站出现结论卡片、而讲解区放不下「正文 need 行 + 结论卡片」时（小屏），以结论卡片完整可见为准（13 项）：
+            // 正文在到站前已从顶部完整展示，到站后讲解区自动滚到结论卡片
+            const both = pc.concl ? pc.concl.h + Math.min(need, pc.lines.text) * pc.lines.lh + pc.concl.fade + 24 : 0;
+            const waived = !!(pc.concl && pc.concl.ok && pc.lines.room < both);
+            if (waived) row.linesWaived = true;
+            else if (pc.lines.visible < Math.min(need, pc.lines.text)) fails.push(`6 正文只露 ${pc.lines.visible} 行（要 ${need}）`);
           }
           if (pc.overflow) fails.push("7 横向溢出");
           row.contrast = +pc.minContrast.toFixed(2);
@@ -322,6 +342,9 @@ async function waitSettled(page, i, ms = Number(process.env.RIDE_SETTLE_MS) || 9
           if (pc.white.length) fails.push(`11 亮白色大块：${pc.white.slice(0, 2).join("；")}`);
           row.void = pc.voidPx;
           if (pc.layout !== "short" && s.kind !== "bus" && pc.voidPx !== null && pc.voidPx > 40 && !pc.allOpen) fails.push(`12 讲解栏空洞 ${pc.voidPx}px`);
+          row.concl = pc.concl;
+          if (s.result && pc.layout !== "tall" && !pc.concl) fails.push("13 没有出现结论卡片");
+          if (pc.concl && !pc.concl.ok) fails.push(`13 结论卡片被裁 ${pc.concl.cut}px（顶 ${pc.concl.top}）`);
           if (wantShot) {
             const f = path.join(OUT, SHOTS === "all" ? `${vname}-${variant}-${String(i + 1).padStart(2, "0")}-${s.id}.png` : `${vname}-${shotKey}.png`);
             await page.screenshot({ path: f });

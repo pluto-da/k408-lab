@@ -43,7 +43,7 @@ interface LabU {
 interface Lab { id: string; name: string; color: string; note: string; mount: unknown }
 
 function load() {
-  const file = resolve(__dirname, "../../public/legacy/js/15-lab-cn.js");
+  const file = resolve(__dirname, "../../legacy-src/js/15-lab-cn.js");
   const win: Record<string, unknown> = { __LEGACY_LOADER__: true, addEventListener: () => undefined, LAB: [] };
   const ctx: Record<string, unknown> = { window: win, document: { readyState: "complete" }, setTimeout, Math, Number, String, parseInt, parseFloat, isNaN, Error, Object, Array, JSON, RegExp };
   win.X = { reduced: true };

@@ -190,8 +190,12 @@ button.rd-head__t { cursor: pointer; min-height: var(--ride-btn); align-items: c
 .rd-scroll {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: var(--ride-gap);
   padding: 16px var(--ride-pad) 16px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
 }
+/* 底部渐隐只在下方还有内容时出现，提示可以继续滚动 */
+/* 底部渐隐高度：--rd-fade（矮横屏讲解区很矮，渐隐收窄到 16px，免得压住到站的结论卡片） */
+.rd-scroll { --rd-fade: 28px; }
+.rd-L--short .rd-scroll { --rd-fade: 16px; }
+.rd-scroll.is-more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--rd-fade)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--rd-fade)), transparent); }
 .rd-body { flex: none; }
 .rd-body p { margin: 0; font-size: calc(15px * var(--rd-cap)); line-height: 1.75; color: var(--ride-ink); user-select: text; -webkit-user-select: text; }
 
@@ -225,7 +229,7 @@ button.rd-head__t { cursor: pointer; min-height: var(--ride-btn); align-items: c
 .rd-concl.is-ok .rd-concl__k { color: var(--ride-ok); }
 .rd-concl.is-bad .rd-concl__k { color: var(--ride-bad-ink); }
 .rd-concl code { background: none; padding: 0; border: 0; border-radius: 0; display: block; margin-top: 6px; font-family: var(--ride-mono); font-size: 13px; font-weight: 400; line-height: 1.6; color: var(--ride-ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
-.rd-concl__f { margin-top: 2px; font-size: 12px; color: var(--ride-ink-3); }
+.rd-concl__f { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--ride-ink-3); }
 
 /* 相关考点：小标题 + 文字链接 */
 .rd-rel { flex: none; display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
@@ -439,8 +443,10 @@ button.rd-head__t { cursor: pointer; min-height: var(--ride-btn); align-items: c
   .rd-L--short .rd-af { flex: 0 1 auto; flex-direction: row; align-items: baseline; gap: 6px; }
 }
 .rd-L--short .rd-body p { font-size: calc(14px * var(--rd-cap)); line-height: 1.6; }
-.rd-L--short .rd-concl { padding: 8px 10px; }
-.rd-L--short .rd-concl p { font-size: calc(14px * var(--rd-cap)); line-height: 1.6; }
+.rd-L--short .rd-concl, .rd-L--tall .rd-concl { padding: 8px 10px; }
+.rd-L--short .rd-concl p, .rd-L--tall .rd-concl p { font-size: calc(14px * var(--rd-cap)); line-height: 1.6; }
+/* 竖屏抽屉 / 矮横屏：表项地址算式已写在画面里的表头上，结论卡片里不再重复，保证到站时卡片整张放得下 */
+.rd-L--tall .rd-concl.is-ok code, .rd-L--tall .rd-concl.is-bad code, .rd-L--short .rd-concl.is-ok code, .rd-L--short .rd-concl.is-bad code { display: none; }
 .rd-L--short .rd-foot { padding: 8px var(--ride-pad) max(8px, env(safe-area-inset-bottom)); }
 .rd-L--short .rd-loc { max-width: 100%; }
 /* 矮横屏高度很小：右上的沉浸 / 更多竖排，画面中间留出整列给焦点 */
